@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Auth.js required models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Application models
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  phone         String    @unique
+  phoneVerified DateTime?
+  image         String?
+  password      String?
+  role          UserRole  @default(BUYER)
+  bio           String?
+  location      String?
+  whatsappNumber String?
+  resetToken    String?
+  resetTokenExpiry DateTime?
+  phoneVerificationToken String?
+  phoneVerificationExpiry DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Auth.js relations
+  accounts Account[]
+  sessions Session[]
+
+  // Application relations
+  articles  Article[]
+  orders    Order[]
+  reviews   Review[]
+  favorites Favorite[]
+  sentMessages     Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  image       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  articles Article[]
+}
+
+model Article {
+  id          String          @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  images      String // JSON string of image URLs
+  size        String?
+  condition   ArticleCondition
+  isAvailable Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relations
+  sellerId   String
+  seller     User      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category  @relation(fields: [categoryId], references: [id])
+
+  orderItems OrderItem[]
+  reviews    Review[]
+  favorites  Favorite[]
+  messages   Message[]
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  status      OrderStatus @default(PENDING)
+  total       Float
+  shippingAddress String?
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  buyerId String
+  buyer   User   @relation(fields: [buyerId], references: [id])
+
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id       String @id @default(cuid())
+  quantity Int    @default(1)
+  price    Float
+
+  // Relations
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  articleId String
+  article   Article @relation(fields: [articleId], references: [id])
+
+  @@unique([orderId, articleId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int // 1-5 stars
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  reviewerId String
+  reviewer   User    @relation(fields: [reviewerId], references: [id])
+  articleId  String
+  article    Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewerId, articleId])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articleId String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, articleId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  senderId   String
+  sender     User    @relation("MessageSender", fields: [senderId], references: [id])
+  receiverId String
+  receiver   User    @relation("MessageReceiver", fields: [receiverId], references: [id])
+  articleId  String?
+  article    Article? @relation(fields: [articleId], references: [id])
+}
+
+// Enums
+enum UserRole {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum ArticleCondition {
+  EXCELLENT
+  GOOD
+  FAIR
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
