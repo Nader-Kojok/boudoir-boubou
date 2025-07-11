@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -9,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Icons } from '@/components/ui/icons'
 import { CheckCircle, AlertCircle, Phone, ArrowLeft } from 'lucide-react'
 
-export default function VerifyPhonePage() {
+function VerifyPhoneContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
@@ -269,5 +270,31 @@ export default function VerifyPhonePage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function VerifyPhonePage() {
+  return (
+    <Suspense fallback={
+      <div className="container flex h-screen w-screen flex-col items-center justify-center">
+        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center space-y-4">
+                <Icons.spinner className="h-8 w-8 animate-spin" />
+                <div className="text-center">
+                  <h3 className="text-lg font-medium">Chargement...</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Veuillez patienter.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    }>
+      <VerifyPhoneContent />
+    </Suspense>
   )
 }

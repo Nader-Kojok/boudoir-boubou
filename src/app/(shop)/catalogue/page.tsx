@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ProductCard } from '@/components/custom/product-card'
@@ -67,7 +68,7 @@ const CONDITION_OPTIONS = [
   { value: 'FAIR', label: 'Correct' },
 ]
 
-export default function CataloguePage() {
+function CatalogueContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
@@ -525,5 +526,32 @@ export default function CataloguePage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CataloguePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-muted rounded w-1/3" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="space-y-4">
+                  <div className="bg-muted rounded-lg aspect-square" />
+                  <div className="space-y-2">
+                    <div className="bg-muted h-4 rounded" />
+                    <div className="bg-muted h-4 rounded w-2/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <CatalogueContent />
+    </Suspense>
   )
 }

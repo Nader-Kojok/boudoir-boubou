@@ -11,7 +11,7 @@ const createReviewSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -23,7 +23,7 @@ export async function POST(
       )
     }
 
-    const { id: articleId } = params
+    const { id: articleId } = await params
     const body = await request.json()
     
     // Validation des données
@@ -97,10 +97,10 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: articleId } = params
+    const { id: articleId } = await params
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')

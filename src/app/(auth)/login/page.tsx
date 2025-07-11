@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useState } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -16,7 +17,7 @@ import { Icons } from '@/components/ui/icons'
 import { loginSchema, type LoginInput } from '@/lib/validations/auth'
 import { Eye, EyeOff, Phone, Lock, AlertCircle } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
@@ -217,5 +218,26 @@ export default function LoginPage() {
         </CardFooter>
       </Card>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">
+              Connexion
+            </CardTitle>
+            <CardDescription className="text-center">
+              Chargement...
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }

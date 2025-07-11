@@ -3,9 +3,10 @@ import { prisma } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '12')
@@ -14,7 +15,7 @@ export async function GET(
     // Récupérer les informations du vendeur
     const seller = await prisma.user.findUnique({
       where: {
-        id: params.id,
+        id,
         role: 'SELLER'
       },
       select: {
@@ -49,7 +50,7 @@ export async function GET(
     const reviewStats = await prisma.review.aggregate({
       where: {
         article: {
-          sellerId: params.id
+          sellerId: id
         }
       },
       _avg: {
@@ -61,7 +62,7 @@ export async function GET(
     const [articles, totalArticles] = await Promise.all([
       prisma.article.findMany({
         where: {
-          sellerId: params.id,
+          sellerId: id,
           isAvailable: true
         },
         include: {
@@ -86,7 +87,7 @@ export async function GET(
       }),
       prisma.article.count({
         where: {
-          sellerId: params.id,
+          sellerId: id,
           isAvailable: true
         }
       })

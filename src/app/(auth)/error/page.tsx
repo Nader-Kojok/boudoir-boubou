@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -23,7 +24,7 @@ const errorMessages = {
   SessionRequired: 'Veuillez vous connecter pour accéder à cette page.',
 }
 
-export default function AuthErrorPage() {
+function AuthErrorContent() {
   const searchParams = useSearchParams()
   const error = searchParams.get('error') as keyof typeof errorMessages
   
@@ -93,5 +94,29 @@ export default function AuthErrorPage() {
         </CardFooter>
       </Card>
     </div>
+  )
+}
+
+export default function AuthErrorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              <div className="text-center">
+                <h3 className="text-lg font-medium">Chargement...</h3>
+                <p className="text-sm text-muted-foreground">
+                  Veuillez patienter.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <AuthErrorContent />
+    </Suspense>
   )
 }
