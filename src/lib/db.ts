@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-import type { Article, Category, User, ArticleCondition, UserRole, Prisma } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
+import type { Article, Category, User, ArticleCondition, UserRole } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
@@ -83,7 +83,7 @@ export async function getArticles(filters?: {
     price?: { gte?: number; lte?: number };
     condition?: ArticleCondition;
     sellerId?: string;
-    OR?: Array<{ title?: { contains: string; mode: string } } | { description?: { contains: string; mode: string } }>;
+    OR?: Array<{ title?: { contains: string; mode: Prisma.QueryMode } } | { description?: { contains: string; mode: Prisma.QueryMode } }>;
   } = {
     isAvailable: true,
   }
@@ -108,8 +108,8 @@ export async function getArticles(filters?: {
 
   if (filters?.search) {
     where.OR = [
-      { title: { contains: filters.search, mode: 'insensitive' } },
-      { description: { contains: filters.search, mode: 'insensitive' } },
+      { title: { contains: filters.search, mode: Prisma.QueryMode.insensitive } },
+      { description: { contains: filters.search, mode: Prisma.QueryMode.insensitive } },
     ]
   }
 
