@@ -6,12 +6,7 @@ export default withAuth(
     const { pathname } = req.nextUrl
     const token = req.nextauth.token
 
-    // Rediriger les utilisateurs non authentifiés vers la page de connexion
-    if (!token && pathname.startsWith('/dashboard')) {
-      return NextResponse.redirect(new URL('/login', req.url))
-    }
-
-    // Vérifier les permissions basées sur les rôles
+    // Vérifier les permissions basées sur les rôles pour les routes dashboard
     if (pathname.startsWith('/dashboard/seller') && token?.role !== 'SELLER') {
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
@@ -43,12 +38,13 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api/auth (NextAuth.js routes)
+     * - api (all API routes including NextAuth)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - login, register, error pages (auth pages)
      */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|public).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|public|login|register|error|forgot-password|reset-password|verify-email).*)',
   ],
 }
