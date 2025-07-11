@@ -13,7 +13,7 @@ export default async function ExampleProtectedPage() {
   
   // Rediriger si non authentifié
   if (!session?.user) {
-    redirect('/auth/signin')
+    redirect('/login')
   }
 
   // Vérifier les permissions (exemple)

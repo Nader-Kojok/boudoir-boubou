@@ -11,7 +11,7 @@ export default async function SellerLayout({ children }: SellerLayoutProps) {
   const session = await getSession()
   
   if (!session) {
-    redirect('/auth/signin')
+    redirect('/login')
   }
 
   // Vérifier si l'utilisateur a le rôle de vendeur

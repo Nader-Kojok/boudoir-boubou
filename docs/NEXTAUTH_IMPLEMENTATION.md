@@ -97,7 +97,7 @@ export default async function ProtectedPage() {
   const session = await getSession()
   
   if (!session) {
-    redirect('/auth/signin')
+    redirect('/login')
   }
   
   const isSeller = await hasRole('SELLER')

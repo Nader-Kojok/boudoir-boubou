@@ -11,7 +11,7 @@ export default async function BuyerLayout({ children }: BuyerLayoutProps) {
   const session = await getSession()
   
   if (!session) {
-    redirect('/auth/signin')
+    redirect('/login')
   }
 
   // Vérifier si l'utilisateur a le rôle d'acheteur
