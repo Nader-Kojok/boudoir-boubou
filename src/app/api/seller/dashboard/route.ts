@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { safeDbOperation } from '@/lib/db-connection'
 
 export async function GET() {
   try {
@@ -16,10 +17,13 @@ export async function GET() {
     }
 
     // Vérifier que l'utilisateur est un vendeur
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true }
-    })
+    const user = await safeDbOperation(
+      () => prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { role: true }
+      }),
+      'seller-dashboard-getUserRole'
+    )
 
     if (!user || (user.role !== 'SELLER' && user.role !== 'ADMIN')) {
       return NextResponse.json(
@@ -33,49 +37,64 @@ export async function GET() {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
 
-    // Récupérer les statistiques
+    // Récupérer les statistiques avec gestion sécurisée des connexions
     const [totalArticles, totalSales, thisMonthSales, lastMonthSales, totalViews] = await Promise.all([
       // Total des articles actifs
-      prisma.article.count({
-        where: {
-          sellerId,
-          isAvailable: true
-        }
-      }),
+      safeDbOperation(
+        () => prisma.article.count({
+          where: {
+            sellerId,
+            isAvailable: true
+          }
+        }),
+        'seller-dashboard-totalArticles'
+      ),
       
       // Total des ventes - maintenant basé sur les articles vendus (isAvailable: false)
-      prisma.article.count({
-        where: {
-          sellerId,
-          isAvailable: false
-        }
-      }),
+      safeDbOperation(
+        () => prisma.article.count({
+          where: {
+            sellerId,
+            isAvailable: false
+          }
+        }),
+        'seller-dashboard-totalSales'
+      ),
       
       // Ventes de ce mois
-      prisma.article.count({
-        where: {
-          sellerId,
-          isAvailable: false,
-          updatedAt: {
-            gte: startOfMonth
+      safeDbOperation(
+        () => prisma.article.count({
+          where: {
+            sellerId,
+            isAvailable: false,
+            updatedAt: {
+              gte: startOfMonth
+            }
           }
-        }
-      }),
+        }),
+        'seller-dashboard-thisMonthSales'
+      ),
       
       // Ventes du mois dernier
-      prisma.article.count({
-        where: {
-          sellerId,
-          isAvailable: false,
-          updatedAt: {
-            gte: startOfLastMonth,
-            lt: startOfMonth
+      safeDbOperation(
+        () => prisma.article.count({
+          where: {
+            sellerId,
+            isAvailable: false,
+            updatedAt: {
+              gte: startOfLastMonth,
+              lt: startOfMonth
+            }
           }
-        }
-      }),
+        }),
+        'seller-dashboard-lastMonthSales'
+      ),
       
       // Total des vues réelles
-      prisma.$queryRaw<Array<{ total: bigint }>>`SELECT COALESCE(SUM(views), 0) as total FROM "Article" WHERE "sellerId" = ${sellerId}`.then((result) => Number(result[0]?.total || 0))
+      safeDbOperation(
+        () => prisma.$queryRaw<Array<{ total: bigint }>>`SELECT COALESCE(SUM(views), 0) as total FROM "Article" WHERE "sellerId" = ${sellerId}`.then((result) => Number(result[0]?.total || 0)),
+        'seller-dashboard-totalViews'
+      )
     ])
 
     // Le revenu total n'est plus calculé automatiquement
@@ -88,7 +107,8 @@ export async function GET() {
       : thisMonthSales > 0 ? 100 : 0
 
     // Récupérer les articles récents
-    const recentArticles = await prisma.article.findMany({
+    const recentArticles = await safeDbOperation(
+      () => prisma.article.findMany({
       where: {
         sellerId,
         isAvailable: true
@@ -108,8 +128,10 @@ export async function GET() {
       orderBy: {
         createdAt: 'desc'
       },
-      take: 5
-    })
+        take: 5
+      }),
+      'seller-dashboard-recentArticles'
+    )
 
     // Les ventes récentes ne sont plus trackées automatiquement
     // car les transactions se font via WhatsApp

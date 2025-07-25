@@ -5,9 +5,39 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient()
+// Configuration optimisée pour la production avec gestion des connexions
+const createPrismaClient = () => {
+  return new PrismaClient({
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
+    },
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  })
+}
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+export const prisma = globalForPrisma.prisma ?? createPrismaClient()
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma
+}
+
+// Fonction pour fermer proprement les connexions
+export async function disconnectPrisma() {
+  await prisma.$disconnect()
+}
+
+// Fonction pour vérifier la santé de la connexion
+export async function checkDatabaseConnection() {
+  try {
+    await prisma.$queryRaw`SELECT 1`
+    return true
+  } catch (error) {
+    console.error('Database connection failed:', error)
+    return false
+  }
+}
 
 // Export types from Prisma
 export type { Article, Category, User, ArticleCondition, UserRole }
@@ -68,6 +98,9 @@ function transformArticle(article: Record<string, unknown>): Record<string, unkn
   return article
 }
 
+// Import des utilitaires de connexion
+import { safeDbOperation, handleDatabaseError } from './db-connection'
+
 // Article functions
 export async function getArticles(filters?: {
   categoryId?: string;
@@ -113,31 +146,38 @@ export async function getArticles(filters?: {
     ]
   }
 
-  const articles = await prisma.article.findMany({
-    where,
-    include: {
-      seller: {
-        select: {
-          id: true,
-          name: true,
-          image: true,
-          location: true,
+  try {
+    const articles = await safeDbOperation(
+      () => prisma.article.findMany({
+        where,
+        include: {
+          seller: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+              location: true,
+            },
+          },
+          category: true,
+          _count: {
+            select: {
+              favorites: true,
+              reviews: true,
+            },
+          },
         },
-      },
-      category: true,
-      _count: {
-        select: {
-          favorites: true,
-          reviews: true,
+        orderBy: {
+          createdAt: 'desc',
         },
-      },
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  })
-  
-  return articles.map(transformArticle) as ArticleWithDetails[]
+      }),
+      'getArticles'
+    )
+    
+    return articles.map(transformArticle) as ArticleWithDetails[]
+  } catch (error) {
+    handleDatabaseError(error, 'getArticles')
+  }
 }
 
 export async function getArticleById(id: string): Promise<Prisma.ArticleGetPayload<{
@@ -351,21 +391,28 @@ export async function createCategory(data: {
 
 // User functions
 export async function getUserById(id: string): Promise<UserWithCounts | null> {
-  return await prisma.user.findUnique({
-    where: { id },
-    include: {
-      _count: {
-        select: {
-          articles: {
-            where: {
-              isAvailable: true,
+  try {
+    return await safeDbOperation(
+      () => prisma.user.findUnique({
+        where: { id },
+        include: {
+          _count: {
+            select: {
+              articles: {
+                where: {
+                  isAvailable: true,
+                },
+              },
+              reviews: true,
             },
           },
-          reviews: true,
         },
-      },
-    },
-  })
+      }),
+      'getUserById'
+    )
+  } catch (error) {
+    handleDatabaseError(error, 'getUserById')
+  }
 }
 
 export async function updateUser(id: string, data: Partial<{

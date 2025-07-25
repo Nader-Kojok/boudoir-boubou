@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { safeDbOperation } from '@/lib/db-connection'
 
 export async function GET() {
   try {
@@ -15,10 +16,13 @@ export async function GET() {
     }
 
     // Vérifier que l'utilisateur est un acheteur
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true }
-    })
+    const user = await safeDbOperation(
+      () => prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { role: true }
+      }),
+      'buyer-dashboard-getUserRole'
+    )
 
     if (!user || (user.role !== 'BUYER' && user.role !== 'ADMIN')) {
       return NextResponse.json(
@@ -32,11 +36,14 @@ export async function GET() {
     // Récupérer les statistiques
     const [favoriteItems] = await Promise.all([
       // Articles favoris
-      prisma.favorite.count({
-        where: {
-          userId: buyerId
-        }
-      })
+      safeDbOperation(
+        () => prisma.favorite.count({
+          where: {
+            userId: buyerId
+          }
+        }),
+        'buyer-dashboard-favoriteItems'
+      )
     ])
 
     const stats = {

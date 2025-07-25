@@ -10,9 +10,18 @@ interface ProvidersProps {
   session?: Session | null
 }
 
+// SessionLogger disabled to avoid client-side fetch issues
+// function SessionLogger({ children }: { children: ReactNode }) {
+//   return <>{children}</>
+// }
+
 export function Providers({ children, session }: ProvidersProps) {
   return (
-    <SessionProvider session={session} refetchInterval={5 * 60}>
+    <SessionProvider 
+      session={session} 
+      refetchInterval={0}
+      refetchOnWindowFocus={false}
+    >
       {children}
       <Toaster 
         position="top-right"

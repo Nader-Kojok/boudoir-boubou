@@ -58,6 +58,14 @@ function LoginForm() {
     setIsLoading(true)
     setAuthError('')
 
+    console.log('[LOGIN] Tentative de connexion:', {
+      phone: data.phone,
+      callbackUrl,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href
+    })
+
     try {
       const result = await signIn('credentials', {
         phone: data.phone,
@@ -66,14 +74,30 @@ function LoginForm() {
         redirect: false, // Handle redirect manually for better control
       })
 
+      console.log('[LOGIN] Résultat de signIn:', {
+        result,
+        ok: result?.ok,
+        error: result?.error,
+        status: result?.status,
+        url: result?.url,
+        timestamp: new Date().toISOString()
+      })
+
       if (result?.error) {
+        console.error('[LOGIN] Erreur de connexion:', result.error)
         setAuthError('Numéro de téléphone ou mot de passe incorrect')
         setIsLoading(false)
       } else if (result?.ok) {
+        console.log('[LOGIN] Connexion réussie, redirection vers:', callbackUrl)
         // Redirect manually after successful login
         window.location.href = callbackUrl
+      } else {
+        console.warn('[LOGIN] Résultat inattendu:', result)
+        setAuthError('Réponse inattendue du serveur')
+        setIsLoading(false)
       }
-    } catch {
+    } catch (error) {
+      console.error('[LOGIN] Exception lors de la connexion:', error)
       setAuthError('Une erreur est survenue lors de la connexion')
       setIsLoading(false)
     }

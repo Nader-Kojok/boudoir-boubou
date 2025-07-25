@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
+import { safeDbOperation } from '@/lib/db-connection'
 import { prisma } from '@/lib/db'
 
 export default async function DashboardPage() {
@@ -20,11 +21,14 @@ export default async function DashboardPage() {
       redirect('/login')
     }
 
-    // Get user role from database
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true }
-    })
+    // Get user role from database with safe connection handling
+    const user = await safeDbOperation(
+      () => prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { role: true }
+      }),
+      'dashboard-getUserRole'
+    )
 
     // Log for production debugging
     if (process.env.NODE_ENV === 'production') {
