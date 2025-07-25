@@ -17,6 +17,11 @@ export default withAuth(
       return clearAuthCookies(response)
     }
 
+    // Log middleware execution for production debugging
+    if (process.env.NODE_ENV === 'production') {
+      console.log(`[Middleware] Path: ${pathname}, Token: ${!!token}, Role: ${token?.role}`)
+    }
+
     // Vérifier les permissions basées sur les rôles pour les routes dashboard
     if (pathname.startsWith('/seller') && token?.role !== 'SELLER') {
       console.log('🚫 Access denied to /seller - Role:', token?.role, 'Required: SELLER')
