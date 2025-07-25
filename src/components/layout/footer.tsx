@@ -66,7 +66,7 @@ export function Footer({ className }: FooterProps) {
                 placeholder="Votre adresse email"
                 className="flex-1"
               />
-              <Button className="bg-boudoir-ocre-500 hover:bg-boudoir-ocre-600 text-white">
+              <Button className="bg-gradient-to-r from-[#a67c3a] to-[#8b5a2b] hover:from-[#8b5a2b] hover:to-[#6d4422] text-white shadow-lg hover:shadow-xl transition-all duration-300">
                 S&apos;inscrire
               </Button>
             </div>

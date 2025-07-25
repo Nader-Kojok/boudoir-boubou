@@ -11,57 +11,64 @@ const featuredProducts = [
     id: "robe-mariee-traditionnelle",
     title: "Robe de Mariée Traditionnelle",
     description: "Magnifique robe de mariée sénégalaise brodée main, portée une seule fois",
-    price: 450.00,
-    originalPrice: 800.00,
+    price: 450000,
+    originalPrice: 800000,
     condition: "EXCELLENT" as const,
     images: [
       "https://images.unsplash.com/photo-1519741497674-611481863552?w=500&h=600&fit=crop&crop=center&auto=format&q=80",
       "https://images.unsplash.com/photo-1465495976277-4387d4b0e4a6?w=500&h=600&fit=crop&crop=center&auto=format&q=80"
     ],
-    category: "Mariage"
+    category: "Mariage",
+    sellerWhatsApp: "221771234567",
+    sellerName: "Fatou Diop"
   },
   {
     id: "boubou-grand-boubou-wax",
     title: "Grand Boubou en Wax",
     description: "Boubou traditionnel en wax authentique avec broderies dorées",
-    price: 180.00,
+    price: 180000,
     condition: "EXCELLENT" as const,
     images: [
       "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=600&fit=crop&crop=center&auto=format&q=80",
       "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=600&fit=crop&crop=center&auto=format&q=80"
     ],
-    category: "Traditionnel"
+    category: "Traditionnel",
+    sellerWhatsApp: "221772345678",
+    sellerName: "Aminata Sow"
   },
   {
     id: "robe-soiree-paillettes",
     title: "Robe de Soirée à Paillettes",
     description: "Robe de soirée élégante avec paillettes dorées, parfaite pour les événements",
-    price: 120.00,
-    originalPrice: 200.00,
+    price: 120000,
+    originalPrice: 200000,
     condition: "EXCELLENT" as const,
     images: [
       "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=500&h=600&fit=crop&crop=center&auto=format&q=80",
       "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=500&h=600&fit=crop&crop=center&auto=format&q=80"
     ],
-    category: "Soirée"
+    category: "Soirée",
+    sellerWhatsApp: "221773456789",
+    sellerName: "Aïcha Ndiaye"
   },
   {
     id: "ensemble-bazin-riche",
     title: "Ensemble Bazin Riche",
     description: "Ensemble complet en bazin riche avec broderies traditionnelles",
-    price: 95.00,
+    price: 95000,
     condition: "GOOD" as const,
     images: [
       "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=600&fit=crop&crop=center&auto=format&q=80",
       "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=600&fit=crop&crop=center&auto=format&q=80"
     ],
-    category: "Traditionnel"
+    category: "Traditionnel",
+    sellerWhatsApp: "221774567890",
+    sellerName: "Mariama Fall"
   }
 ]
 
 export function FeaturedProducts() {
   const [favorites, setFavorites] = useState<string[]>([])
-  const [cart, setCart] = useState<string[]>([])
 
   const handleFavoriteToggle = (productId: string) => {
     setFavorites(prev => 
@@ -71,12 +78,12 @@ export function FeaturedProducts() {
     )
   }
 
-  const handleAddToCart = (productId: string) => {
-    setCart(prev => 
-      prev.includes(productId) 
-        ? prev
-        : [...prev, productId]
+  const handleWhatsAppContact = (productId: string, sellerWhatsApp: string, title: string) => {
+    const message = encodeURIComponent(
+      `Bonjour, je suis intéressé(e) par votre article "${title}" sur Boudoir.`
     )
+    const whatsappUrl = `https://wa.me/${sellerWhatsApp}?text=${message}`
+    window.open(whatsappUrl, '_blank')
   }
 
   const handleProductClick = (productId: string) => {
@@ -118,9 +125,10 @@ export function FeaturedProducts() {
               images={product.images}
               category={product.category}
               isFavorite={favorites.includes(product.id)}
-              isInCart={cart.includes(product.id)}
+              sellerWhatsApp={product.sellerWhatsApp}
+              sellerName={product.sellerName}
               onFavoriteToggle={handleFavoriteToggle}
-              onAddToCart={handleAddToCart}
+              onWhatsAppContact={handleWhatsAppContact}
               onClick={handleProductClick}
               className="h-full"
             />

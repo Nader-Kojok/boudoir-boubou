@@ -24,6 +24,7 @@ export default async function ProfilePage() {
       name: true,
       phone: true,
       image: true,
+      bannerImage: true,
       role: true,
       createdAt: true,
       phoneVerified: true,

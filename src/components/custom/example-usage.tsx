@@ -9,9 +9,8 @@ import {
 } from "./index"
 
 // Exemple d'utilisation des composants personnalisés
-export function ComponentExamples() {
+export function ExampleUsage() {
   const [favorites, setFavorites] = React.useState<string[]>([])
-  const [cart, setCart] = React.useState<string[]>([])
 
   const handleFavoriteToggle = (id: string) => {
     setFavorites(prev => 
@@ -21,12 +20,12 @@ export function ComponentExamples() {
     )
   }
 
-  const handleAddToCart = (id: string) => {
-    setCart(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
+  const handleWhatsAppContact = (id: string, sellerWhatsApp: string, title: string) => {
+    const message = encodeURIComponent(
+      `Bonjour, je suis intéressé(e) par votre article "${title}" sur Boudoir.`
     )
+    const whatsappUrl = `https://wa.me/${sellerWhatsApp}?text=${message}`
+    window.open(whatsappUrl, '_blank')
   }
 
   const sampleImages = [
@@ -47,15 +46,16 @@ export function ComponentExamples() {
             id="product-1"
             title="Robe élégante vintage"
             description="Magnifique robe des années 60 en parfait état"
-            price={89.99}
-            originalPrice={129.99}
+            price={89000}
+            originalPrice={129000}
             condition="EXCELLENT"
             images={sampleImages}
             category="Robes"
             isFavorite={favorites.includes("product-1")}
-            isInCart={cart.includes("product-1")}
+            sellerWhatsApp="221771234567"
+            sellerName="Fatou Diop"
             onFavoriteToggle={handleFavoriteToggle}
-            onAddToCart={handleAddToCart}
+            onWhatsAppContact={handleWhatsAppContact}
             onClick={(id) => console.log("Clicked product:", id)}
           />
           
@@ -63,14 +63,15 @@ export function ComponentExamples() {
             id="product-2"
             title="Sac à main cuir"
             description="Sac en cuir véritable, quelques marques d'usage"
-            price={45.00}
+            price={45000}
             condition="GOOD"
             images={[sampleImages[0]]}
             category="Accessoires"
             isFavorite={favorites.includes("product-2")}
-            isInCart={cart.includes("product-2")}
+            sellerWhatsApp="221772345678"
+            sellerName="Aminata Sow"
             onFavoriteToggle={handleFavoriteToggle}
-            onAddToCart={handleAddToCart}
+            onWhatsAppContact={handleWhatsAppContact}
           />
         </div>
       </section>
@@ -144,9 +145,9 @@ export function ComponentExamples() {
         <h2 className="text-2xl font-semibold mb-4">PriceDisplay</h2>
         <div className="space-y-4">
           <div className="flex items-center gap-8">
-            <PriceDisplay price={29.99} size="sm" />
-            <PriceDisplay price={89.99} originalPrice={129.99} size="md" />
-            <PriceDisplay price={199.99} originalPrice={299.99} size="lg" discountFormat="amount" />
+            <PriceDisplay price={29000} size="sm" />
+            <PriceDisplay price={89000} originalPrice={129000} size="md" />
+            <PriceDisplay price={199000} originalPrice={299000} size="lg" discountFormat="amount" />
           </div>
         </div>
       </section>
@@ -194,4 +195,4 @@ export function ComponentExamples() {
   )
 }
 
-export default ComponentExamples
+export default ExampleUsage

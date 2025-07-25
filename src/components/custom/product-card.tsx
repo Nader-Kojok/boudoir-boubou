@@ -2,7 +2,7 @@ import * as React from "react"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Heart, ShoppingCart } from "lucide-react"
+import { Heart, Phone } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { PriceDisplay } from "./price-display"
 import { ConditionBadge, type ConditionType } from "./condition-badge"
@@ -18,10 +18,11 @@ export interface ProductCardProps {
   images: string[]
   category?: string
   isFavorite?: boolean
-  isInCart?: boolean
   className?: string
+  sellerWhatsApp?: string
+  sellerName?: string
   onFavoriteToggle?: (id: string) => void
-  onAddToCart?: (id: string) => void
+  onWhatsAppContact?: (id: string, sellerWhatsApp: string, title: string) => void
   onClick?: (id: string) => void
 }
 
@@ -35,10 +36,10 @@ export function ProductCard({
   images,
   category,
   isFavorite = false,
-  isInCart = false,
   className,
+  sellerWhatsApp,
   onFavoriteToggle,
-  onAddToCart,
+  onWhatsAppContact,
   onClick,
 }: ProductCardProps) {
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -46,9 +47,11 @@ export function ProductCard({
     onFavoriteToggle?.(id)
   }
 
-  const handleAddToCartClick = (e: React.MouseEvent) => {
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    onAddToCart?.(id)
+    if (sellerWhatsApp) {
+      onWhatsAppContact?.(id, sellerWhatsApp, title)
+    }
   }
 
   const handleCardClick = () => {
@@ -125,11 +128,11 @@ export function ProductCard({
       <CardFooter className="p-4 pt-0">
         <Button 
           className="w-full"
-          variant={isInCart ? "secondary" : "default"}
-          onClick={handleAddToCartClick}
+          onClick={handleWhatsAppClick}
+          disabled={!sellerWhatsApp}
         >
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          {isInCart ? "Dans le panier" : "Ajouter au panier"}
+          <Phone className="h-4 w-4 mr-2" />
+          Contacter le vendeur
         </Button>
       </CardFooter>
     </Card>

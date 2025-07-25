@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    // Permettre les data URLs (base64) pour les images uploadées
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    // Autoriser les data URLs
+    unoptimized: false,
+    formats: ['image/webp'],
   },
 };
 

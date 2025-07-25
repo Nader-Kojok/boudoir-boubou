@@ -20,6 +20,9 @@ import {
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { ConditionBadge } from '@/components/custom/condition-badge'
+import { ImageGallery } from '@/components/custom/image-gallery'
+import { handleError, handleSuccess } from '@/hooks/use-notifications'
+import { useConfirmation } from '@/components/ui/confirmation-dialog'
 
 interface Article {
   id: string
@@ -47,111 +50,44 @@ export default function ArticlesPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [sortBy, setSortBy] = useState('recent')
+  const { confirm, ConfirmationComponent } = useConfirmation()
 
   useEffect(() => {
     fetchArticles()
-  }, [])
+  }, [searchTerm, statusFilter, categoryFilter, sortBy])
 
   const fetchArticles = async () => {
     try {
       setLoading(true)
-      // Simulation de données - à remplacer par de vrais appels API
-      await new Promise(resolve => setTimeout(resolve, 1000))
       
-      setArticles([
-        {
-          id: '1',
-          title: 'Robe Wax Élégante Traditionnelle',
-          description: 'Magnifique robe en tissu wax authentique, parfaite pour les occasions spéciales.',
-          price: 85,
-          images: ['/placeholder-product.jpg'],
-          condition: 'EXCELLENT',
-          isAvailable: true,
-          views: 124,
-          favorites: 8,
-          createdAt: '2024-01-15T10:00:00Z',
-          updatedAt: '2024-01-15T10:00:00Z',
-          category: { id: '1', name: 'Robes' },
-          status: 'ACTIVE'
-        },
-        {
-          id: '2',
-          title: 'Ensemble Traditionnel Complet',
-          description: 'Ensemble complet avec boubou et pantalon assorti.',
-          price: 120,
-          images: ['/placeholder-product.jpg'],
-          condition: 'GOOD',
-          isAvailable: true,
-          views: 89,
-          favorites: 5,
-          createdAt: '2024-01-12T14:30:00Z',
-          updatedAt: '2024-01-12T14:30:00Z',
-          category: { id: '2', name: 'Ensembles' },
-          status: 'ACTIVE'
-        },
-        {
-          id: '3',
-          title: 'Headwrap Coloré Artisanal',
-          description: 'Headwrap fait main avec motifs traditionnels.',
-          price: 25,
-          images: ['/placeholder-product.jpg'],
-          condition: 'EXCELLENT',
-          isAvailable: false,
-          views: 67,
-          favorites: 12,
-          createdAt: '2024-01-10T09:15:00Z',
-          updatedAt: '2024-01-14T16:20:00Z',
-          category: { id: '3', name: 'Accessoires' },
-          status: 'SOLD'
-        },
-        {
-          id: '4',
-          title: 'Bijoux Traditionnels en Or',
-          description: 'Collier et boucles d\'oreilles en or 18 carats.',
-          price: 350,
-          images: ['/placeholder-product.jpg'],
-          condition: 'EXCELLENT',
-          isAvailable: true,
-          views: 45,
-          favorites: 3,
-          createdAt: '2024-01-08T11:45:00Z',
-          updatedAt: '2024-01-08T11:45:00Z',
-          category: { id: '4', name: 'Bijoux' },
-          status: 'PAUSED'
-        }
-      ])
+      // Construction des paramètres de requête
+      const params = new URLSearchParams()
+      if (searchTerm) params.append('search', searchTerm)
+      if (statusFilter !== 'all') params.append('status', statusFilter)
+      if (categoryFilter !== 'all') params.append('categoryId', categoryFilter)
+      if (sortBy) params.append('sortBy', sortBy)
+      
+      // Removed test mode functionality for security
+      
+      const response = await fetch(`/api/seller/articles?${params.toString()}`)
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des articles')
+      }
+      
+      const data = await response.json()
+      setArticles(data.articles || [])
+      
     } catch (error) {
-      console.error('Erreur lors du chargement des articles:', error)
+      handleError(error, 'Chargement des articles')
+      setArticles([])
     } finally {
       setLoading(false)
     }
   }
 
-  const filteredArticles = articles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         article.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || article.status.toLowerCase() === statusFilter
-    const matchesCategory = categoryFilter === 'all' || article.category.name === categoryFilter
-    
-    return matchesSearch && matchesStatus && matchesCategory
-  })
-
-  const sortedArticles = [...filteredArticles].sort((a, b) => {
-    switch (sortBy) {
-      case 'recent':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      case 'price-high':
-        return b.price - a.price
-      case 'price-low':
-        return a.price - b.price
-      case 'views':
-        return b.views - a.views
-      case 'favorites':
-        return b.favorites - a.favorites
-      default:
-        return 0
-    }
-  })
+  // Les articles sont déjà filtrés et triés côté serveur
+  const displayedArticles = articles
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -181,19 +117,70 @@ export default function ArticlesPage() {
     )
   }
 
-  const toggleArticleStatus = (articleId: string) => {
-    setArticles(prev => prev.map(article => {
-      if (article.id === articleId) {
-        const newStatus = article.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE'
-        return { ...article, status: newStatus, isAvailable: newStatus === 'ACTIVE' }
+  const toggleArticleStatus = async (articleId: string) => {
+    try {
+      const article = articles.find(a => a.id === articleId)
+      if (!article) return
+      
+      const newStatus = article.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE'
+      const newIsAvailable = newStatus === 'ACTIVE'
+      
+      const response = await fetch(`/api/articles/${articleId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          isAvailable: newIsAvailable
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la mise à jour du statut')
       }
-      return article
-    }))
+      
+      // Mettre à jour l'état local
+      setArticles(prev => prev.map(article => {
+        if (article.id === articleId) {
+          return { ...article, status: newStatus, isAvailable: newIsAvailable }
+        }
+        return article
+      }))
+      
+    } catch (error) {
+      handleError(error, 'Changement de statut de l\'article')
+    }
   }
 
-  const deleteArticle = (articleId: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
+  const deleteArticle = async (articleId: string) => {
+    const confirmed = await confirm({
+      title: 'Supprimer l\'article',
+      description: 'Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      variant: 'destructive'
+    })
+    
+    if (!confirmed) {
+      return
+    }
+    
+    try {
+      const response = await fetch(`/api/articles/${articleId}`, {
+        method: 'DELETE'
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Erreur lors de la suppression')
+      }
+      
+      // Mettre à jour l'état local
       setArticles(prev => prev.filter(article => article.id !== articleId))
+      handleSuccess('Article supprimé avec succès')
+      
+    } catch (error) {
+      handleError(error, 'Suppression de l\'article')
     }
   }
 
@@ -221,7 +208,7 @@ export default function ArticlesPage() {
           <p className="text-gray-600 mt-1">Gérez vos articles en vente</p>
         </div>
         <Link href="/seller/vendre">
-          <Button className="bg-boudoir-ocre-500 hover:bg-boudoir-ocre-600">
+          <Button className="bg-gradient-to-r from-[#a67c3a] to-[#8b5a2b] hover:from-[#8b5a2b] hover:to-[#6d4422] text-white shadow-lg hover:shadow-xl transition-all duration-300">
             <Plus className="w-4 h-4 mr-2" />
             Ajouter un article
           </Button>
@@ -284,32 +271,46 @@ export default function ArticlesPage() {
       </Card>
 
       {/* Articles Grid */}
-      {sortedArticles.length > 0 ? (
+      {displayedArticles.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedArticles.map((article) => (
+          {displayedArticles.map((article) => (
             <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="aspect-square bg-gray-100 relative">
-                <div className="absolute top-3 left-3 z-10">
-                  {getStatusBadge(article.status)}
+              <Link href={`/article/${article.id}`} className="block">
+                <div className="aspect-square bg-gray-100 relative">
+                  <div className="absolute top-3 left-3 z-10">
+                    {getStatusBadge(article.status)}
+                  </div>
+                  <div className="absolute top-3 right-3 z-10">
+                    <ConditionBadge condition={article.condition} />
+                  </div>
+                  {article.images && article.images.length > 0 ? (
+                    <ImageGallery 
+                      images={article.images}
+                      alt={article.title}
+                      className="w-full h-full"
+                      showControls={article.images.length > 1}
+                      showThumbnails={false}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package className="w-16 h-16 text-gray-400" />
+                    </div>
+                  )}
                 </div>
-                <div className="absolute top-3 right-3 z-10">
-                  <ConditionBadge condition={article.condition} />
-                </div>
-                <div className="w-full h-full flex items-center justify-center">
-                  <Package className="w-16 h-16 text-gray-400" />
-                </div>
-              </div>
+              </Link>
               
               <CardContent className="p-4 space-y-3">
                 <div>
-                  <h3 className="font-semibold text-lg line-clamp-2">{article.title}</h3>
+                  <Link href={`/article/${article.id}`}>
+                    <h3 className="font-semibold text-lg line-clamp-2 hover:text-boudoir-ocre-600 transition-colors cursor-pointer">{article.title}</h3>
+                  </Link>
                   <p className="text-sm text-gray-600 line-clamp-2 mt-1">{article.description}</p>
                   <p className="text-xs text-gray-500 mt-1">{article.category.name}</p>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="text-xl font-bold text-boudoir-ocre-600">
-                    {article.price}€
+                    {article.price}F
                   </div>
                   <div className="flex items-center gap-3 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
@@ -328,10 +329,12 @@ export default function ArticlesPage() {
                 </div>
                 
                 <div className="flex gap-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Edit className="w-3 h-3 mr-1" />
-                    Modifier
-                  </Button>
+                  <Link href={`/seller/vendre?edit=${article.id}`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">
+                      <Edit className="w-3 h-3 mr-1" />
+                      Modifier
+                    </Button>
+                  </Link>
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -375,7 +378,7 @@ export default function ArticlesPage() {
             </p>
             {!searchTerm && statusFilter === 'all' && categoryFilter === 'all' && (
               <Link href="/seller/vendre">
-                <Button className="bg-boudoir-ocre-500 hover:bg-boudoir-ocre-600">
+                <Button className="bg-gradient-to-r from-[#a67c3a] to-[#8b5a2b] hover:from-[#8b5a2b] hover:to-[#6d4422] text-white shadow-lg hover:shadow-xl transition-all duration-300">
                   <Plus className="w-4 h-4 mr-2" />
                   Ajouter un article
                 </Button>
@@ -386,13 +389,14 @@ export default function ArticlesPage() {
       )}
 
       {/* Summary */}
-      {sortedArticles.length > 0 && (
+      {displayedArticles.length > 0 && (
         <div className="text-center text-sm text-gray-600">
-          {sortedArticles.length} article{sortedArticles.length > 1 ? 's' : ''} affiché{sortedArticles.length > 1 ? 's' : ''}
-          {(searchTerm || statusFilter !== 'all' || categoryFilter !== 'all') && 
-            ` sur ${articles.length} au total`}
+          {displayedArticles.length} article{displayedArticles.length > 1 ? 's' : ''} affiché{displayedArticles.length > 1 ? 's' : ''}
         </div>
       )}
+      
+      {/* Confirmation Dialog */}
+      {ConfirmationComponent}
     </div>
   )
 }

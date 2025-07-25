@@ -20,6 +20,14 @@ const updateProfileSchema = z.object({
   role: z.enum(['SELLER', 'BUYER', 'ADMIN'], {
     required_error: 'Veuillez sélectionner un rôle',
   }),
+  image: z.string().optional().or(z.literal('')).refine(
+    (val) => !val || val === '' || /^https?:\/\//.test(val) || /^data:image\//.test(val),
+    'Format d\'image invalide (URL ou base64)'
+  ),
+  bannerImage: z.string().optional().or(z.literal('')).refine(
+    (val) => !val || val === '' || /^https?:\/\//.test(val) || /^data:image\//.test(val),
+    'Format d\'image invalide (URL ou base64)'
+  ),
 })
 
 export async function PATCH(request: NextRequest) {
@@ -37,7 +45,7 @@ export async function PATCH(request: NextRequest) {
     
     // Validation des données
     const validatedData = updateProfileSchema.parse(body)
-    const { name, phone, role } = validatedData
+    const { name, phone, role, image, bannerImage } = validatedData
 
     // Récupérer l'utilisateur actuel pour vérifier le téléphone
     const currentUser = await prisma.user.findUnique({
@@ -73,6 +81,8 @@ export async function PATCH(request: NextRequest) {
         name,
         phone,
         role,
+        image: image || null,
+        bannerImage: bannerImage || null,
         // Si le téléphone change, marquer comme non vérifié
         ...(phone !== currentUser.phone && { phoneVerified: null }),
       },
@@ -81,6 +91,8 @@ export async function PATCH(request: NextRequest) {
         name: true,
         phone: true,
         role: true,
+        image: true,
+        bannerImage: true,
         phoneVerified: true,
         updatedAt: true,
       },

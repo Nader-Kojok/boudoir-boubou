@@ -17,6 +17,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Icons } from '@/components/ui/icons'
 import { registerSchema, type RegisterInput } from '@/lib/validations/auth'
 import { Eye, EyeOff, Phone, Lock, User, AlertCircle, ShoppingBag, Store } from 'lucide-react'
+import { delayedPush } from '@/utils/delayed-navigation'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -76,10 +77,9 @@ export default function RegisterPage() {
 
       if (result?.error) {
         setAuthError('Inscription réussie, mais erreur de connexion automatique')
-        router.push('/login')
+        delayedPush(router, '/login', 2000)
       } else {
-        router.push('/dashboard')
-        router.refresh()
+        delayedPush(router, '/dashboard', 2000, true)
       }
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : 'Une erreur est survenue')

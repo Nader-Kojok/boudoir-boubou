@@ -53,6 +53,7 @@ model User {
   phone         String    @unique
   phoneVerified DateTime?
   image         String?
+  bannerImage   String?
   password      String?
   role          UserRole  @default(BUYER)
   bio           String?
@@ -71,11 +72,9 @@ model User {
 
   // Application relations
   articles  Article[]
-  orders    Order[]
   reviews   Review[]
   favorites Favorite[]
-  sentMessages     Message[] @relation("MessageSender")
-  receivedMessages Message[] @relation("MessageReceiver")
+
 }
 
 model Category {
@@ -97,6 +96,8 @@ model Article {
   price       Float
   images      String // JSON string of image URLs
   size        String?
+  brand       String?
+  color       String?
   condition   ArticleCondition
   isAvailable Boolean         @default(true)
   createdAt   DateTime        @default(now())
@@ -108,41 +109,12 @@ model Article {
   categoryId String
   category   Category  @relation(fields: [categoryId], references: [id])
 
-  orderItems OrderItem[]
   reviews    Review[]
   favorites  Favorite[]
-  messages   Message[]
+
 }
 
-model Order {
-  id          String      @id @default(cuid())
-  status      OrderStatus @default(PENDING)
-  total       Float
-  shippingAddress String?
-  notes       String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
 
-  // Relations
-  buyerId String
-  buyer   User   @relation(fields: [buyerId], references: [id])
-
-  orderItems OrderItem[]
-}
-
-model OrderItem {
-  id       String @id @default(cuid())
-  quantity Int    @default(1)
-  price    Float
-
-  // Relations
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  articleId String
-  article   Article @relation(fields: [articleId], references: [id])
-
-  @@unique([orderId, articleId])
-}
 
 model Review {
   id        String   @id @default(cuid())
@@ -173,20 +145,7 @@ model Favorite {
   @@unique([userId, articleId])
 }
 
-model Message {
-  id        String   @id @default(cuid())
-  content   String
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
 
-  // Relations
-  senderId   String
-  sender     User    @relation("MessageSender", fields: [senderId], references: [id])
-  receiverId String
-  receiver   User    @relation("MessageReceiver", fields: [receiverId], references: [id])
-  articleId  String?
-  article    Article? @relation(fields: [articleId], references: [id])
-}
 
 // Enums
 enum UserRole {
@@ -199,12 +158,4 @@ enum ArticleCondition {
   EXCELLENT
   GOOD
   FAIR
-}
-
-enum OrderStatus {
-  PENDING
-  CONFIRMED
-  SHIPPED
-  DELIVERED
-  CANCELLED
 }

@@ -93,14 +93,24 @@ export function ImageGallery({
   if (images.length === 1) {
     return (
       <div className={cn("relative group", className)}>
-        <Image
-          src={images[0]}
-          alt={alt}
-          width={500}
-          height={500}
-          className="w-full h-full object-cover rounded-lg cursor-pointer"
-          onClick={() => handleImageClick(0)}
-        />
+        {images[0].startsWith('data:') ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={images[0]}
+            alt={alt}
+            className="w-full h-full object-cover rounded-lg cursor-pointer"
+            onClick={() => handleImageClick(0)}
+          />
+        ) : (
+          <Image
+            src={images[0]}
+            alt={alt}
+            width={500}
+            height={500}
+            className="w-full h-full object-cover rounded-lg cursor-pointer"
+            onClick={() => handleImageClick(0)}
+          />
+        )}
         {showExpandButton && (
           <Button
             variant="ghost"
@@ -123,14 +133,24 @@ export function ImageGallery({
           <div className="flex">
             {images.map((image, index) => (
               <div key={index} className="flex-[0_0_100%] min-w-0">
-                <Image
-                  src={image}
-                  alt={`${alt} ${index + 1}`}
-                  width={500}
-                  height={500}
-                  className="w-full h-full object-cover cursor-pointer"
-                  onClick={() => handleImageClick(index)}
-                />
+                {image.startsWith('data:') ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={image}
+                    alt={`${alt} ${index + 1}`}
+                    className="w-full h-full object-cover cursor-pointer"
+                    onClick={() => handleImageClick(index)}
+                  />
+                ) : (
+                  <Image
+                    src={image}
+                    alt={`${alt} ${index + 1}`}
+                    width={500}
+                    height={500}
+                    className="w-full h-full object-cover cursor-pointer"
+                    onClick={() => handleImageClick(index)}
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -201,13 +221,22 @@ export function ImageGallery({
                 )}
                 onClick={() => emblaApi?.scrollTo(index)}
               >
-                <Image
-                  src={image}
-                  alt={`${alt} thumbnail ${index + 1}`}
-                  width={64}
-                  height={64}
-                  className="w-full h-full object-cover"
-                />
+                {image.startsWith('data:') ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={image}
+                    alt={`${alt} thumbnail ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={image}
+                    alt={`${alt} thumbnail ${index + 1}`}
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                  />
+                )}
               </button>
             ))}
           </div>

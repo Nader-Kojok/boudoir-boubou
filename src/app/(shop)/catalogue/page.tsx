@@ -29,6 +29,7 @@ interface Article {
     name: string
     image?: string
     location?: string
+    whatsappNumber?: string
   }
   _count: {
     favorites: number
@@ -174,9 +175,12 @@ function CatalogueContent() {
     console.log('Toggle favorite for article:', articleId)
   }
 
-  const handleAddToCart = async (articleId: string) => {
-    // TODO: Implement add to cart API call
-    console.log('Add to cart article:', articleId)
+  const handleWhatsAppContact = (articleId: string, sellerWhatsApp: string, title: string) => {
+    const message = encodeURIComponent(
+      `Bonjour, je suis intéressé(e) par votre article "${title}" sur Boudoir.`
+    )
+    const whatsappUrl = `https://wa.me/${sellerWhatsApp}?text=${message}`
+    window.open(whatsappUrl, '_blank')
   }
 
   const handleProductClick = (articleId: string) => {
@@ -464,8 +468,10 @@ function CatalogueContent() {
                     condition={article.condition}
                     images={article.images}
                     category={article.category.name}
+                    sellerWhatsApp={article.seller.whatsappNumber}
+                    sellerName={article.seller.name}
                     onFavoriteToggle={handleFavoriteToggle}
-                    onAddToCart={handleAddToCart}
+                    onWhatsAppContact={handleWhatsAppContact}
                     onClick={handleProductClick}
                     className={viewMode === 'list' ? 'flex-row' : ''}
                   />

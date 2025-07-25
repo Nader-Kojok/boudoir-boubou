@@ -91,7 +91,7 @@
   - [x] Order (commandes)
   - [x] Review (avis)
   - [x] Favorite (favoris)
-  - [x] Message (messagerie)
+
 
 ### 🔄 Validations Zod
 - [x] **Schémas de validation**
@@ -101,7 +101,7 @@
   - [x] Validation commandes
   - [x] Validation avis
   - [x] Validation favoris
-  - [x] Validation messages
+
 
 ---
 
@@ -218,7 +218,7 @@
 - [ ] **Dashboard acheteur** ❌ **DOSSIER VIDE**
   - [ ] Favoris
   - [ ] Historique des achats
-  - [ ] Messages
+
   - [ ] Profil
 
 - [ ] **Système de favoris** ⚠️ **BACKEND PRÊT**
@@ -256,32 +256,26 @@
 ## 🛒 Phase 6: Système de commandes (Priorité: MOYENNE)
 
 ### 💰 Processus d'achat
-- [ ] **Panier d'achat**
-  - [ ] Ajouter au panier
-  - [ ] Gestion quantités
-  - [ ] Calcul total
-  - [ ] Sauvegarde session
+- [ ] **Contact WhatsApp**
+  - [ ] Bouton contact vendeur
 
-- [ ] **Checkout**
-  - [ ] Formulaire de commande
-  - [ ] Choix livraison
-  - [ ] Intégration paiement
-  - [ ] Confirmation commande
+  - [ ] Redirection WhatsApp
 
-- [ ] **Suivi commandes**
-  - [ ] Statuts de commande
-  - [ ] Historique acheteur
-  - [ ] Notifications
+
+- [ ] **Gestion des transactions**
+  - [ ] Marquer comme vendu
+  - [ ] Historique des ventes
+  - [ ] Statistiques simplifiées
 
 ---
 
 ## 👥 Phase 7: Fonctionnalités sociales (Priorité: BASSE)
 
 ### 💬 Interactions
-- [ ] **Système de messages**
-  - [ ] Chat vendeur-acheteur
-  - [ ] Notifications en temps réel
-  - [ ] Historique conversations
+- [x] **Communication via WhatsApp**
+  - [x] Boutons de contact direct
+  - [x] Génération automatique de messages
+  - [x] Redirection vers WhatsApp
 
 - [ ] **Avis et évaluations**
   - [ ] Système de notation

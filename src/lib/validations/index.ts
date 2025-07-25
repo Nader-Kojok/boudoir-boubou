@@ -10,13 +10,10 @@ export * from './article';
 export * from './profile';
 
 // Schémas de commandes
-export * from './order';
+
 
 // Schémas d'avis
 export * from './review';
 
 // Schémas de favoris
 export * from './favorite';
-
-// Schémas de messages
-export * from './message';

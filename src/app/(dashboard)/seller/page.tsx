@@ -12,11 +12,12 @@ import {
   Heart, 
   ShoppingCart,
   Plus,
-  DollarSign,
-  MoreHorizontal
+  MoreHorizontal,
+  FileText
 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { ImageGallery } from '@/components/custom/image-gallery'
 
 interface DashboardStats {
   totalSales: number
@@ -50,7 +51,7 @@ interface Sale {
   buyerName: string
   amount: number
   date: string
-  status: 'COMPLETED' | 'PENDING' | 'CANCELLED'
+  status: 'DELIVERED' | 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'CANCELLED'
 }
 
 export default function SellerDashboard() {
@@ -73,67 +74,33 @@ export default function SellerDashboard() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
-      // Simulation de données - à remplacer par de vrais appels API
-      await new Promise(resolve => setTimeout(resolve, 1000))
       
-      setStats({
-        totalSales: 24,
-        totalRevenue: 1250,
-        activeArticles: 12,
-        totalViews: 1847,
-        thisMonthSales: 8,
-        salesGrowth: 15.2
-      })
-
-      setRecentArticles([
-        {
-          id: '1',
-          title: 'Robe Wax Élégante',
-          price: 85,
-          images: ['/placeholder-product.jpg'],
-          condition: 'EXCELLENT',
-          isAvailable: true,
-          views: 124,
-          favorites: 8,
-          createdAt: '2024-01-15',
-          category: { name: 'Robes' }
-        },
-        {
-          id: '2',
-          title: 'Ensemble Traditionnel',
-          price: 120,
-          images: ['/placeholder-product.jpg'],
-          condition: 'GOOD',
-          isAvailable: true,
-          views: 89,
-          favorites: 5,
-          createdAt: '2024-01-12',
-          category: { name: 'Ensembles' }
-        }
-      ])
-
-
-
-      setRecentSales([
-        {
-          id: '1',
-          articleTitle: 'Boubou Brodé',
-          buyerName: 'Aminata K.',
-          amount: 95,
-          date: '2024-01-15',
-          status: 'COMPLETED'
-        },
-        {
-          id: '2',
-          articleTitle: 'Headwrap Coloré',
-          buyerName: 'Fatou S.',
-          amount: 25,
-          date: '2024-01-14',
-          status: 'COMPLETED'
-        }
-      ])
+      // Récupérer les données du tableau de bord
+      const response = await fetch('/api/seller/dashboard')
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des données')
+      }
+      
+      const data = await response.json()
+      
+      setStats(data.stats)
+      setRecentArticles(data.recentArticles)
+      setRecentSales(data.recentSales)
+      
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error)
+      // En cas d'erreur, garder les données par défaut
+      setStats({
+        totalSales: 0,
+        totalRevenue: 0,
+        activeArticles: 0,
+        totalViews: 0,
+        thisMonthSales: 0,
+        salesGrowth: 0
+      })
+      setRecentArticles([])
+      setRecentSales([])
     } finally {
       setLoading(false)
     }
@@ -150,13 +117,17 @@ export default function SellerDashboard() {
 
   const getStatusBadge = (status: Sale['status']) => {
     const variants = {
-      COMPLETED: 'bg-green-100 text-green-800',
+      DELIVERED: 'bg-green-100 text-green-800',
+      CONFIRMED: 'bg-blue-100 text-blue-800',
+      SHIPPED: 'bg-purple-100 text-purple-800',
       PENDING: 'bg-yellow-100 text-yellow-800',
       CANCELLED: 'bg-red-100 text-red-800'
     }
     
     const labels = {
-      COMPLETED: 'Terminée',
+      DELIVERED: 'Livrée',
+      CONFIRMED: 'Confirmée',
+      SHIPPED: 'Expédiée',
       PENDING: 'En attente',
       CANCELLED: 'Annulée'
     }
@@ -192,7 +163,7 @@ export default function SellerDashboard() {
           <p className="text-gray-600 mt-1">Gérez vos ventes et suivez vos performances</p>
         </div>
         <Link href="/seller/vendre">
-          <Button className="bg-boudoir-ocre-500 hover:bg-boudoir-ocre-600">
+          <Button className="bg-gradient-to-r from-[#a67c3a] to-[#8b5a2b] hover:from-[#8b5a2b] hover:to-[#6d4422] text-white shadow-lg hover:shadow-xl transition-all duration-300">
             <Plus className="w-4 h-4 mr-2" />
             Ajouter un article
           </Button>
@@ -200,7 +171,7 @@ export default function SellerDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ventes totales</CardTitle>
@@ -217,10 +188,10 @@ export default function SellerDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Revenus</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalRevenue}€</div>
+            <div className="text-2xl font-bold">{stats.totalRevenue}F</div>
             <p className="text-xs text-muted-foreground">
               +{stats.salesGrowth}% vs mois dernier
             </p>
@@ -236,6 +207,25 @@ export default function SellerDashboard() {
             <div className="text-2xl font-bold">{stats.activeArticles}</div>
             <p className="text-xs text-muted-foreground">
               Articles en vente
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Brouillons</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {typeof window !== 'undefined' ? (
+                JSON.parse(localStorage.getItem('article-drafts') || '[]').length
+              ) : 0}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              <Link href="/seller/brouillons" className="text-boudoir-ocre-600 hover:underline">
+                Voir les brouillons
+              </Link>
             </p>
           </CardContent>
         </Card>
@@ -259,7 +249,7 @@ export default function SellerDashboard() {
                   <p className="text-xs text-gray-500">{formatDate(sale.date)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-green-600">{sale.amount}€</p>
+                  <p className="font-bold text-green-600">{sale.amount}F</p>
                   {getStatusBadge(sale.status)}
                 </div>
               </div>
@@ -282,24 +272,37 @@ export default function SellerDashboard() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentArticles.map((article) => (
-              <div key={article.id} className="border rounded-lg p-4 space-y-3">
-                <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-                  <Package className="w-12 h-12 text-gray-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-sm">{article.title}</h3>
-                  <p className="text-lg font-bold text-boudoir-ocre-600">{article.price}€</p>
-                  <div className="flex items-center gap-4 text-xs text-gray-600 mt-2">
-                    <span className="flex items-center gap-1">
-                      <Eye className="w-3 h-3" />
-                      {article.views}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-3 h-3" />
-                      {article.favorites}
-                    </span>
+              <div key={article.id} className="border rounded-lg p-4 space-y-3 hover:bg-gray-50 transition-colors">
+                <Link href={`/article/${article.id}`} className="block cursor-pointer">
+                  <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                    {article.images && article.images.length > 0 ? (
+                      <ImageGallery
+                        images={article.images}
+                        alt={article.title}
+                        className="w-full h-full"
+                        showThumbnails={false}
+                        showControls={false}
+                        showExpandButton={false}
+                      />
+                    ) : (
+                      <Package className="w-12 h-12 text-gray-400" />
+                    )}
                   </div>
-                </div>
+                  <div>
+                    <h3 className="font-medium text-sm hover:text-boudoir-ocre-600 transition-colors">{article.title}</h3>
+                    <p className="text-lg font-bold text-boudoir-ocre-600">{article.price}F</p>
+                    <div className="flex items-center gap-4 text-xs text-gray-600 mt-2">
+                      <span className="flex items-center gap-1">
+                        <Eye className="w-3 h-3" />
+                        {article.views}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Heart className="w-3 h-3" />
+                        {article.favorites}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" className="flex-1">
                     Modifier
@@ -316,7 +319,7 @@ export default function SellerDashboard() {
               <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500 mb-4">Aucun article en cours</p>
               <Link href="/seller/vendre">
-                <Button className="bg-boudoir-ocre-500 hover:bg-boudoir-ocre-600">
+                <Button className="bg-gradient-to-r from-[#a67c3a] to-[#8b5a2b] hover:from-[#8b5a2b] hover:to-[#6d4422] text-white shadow-lg hover:shadow-xl transition-all duration-300">
                   <Plus className="w-4 h-4 mr-2" />
                   Ajouter votre premier article
                 </Button>

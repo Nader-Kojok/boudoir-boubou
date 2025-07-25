@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Star, MessageSquare } from 'lucide-react'
+import { Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
@@ -116,7 +116,7 @@ export function ReviewSection({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2">
-            <MessageSquare className="h-5 w-5" />
+            <Star className="h-5 w-5" />
             <span>Avis ({totalReviews})</span>
           </CardTitle>
           {session && (
@@ -260,7 +260,7 @@ export function ReviewSection({
         ) : (
           totalReviews === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <Star className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>Aucun avis pour le moment</p>
               <p className="text-sm">Soyez le premier à laisser un avis !</p>
             </div>

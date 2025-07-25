@@ -30,12 +30,12 @@ export default async function BuyerLayout({ children }: BuyerLayoutProps) {
                 <Link href="/buyer" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
                   Tableau de bord
                 </Link>
-                <a href="/buyer/commandes" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
-                  Mes commandes
-                </a>
                 <a href="/buyer/favoris" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
                   Mes favoris
                 </a>
+                <Link href="/catalogue" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
+                  Catalogue
+                </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">

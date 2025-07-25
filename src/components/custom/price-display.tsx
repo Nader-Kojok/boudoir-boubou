@@ -34,7 +34,7 @@ const sizeClasses = {
 export function PriceDisplay({
   price,
   originalPrice,
-  currency = "EUR",
+  currency = "XOF",
   locale = "fr-FR",
   showDiscount = true,
   discountFormat = "percentage",

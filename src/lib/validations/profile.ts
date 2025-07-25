@@ -76,7 +76,7 @@ export const notificationPreferencesSchema = z.object({
   smsNotifications: z.boolean().default(true),
   pushNotifications: z.boolean().default(true),
   marketingSms: z.boolean().default(false),
-  newMessageNotifications: z.boolean().default(true),
+
   articleSoldNotifications: z.boolean().default(true),
   priceDropNotifications: z.boolean().default(true),
 });
@@ -87,7 +87,7 @@ export const privacySettingsSchema = z.object({
   showPhone: z.boolean().default(false),
   showWhatsapp: z.boolean().default(true),
   showLocation: z.boolean().default(true),
-  allowMessages: z.boolean().default(true),
+
 });
 
 // Schéma pour la suppression de compte

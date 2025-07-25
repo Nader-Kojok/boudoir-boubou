@@ -37,9 +37,8 @@ export default async function SellerLayout({ children }: SellerLayoutProps) {
                 <Link href="/seller/articles" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
                   Mes Articles
                 </Link>
-
-                <Link href="/seller/statistiques" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
-                  Statistiques
+                <Link href="/seller/brouillons" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
+                  Brouillons
                 </Link>
               </div>
             </div>

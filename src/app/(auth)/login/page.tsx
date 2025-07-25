@@ -16,11 +16,16 @@ import { Separator } from '@/components/ui/separator'
 import { Icons } from '@/components/ui/icons'
 import { loginSchema, type LoginInput } from '@/lib/validations/auth'
 import { Eye, EyeOff, Phone, Lock, AlertCircle } from 'lucide-react'
+import { delayedPush } from '@/utils/delayed-navigation'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+  const rawCallbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+  // Use local callback URL when running locally
+  const callbackUrl = rawCallbackUrl.startsWith('https://boudoir-boubou.vercel.app') 
+    ? '/dashboard' 
+    : rawCallbackUrl
   const error = searchParams.get('error')
   
   const [isLoading, setIsLoading] = useState(false)
@@ -49,11 +54,10 @@ function LoginForm() {
       if (result?.error) {
         setAuthError('Numéro de téléphone ou mot de passe incorrect')
       } else {
-        // Vérifier la session et rediriger
+        // Vérifier la session et rediriger après un délai
         const session = await getSession()
         if (session) {
-          router.push(callbackUrl)
-          router.refresh()
+          delayedPush(router, callbackUrl, 2000, true)
         }
       }
     } catch {

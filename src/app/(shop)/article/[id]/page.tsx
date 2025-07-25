@@ -12,7 +12,7 @@ import { PriceDisplay } from '@/components/custom/price-display'
 import { ConditionBadge } from '@/components/custom/condition-badge'
 import { ProductCard } from '@/components/custom/product-card'
 import { ReviewSection } from '@/components/custom/review-section'
-import { Heart, MessageCircle, Share2, MapPin, Calendar, Package, Star } from 'lucide-react'
+import { Heart, Phone, Share2, MapPin, Calendar, Package, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
@@ -273,7 +273,7 @@ export default function ArticlePage() {
               onClick={handleWhatsAppContact}
               disabled={!article.seller.whatsappNumber || !article.isAvailable}
             >
-              <MessageCircle className="h-5 w-5 mr-2" />
+              <Phone className="h-5 w-5 mr-2" />
               Contacter via WhatsApp
             </Button>
           </div>
@@ -303,7 +303,7 @@ export default function ArticlePage() {
               )}
             </div>
             <Button variant="outline" asChild>
-              <Link href={`/seller/${article.seller.id}`}>Voir le profil</Link>
+              <Link href={`/user/${article.seller.id}`}>Voir le profil</Link>
             </Button>
           </div>
         </CardContent>

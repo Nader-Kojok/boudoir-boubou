@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProductCard } from '@/components/custom/product-card'
 import { Pagination } from '@/components/custom/pagination'
-import { MapPin, Calendar, Package, Star, MessageCircle } from 'lucide-react'
+import { MapPin, Calendar, Package, Star, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
@@ -200,7 +200,7 @@ export default function SellerPage() {
             <div className="flex flex-col space-y-2">
               {seller.whatsappNumber && (
                 <Button onClick={handleWhatsAppContact}>
-                  <MessageCircle className="h-4 w-4 mr-2" />
+                  <Phone className="h-4 w-4 mr-2" />
                   Contacter
                 </Button>
               )}

@@ -17,8 +17,8 @@ export const articleSchema = z.object({
       required_error: 'Le prix est requis',
       invalid_type_error: 'Le prix doit être un nombre',
     })
-    .min(0.01, 'Le prix doit être supérieur à 0')
-    .max(10000, 'Le prix ne peut pas dépasser 10 000€'),
+    .min(1, 'Le prix doit être supérieur à 0')
+    .max(10000, 'Le prix ne peut pas dépasser 10 000F'),
   categoryId: z
     .string()
     .min(1, 'La catégorie est requise'),

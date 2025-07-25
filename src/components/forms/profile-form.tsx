@@ -13,6 +13,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Icons } from "@/components/ui/icons"
 import { User, Phone, AlertCircle, CheckCircle, ShoppingBag, Store } from "lucide-react"
 import type { UserRole } from "@prisma/client"
+import { handleError } from "@/hooks/use-notifications"
+import { delayedRefresh } from "@/utils/delayed-navigation"
 
 const profileSchema = z.object({
   name: z
@@ -30,6 +32,8 @@ const profileSchema = z.object({
   role: z.enum(["SELLER", "BUYER", "ADMIN"], {
     required_error: "Veuillez sélectionner un rôle",
   }),
+  image: z.string().optional(),
+  bannerImage: z.string().optional(),
 })
 
 type ProfileInput = z.infer<typeof profileSchema>
@@ -40,6 +44,8 @@ interface ProfileFormProps {
     name: string | null
     phone: string
     role: UserRole
+    image?: string | null
+    bannerImage?: string | null
   }
 }
 
@@ -47,6 +53,51 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(user.image || null)
+  const [bannerPreview, setBannerPreview] = useState<string | null>(user.bannerImage || null)
+
+  // Helper function to convert file to base64
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }
+
+  // Handle image upload
+  const handleImageUpload = async (file: File, type: 'image' | 'bannerImage') => {
+    try {
+      // Check file size (5MB max)
+      const maxSize = 5 * 1024 * 1024 // 5MB in bytes
+      if (file.size > maxSize) {
+        setMessage({ type: 'error', text: 'L\'image ne doit pas dépasser 5MB' })
+        return
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        setMessage({ type: 'error', text: 'Veuillez sélectionner un fichier image valide' })
+        return
+      }
+
+      const base64 = await convertToBase64(file)
+      if (type === 'image') {
+        setImagePreview(base64)
+        setValue('image', base64, { shouldDirty: true })
+      } else {
+        setBannerPreview(base64)
+        setValue('bannerImage', base64, { shouldDirty: true })
+      }
+      
+      // Clear any previous error messages
+      setMessage(null)
+    } catch (error) {
+      handleError(error, 'Téléchargement image')
+      setMessage({ type: 'error', text: 'Erreur lors du téléchargement de l\'image' })
+    }
+  }
 
   const {
     register,
@@ -60,6 +111,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
       name: user.name || "",
       phone: user.phone,
       role: user.role,
+      image: user.image || "",
+      bannerImage: user.bannerImage || "",
     },
   })
 
@@ -88,8 +141,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
         text: "Profil mis à jour avec succès",
       })
 
-      // Rafraîchir la page pour mettre à jour les données
-      router.refresh()
+      // Rafraîchir la page pour mettre à jour les données après un délai
+      delayedRefresh(router, 2000)
     } catch (error) {
       setMessage({
         type: "error",
@@ -147,6 +200,102 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </div>
           {errors.phone && (
             <p className="text-sm text-destructive">{errors.phone.message}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="image">Photo de profil</Label>
+          <div className="flex items-center space-x-4">
+             {imagePreview && (
+               <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200">
+                 <img
+                   src={imagePreview}
+                   alt="Aperçu photo de profil"
+                   className="w-full h-full object-cover"
+                 />
+                 <button
+                   type="button"
+                   onClick={() => {
+                     setImagePreview(null)
+                     setValue('image', '', { shouldDirty: true })
+                   }}
+                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                   disabled={isLoading}
+                 >
+                   ×
+                 </button>
+               </div>
+             )}
+            <div className="flex-1">
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    handleImageUpload(file, 'image')
+                  }
+                }}
+                className="cursor-pointer"
+                disabled={isLoading}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Formats acceptés: JPG, PNG, GIF (max 5MB)
+              </p>
+            </div>
+          </div>
+          {errors.image && (
+            <p className="text-sm text-destructive">{errors.image.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="bannerImage">Image de bannière</Label>
+          <div className="space-y-2">
+             {bannerPreview && (
+               <div className="relative w-full h-32 rounded-lg overflow-hidden border-2 border-gray-200">
+                 <img
+                   src={bannerPreview}
+                   alt="Aperçu image de bannière"
+                   className="w-full h-full object-cover"
+                 />
+                 <button
+                   type="button"
+                   onClick={() => {
+                     setBannerPreview(null)
+                     setValue('bannerImage', '', { shouldDirty: true })
+                   }}
+                   className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                   disabled={isLoading}
+                 >
+                   ×
+                 </button>
+               </div>
+             )}
+            <div>
+              <Input
+                id="bannerImage"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    handleImageUpload(file, 'bannerImage')
+                  }
+                }}
+                className="cursor-pointer"
+                disabled={isLoading}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Formats acceptés: JPG, PNG, GIF (max 5MB)
+              </p>
+            </div>
+          </div>
+          {errors.bannerImage && (
+            <p className="text-sm text-destructive">{errors.bannerImage.message}</p>
           )}
         </div>
       </div>

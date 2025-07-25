@@ -3,26 +3,13 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { 
   ShoppingBag, 
   Heart, 
   Package, 
-  Clock,
-  CheckCircle,
-  XCircle,
   Plus
 } from 'lucide-react'
 import Link from 'next/link'
-
-interface Order {
-  id: string
-  articleTitle: string
-  sellerName: string
-  amount: number
-  date: string
-  status: 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'
-}
 
 interface BuyerStats {
   totalOrders: number
@@ -38,7 +25,6 @@ export default function BuyerDashboard() {
     favoriteItems: 0,
     pendingOrders: 0
   })
-  const [recentOrders, setRecentOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -47,69 +33,31 @@ export default function BuyerDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Simuler un appel API
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/buyer/dashboard')
       
-      // Données mockées
-      setStats({
-        totalOrders: 12,
-        totalSpent: 450.00,
-        favoriteItems: 8,
-        pendingOrders: 2
-      })
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des données')
+      }
       
-      setRecentOrders([
-        {
-          id: '1',
-          articleTitle: 'Robe élégante noire',
-          sellerName: 'Marie Dubois',
-          amount: 85.00,
-          date: '2024-01-15',
-          status: 'DELIVERED'
-        },
-        {
-          id: '2',
-          articleTitle: 'Sac à main vintage',
-          sellerName: 'Sophie Martin',
-          amount: 65.00,
-          date: '2024-01-12',
-          status: 'SHIPPED'
-        },
-        {
-          id: '3',
-          articleTitle: 'Chaussures à talons',
-          sellerName: 'Claire Rousseau',
-          amount: 120.00,
-          date: '2024-01-10',
-          status: 'PENDING'
-        }
-      ])
+      const data = await response.json()
+      
+      setStats(data.stats)
+      
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error)
+      // En cas d'erreur, garder les données par défaut
+      setStats({
+        totalOrders: 0,
+        totalSpent: 0,
+        favoriteItems: 0,
+        pendingOrders: 0
+      })
     } finally {
       setLoading(false)
     }
   }
 
-  const getStatusBadge = (status: Order['status']) => {
-    const statusConfig = {
-      PENDING: { label: 'En attente', variant: 'secondary' as const, icon: Clock },
-      CONFIRMED: { label: 'Confirmée', variant: 'default' as const, icon: CheckCircle },
-      SHIPPED: { label: 'Expédiée', variant: 'default' as const, icon: Package },
-      DELIVERED: { label: 'Livrée', variant: 'default' as const, icon: CheckCircle },
-      CANCELLED: { label: 'Annulée', variant: 'destructive' as const, icon: XCircle }
-    }
-    
-    const config = statusConfig[status]
-    const Icon = config.icon
-    
-    return (
-      <Badge variant={config.variant} className="flex items-center gap-1">
-        <Icon className="h-3 w-3" />
-        {config.label}
-      </Badge>
-    )
-  }
+
 
   if (loading) {
     return (
@@ -142,83 +90,67 @@ export default function BuyerDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total commandes</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalOrders}</div>
-            <p className="text-xs text-muted-foreground">Depuis votre inscription</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total dépensé</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalSpent.toFixed(2)} €</div>
-            <p className="text-xs text-muted-foreground">Toutes commandes confondues</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Articles favoris</CardTitle>
             <Heart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.favoriteItems}</div>
-            <p className="text-xs text-muted-foreground">Dans votre liste de souhaits</p>
+            <p className="text-xs text-muted-foreground">Articles que vous aimez</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Commandes en cours</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Transactions WhatsApp</CardTitle>
+            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingOrders}</div>
-            <p className="text-xs text-muted-foreground">En attente de traitement</p>
+            <div className="text-2xl font-bold">-</div>
+            <p className="text-xs text-muted-foreground">Contactez directement les vendeurs</p>
           </CardContent>
         </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Catalogue</CardTitle>
+            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">∞</div>
+            <p className="text-xs text-muted-foreground">Articles disponibles</p>
+          </CardContent>
+        </Card>
+        
+
       </div>
 
-      {/* Commandes récentes */}
+      {/* Actions rapides */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Commandes récentes</CardTitle>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/buyer/commandes">Voir toutes</Link>
-          </Button>
+        <CardHeader>
+          <CardTitle>Actions rapides</CardTitle>
         </CardHeader>
         <CardContent>
-          {recentOrders.length === 0 ? (
-            <div className="text-center py-8">
-              <ShoppingBag className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Aucune commande récente</p>
-              <Button className="mt-4" asChild>
-                <Link href="/catalogue">Commencer mes achats</Link>
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">{order.articleTitle}</h3>
-                    <p className="text-sm text-gray-600">Vendu par {order.sellerName}</p>
-                    <p className="text-xs text-gray-500">Commandé le {new Date(order.date).toLocaleDateString('fr-FR')}</p>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <span className="font-semibold text-gray-900">{order.amount.toFixed(2)} €</span>
-                    {getStatusBadge(order.status)}
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Button asChild className="h-auto p-4 justify-start">
+              <Link href="/catalogue">
+                <ShoppingBag className="h-5 w-5 mr-3" />
+                <div className="text-left">
+                  <div className="font-medium">Parcourir le catalogue</div>
+                  <div className="text-sm text-muted-foreground">Découvrez de nouveaux articles</div>
                 </div>
-              ))}
-            </div>
-          )}
+              </Link>
+            </Button>
+            
+            <Button asChild variant="outline" className="h-auto p-4 justify-start">
+              <Link href="/buyer/favoris">
+                <Heart className="h-5 w-5 mr-3" />
+                <div className="text-left">
+                  <div className="font-medium">Mes favoris</div>
+                  <div className="text-sm text-muted-foreground">Articles que vous aimez</div>
+                </div>
+              </Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
