@@ -76,6 +76,20 @@ export default function ArticlePage() {
       setArticle(data.article)
       setReviews(data.reviews || [])
       setSimilarArticles(data.similarArticles || [])
+      
+      // Check if article is favorited
+      const favoriteResponse = await fetch(`/api/articles/${id}/favorite`)
+      if (favoriteResponse.ok) {
+        const favoriteData = await favoriteResponse.json()
+        setIsFavorite(favoriteData.isFavorite)
+      }
+      
+      // Increment view count
+      fetch(`/api/articles/${id}/views`, {
+        method: 'POST'
+      }).catch(error => {
+        console.error('Erreur lors de l\'incrémentation des vues:', error)
+      })
     } catch (error) {
       console.error('Erreur lors du chargement de l\'article:', error)
       router.push('/catalogue')

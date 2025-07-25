@@ -115,10 +115,10 @@ export async function GET(request: NextRequest) {
             }
           },
           _count: {
-          select: {
-            favorites: true
+            select: {
+              favorites: true
+            }
           }
-        }
         },
         orderBy,
         skip,
@@ -137,6 +137,7 @@ export async function GET(request: NextRequest) {
       condition: article.condition,
       isAvailable: article.isAvailable,
       favorites: article._count.favorites,
+      views: article.views,
       createdAt: article.createdAt.toISOString(),
       updatedAt: article.updatedAt.toISOString(),
       category: article.category,

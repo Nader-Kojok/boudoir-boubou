@@ -19,11 +19,7 @@ import { Eye, EyeOff, Phone, Lock, AlertCircle } from 'lucide-react'
 
 function LoginForm() {
   const searchParams = useSearchParams()
-  const rawCallbackUrl = searchParams.get('callbackUrl') || '/dashboard'
-  // Use local callback URL when running locally
-  const callbackUrl = rawCallbackUrl.startsWith('https://boudoir-boubou.vercel.app') 
-    ? '/dashboard' 
-    : rawCallbackUrl
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
   const error = searchParams.get('error')
   
   const [isLoading, setIsLoading] = useState(false)

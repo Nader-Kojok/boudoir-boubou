@@ -74,14 +74,8 @@ export async function GET() {
         }
       }),
       
-      // Total des vues (approximation basée sur les favoris)
-      prisma.favorite.count({
-        where: {
-          article: {
-            sellerId
-          }
-        }
-      })
+      // Total des vues réelles
+      prisma.$queryRaw<Array<{ total: bigint }>>`SELECT COALESCE(SUM(views), 0) as total FROM "Article" WHERE "sellerId" = ${sellerId}`.then((result) => Number(result[0]?.total || 0))
     ])
 
     // Le revenu total n'est plus calculé automatiquement
@@ -125,7 +119,7 @@ export async function GET() {
       totalSales,
       totalRevenue: Number(totalRevenue),
       activeArticles: totalArticles,
-      totalViews: totalViews * 15, // Estimation : chaque favori = ~15 vues
+      totalViews: totalViews,
       thisMonthSales,
       salesGrowth: Number(salesGrowth.toFixed(1))
     }
@@ -137,7 +131,7 @@ export async function GET() {
       images: JSON.parse(article.images),
       condition: article.condition,
       isAvailable: article.isAvailable,
-      views: article._count.favorites * 15, // Estimation
+      views: article.views || 0,
       createdAt: article.createdAt.toISOString(),
       category: {
         name: article.category.name
