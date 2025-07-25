@@ -18,11 +18,11 @@ export default withAuth(
     }
 
     // Vérifier les permissions basées sur les rôles pour les routes dashboard
-    if (pathname.startsWith('/dashboard/seller') && token?.role !== 'SELLER') {
+    if (pathname.startsWith('/seller') && token?.role !== 'SELLER') {
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
-    if (pathname.startsWith('/dashboard/buyer') && token?.role !== 'BUYER') {
+    if (pathname.startsWith('/buyer') && token?.role !== 'BUYER') {
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
@@ -34,11 +34,11 @@ export default withAuth(
         const { pathname } = req.nextUrl
         
         // Permettre l'accès aux routes publiques
-        if (!pathname.startsWith('/dashboard')) {
+        if (!pathname.startsWith('/dashboard') && !pathname.startsWith('/seller') && !pathname.startsWith('/buyer')) {
           return true
         }
         
-        // Exiger une authentification pour les routes du dashboard
+        // Exiger une authentification pour les routes du dashboard, seller et buyer
         return !!token
       },
     },

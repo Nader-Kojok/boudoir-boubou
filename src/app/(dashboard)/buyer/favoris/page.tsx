@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
@@ -61,20 +61,7 @@ export default function FavorisPage() {
 
   const ITEMS_PER_PAGE = 12
 
-
-
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/login')
-      return
-    }
-    
-    if (status === 'authenticated') {
-      fetchFavorites()
-    }
-  }, [status, currentPage, sortBy, router])
-
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(
@@ -94,7 +81,18 @@ export default function FavorisPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentPage, sortBy])
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/login')
+      return
+    }
+    
+    if (status === 'authenticated') {
+      fetchFavorites()
+    }
+  }, [status, router, fetchFavorites])
 
   const handleFavoriteToggle = async (articleId: string) => {
     try {

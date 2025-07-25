@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Separator } from '@/components/ui/separator'
+
 import { Icons } from '@/components/ui/icons'
 import { loginSchema, type LoginInput } from '@/lib/validations/auth'
 import { Eye, EyeOff, Phone, Lock, AlertCircle } from 'lucide-react'
@@ -63,31 +63,21 @@ function LoginForm() {
         phone: data.phone,
         password: data.password,
         callbackUrl,
-        redirect: true,
+        redirect: false, // Handle redirect manually for better control
       })
 
       if (result?.error) {
         setAuthError('Numéro de téléphone ou mot de passe incorrect')
         setIsLoading(false)
+      } else if (result?.ok) {
+        // Redirect manually after successful login
+        window.location.href = callbackUrl
       }
-      // No need to handle success case - NextAuth will redirect automatically
     } catch {
       setAuthError('Une erreur est survenue lors de la connexion')
       setIsLoading(false)
     }
   }
-
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true)
-    try {
-      await signIn('google', { callbackUrl })
-    } catch {
-      setAuthError('Erreur lors de la connexion avec Google')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
 
 
   return (
@@ -184,31 +174,7 @@ function LoginForm() {
             </Button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Ou continuer avec
-              </span>
-            </div>
-          </div>
 
-          <Button
-            variant="outline"
-            type="button"
-            className="w-full"
-            onClick={handleGoogleSignIn}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Icons.google className="mr-2 h-4 w-4" />
-            )}
-            Google
-          </Button>
         </CardContent>
 
         <CardFooter>
