@@ -164,9 +164,9 @@ export const authOptions: NextAuthOptions = {
         // Store essential user data in token to reduce DB queries
         token.role = user.role
         token.name = user.name
+        token.image = user.image
         // Remove any large data that might be in the token
         delete token.picture
-        delete token.image
       }
       
       console.log('[NextAuth JWT] Token created/updated:', {
@@ -183,10 +183,13 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as UserRole
-        // Optimisation : éviter les requêtes DB fréquentes pour les sessions
-        // Les données utilisateur essentielles sont stockées dans le token JWT
-        // Seules les données critiques sont récupérées si nécessaire
-        if (token.sub && !session.user.name) {
+        
+        // Use token data first, then fetch from DB if needed
+        session.user.name = token.name || session.user.name
+        session.user.image = (typeof token.image === 'string' ? token.image : null) || session.user.image
+        
+        // Fetch fresh user data if not available in token
+        if (token.sub && (!session.user.name || !session.user.image)) {
           try {
             const user = await safeDbOperation(
               () => prisma.user.findUnique({
@@ -196,8 +199,8 @@ export const authOptions: NextAuthOptions = {
               'session-getUserData'
             )
             if (user) {
-              session.user.name = user.name
-              session.user.image = user.image
+              session.user.name = session.user.name || user.name
+              session.user.image = session.user.image || user.image
               console.log('[NextAuth Session] User data fetched successfully')
             } else {
               console.warn('[NextAuth Session] User not found in database:', token.sub)
@@ -205,7 +208,7 @@ export const authOptions: NextAuthOptions = {
           } catch (error) {
             console.error('[NextAuth Session] Error fetching user data:', error)
             // En cas d'erreur DB, utiliser les données du token si disponibles
-            session.user.name = token.name || 'Utilisateur'
+            session.user.name = session.user.name || token.name || 'Utilisateur'
           }
         }
       }
@@ -213,6 +216,7 @@ export const authOptions: NextAuthOptions = {
       console.log('[NextAuth Session] Session created:', {
         userId: session.user?.id,
         userRole: session.user?.role,
+        hasImage: !!session.user?.image,
         environment: process.env.NODE_ENV
       })
       
