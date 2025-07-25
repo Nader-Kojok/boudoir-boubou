@@ -115,7 +115,9 @@ export const authOptions: NextAuthOptions = {
         // Remove any large data that might be in the token
         delete token.picture
         delete token.image
+        
       }
+      
       return token
     },
     async session({ session, token }: { session: Session; token: JWT }) {

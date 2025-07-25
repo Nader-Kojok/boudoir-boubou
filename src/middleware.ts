@@ -19,10 +19,12 @@ export default withAuth(
 
     // Vérifier les permissions basées sur les rôles pour les routes dashboard
     if (pathname.startsWith('/seller') && token?.role !== 'SELLER') {
+      console.log('🚫 Access denied to /seller - Role:', token?.role, 'Required: SELLER')
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
     if (pathname.startsWith('/buyer') && token?.role !== 'BUYER') {
+      console.log('🚫 Access denied to /buyer - Role:', token?.role, 'Required: BUYER')
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
