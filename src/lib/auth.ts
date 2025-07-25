@@ -82,13 +82,39 @@ export const authOptions: NextAuthOptions = {
         sameSite: 'lax',
         path: '/',
         secure: process.env.NODE_ENV === 'production',
+        // Reduce cookie size to prevent header too large errors
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+      },
+    },
+    callbackUrl: {
+      name: `next-auth.callback-url`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60, // 1 hour - shorter for callback URLs
+      },
+    },
+    csrfToken: {
+      name: `next-auth.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60, // 1 hour
       },
     },
   },
   callbacks: {
     async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
+        // Only store essential data to minimize token size
         token.role = user.role
+        // Remove any large data that might be in the token
+        delete token.picture
+        delete token.image
       }
       return token
     },
@@ -96,6 +122,21 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as UserRole
+        // Fetch fresh user data from database instead of storing in token
+        if (token.sub) {
+          try {
+            const user = await prisma.user.findUnique({
+              where: { id: token.sub },
+              select: { name: true, image: true, phone: true }
+            })
+            if (user) {
+              session.user.name = user.name
+              session.user.image = user.image
+            }
+          } catch (error) {
+            console.error('Error fetching user data:', error)
+          }
+        }
       }
       return session
     },

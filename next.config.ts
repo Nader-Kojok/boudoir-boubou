@@ -17,6 +17,28 @@ const nextConfig: NextConfig = {
     unoptimized: false,
     formats: ['image/webp'],
   },
+  // Optimize for header size issues
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client'],
+  },
+  // Add headers configuration to handle large headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+        ],
+      },
+    ]
+  },
 };
 
 export default nextConfig;

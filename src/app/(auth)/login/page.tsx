@@ -32,6 +32,26 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [authError, setAuthError] = useState('')
 
+  // Handle specific error types
+  const getErrorMessage = (errorType: string | null) => {
+    switch (errorType) {
+      case 'HeaderTooLarge':
+        return 'Vos données de session sont trop volumineuses. Veuillez vous reconnecter.'
+      case 'CredentialsSignin':
+        return 'Numéro de téléphone ou mot de passe incorrect.'
+      case 'OAuthSignin':
+      case 'OAuthCallback':
+      case 'OAuthCreateAccount':
+      case 'EmailCreateAccount':
+      case 'Callback':
+        return 'Erreur lors de la connexion. Veuillez réessayer.'
+      default:
+        return null
+    }
+  }
+
+  const errorMessage = getErrorMessage(error)
+
   const {
     register,
     handleSubmit,
@@ -78,18 +98,7 @@ function LoginForm() {
     }
   }
 
-  const getErrorMessage = (error: string | null) => {
-    switch (error) {
-      case 'CredentialsSignin':
-        return 'Numéro de téléphone ou mot de passe incorrect'
-      case 'OAuthAccountNotLinked':
-        return 'Ce compte existe déjà avec un autre fournisseur'
-      case 'EmailSignin':
-        return 'Erreur lors de l&apos;envoi de l&apos;email de connexion'
-      default:
-        return 'Une erreur est survenue lors de la connexion'
-    }
-  }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 p-4">
@@ -104,11 +113,11 @@ function LoginForm() {
         </CardHeader>
         
         <CardContent className="space-y-4">
-          {(error || authError) && (
+          {(errorMessage || authError) && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                {authError || getErrorMessage(error)}
+                {authError || errorMessage}
               </AlertDescription>
             </Alert>
           )}

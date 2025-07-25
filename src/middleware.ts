@@ -1,10 +1,21 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import { checkHeaderSize, logCookieInfo, clearAuthCookies } from '@/lib/cookie-utils'
 
 export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl
     const token = req.nextauth.token
+
+    // Check for large headers and log cookie info in development
+    logCookieInfo(req)
+    
+    // If headers are too large, clear auth cookies and redirect to login
+    if (checkHeaderSize(req)) {
+      console.warn('Headers too large, clearing auth cookies')
+      const response = NextResponse.redirect(new URL('/login?error=HeaderTooLarge', req.url))
+      return clearAuthCookies(response)
+    }
 
     // Vérifier les permissions basées sur les rôles pour les routes dashboard
     if (pathname.startsWith('/dashboard/seller') && token?.role !== 'SELLER') {
