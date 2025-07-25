@@ -157,6 +157,7 @@ export async function getArticles(filters?: {
               name: true,
               image: true,
               location: true,
+              whatsappNumber: true,
             },
           },
           category: true,

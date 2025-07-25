@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Menu, X, ShoppingBag, Heart } from "lucide-react"
+import { Menu, X, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuthButton } from "@/components/auth/auth-button"
 
@@ -50,16 +50,11 @@ export function Header({ className }: HeaderProps) {
 
           {/* Actions desktop */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="relative">
-              <Heart className="h-5 w-5" />
-              <span className="sr-only">Favoris</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="relative">
-              <ShoppingBag className="h-5 w-5" />
-              <span className="sr-only">Mes achats</span>
-              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-boudoir-ocre-500 text-xs text-white flex items-center justify-center">
-                0
-              </span>
+            <Button variant="ghost" size="sm" className="relative" asChild>
+              <Link href="/buyer/favoris">
+                <Heart className="h-5 w-5" />
+                <span className="sr-only">Favoris</span>
+              </Link>
             </Button>
             <AuthButton />
           </div>
@@ -98,16 +93,11 @@ export function Header({ className }: HeaderProps) {
               ))}
               <div className="border-t border-border pt-4 pb-3">
                 <div className="flex items-center px-3 space-x-3">
-                  <Button variant="ghost" size="sm" className="flex-1 justify-start">
-                    <Heart className="h-5 w-5 mr-2" />
-                    Favoris
-                  </Button>
-                  <Button variant="ghost" size="sm" className="flex-1 justify-start relative">
-                    <ShoppingBag className="h-5 w-5 mr-2" />
-                    Mes achats
-                    <span className="ml-auto h-5 w-5 rounded-full bg-boudoir-ocre-500 text-xs text-white flex items-center justify-center">
-                      0
-                    </span>
+                  <Button variant="ghost" size="sm" className="flex-1 justify-start" asChild>
+                    <Link href="/buyer/favoris" onClick={() => setMobileMenuOpen(false)}>
+                      <Heart className="h-5 w-5 mr-2" />
+                      Favoris
+                    </Link>
                   </Button>
                 </div>
                 <div className="mt-3 px-3">

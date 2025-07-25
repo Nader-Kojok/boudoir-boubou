@@ -122,7 +122,7 @@ export default function HowItWorksPage() {
             {steps.map((step, index) => {
               const Icon = step.icon
               return (
-                <Card key={index} className="relative border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+                <Card key={index} className="relative border-0 shadow-lg hover:shadow-xl transition-all duration-300 group flex flex-col h-full">
                   <CardHeader className="text-center pb-4">
                     <div className="mx-auto w-16 h-16 bg-gradient-to-br from-boudoir-ocre-400 to-boudoir-vert-400 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                       <Icon className="w-8 h-8 text-white" />
@@ -135,7 +135,7 @@ export default function HowItWorksPage() {
                       {step.description}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex-grow">
                     <ul className="space-y-3">
                       {step.details.map((detail, detailIndex) => (
                         <li key={detailIndex} className="flex items-center text-sm text-gray-600">
@@ -171,8 +171,8 @@ export default function HowItWorksPage() {
             {benefits.map((benefit, index) => {
               const Icon = benefit.icon
               return (
-                <Card key={index} className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 group bg-white">
-                  <CardContent className="p-8">
+                <Card key={index} className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 group bg-white flex flex-col h-full">
+                  <CardContent className="p-8 flex-grow">
                     <div className="mx-auto w-16 h-16 bg-gradient-to-br from-[#f5f0e8] to-[#e6f2f1] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                       <Icon className="w-8 h-8 text-boudoir-ocre-600" />
                     </div>

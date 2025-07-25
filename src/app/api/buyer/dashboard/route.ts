@@ -15,7 +15,8 @@ export async function GET() {
       )
     }
 
-    // Vérifier que l'utilisateur est un acheteur
+    // Vérifier que l'utilisateur est un acheteur, vendeur ou admin
+    // Les vendeurs peuvent aussi être acheteurs et accéder aux fonctionnalités d'achat
     const user = await safeDbOperation(
       () => prisma.user.findUnique({
         where: { id: session.user.id },
@@ -24,7 +25,7 @@ export async function GET() {
       'buyer-dashboard-getUserRole'
     )
 
-    if (!user || (user.role !== 'BUYER' && user.role !== 'ADMIN')) {
+    if (!user || (user.role !== 'BUYER' && user.role !== 'ADMIN' && user.role !== 'SELLER')) {
       return NextResponse.json(
         { error: 'Accès non autorisé' },
         { status: 403 }

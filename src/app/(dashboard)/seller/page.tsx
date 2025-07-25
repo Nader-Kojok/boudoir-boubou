@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ArticleActionsDropdown } from '@/components/custom/article-actions-dropdown'
 
 import { 
   TrendingUp, 
@@ -12,7 +13,6 @@ import {
   Heart, 
   ShoppingCart,
   Plus,
-  MoreHorizontal,
   FileText
 } from 'lucide-react'
 import Link from 'next/link'
@@ -268,18 +268,21 @@ export default function SellerDashboard() {
             <Package className="w-5 h-5" />
             Articles en cours
           </CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Gérez vos articles actuellement en vente
+          </p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentArticles.map((article) => (
-              <div key={article.id} className="border rounded-lg p-4 space-y-3 hover:bg-gray-50 transition-colors">
+              <div key={article.id} className="border rounded-lg overflow-hidden hover:shadow-md transition-all duration-200 flex flex-col h-full">
                 <Link href={`/article/${article.id}`} className="block cursor-pointer">
-                  <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div className="aspect-square bg-gray-100 flex items-center justify-center">
                     {article.images && article.images.length > 0 ? (
                       <ImageGallery
                         images={article.images}
                         alt={article.title}
-                        className="w-full h-full"
+                        className="w-full h-full object-cover"
                         showThumbnails={false}
                         showControls={false}
                         showExpandButton={false}
@@ -288,28 +291,43 @@ export default function SellerDashboard() {
                       <Package className="w-12 h-12 text-gray-400" />
                     )}
                   </div>
-                  <div>
-                    <h3 className="font-medium text-sm hover:text-boudoir-ocre-600 transition-colors">{article.title}</h3>
-                    <p className="text-lg font-bold text-boudoir-ocre-600">{article.price}F</p>
+                </Link>
+                <div className="p-4 space-y-3 flex flex-col flex-grow">
+                  <div className="flex-grow">
+                    <h3 className="font-medium text-sm line-clamp-2 hover:text-boudoir-ocre-600 transition-colors">{article.title}</h3>
+                    <p className="text-lg font-bold text-boudoir-ocre-600 mt-1">{article.price}F</p>
                     <div className="flex items-center gap-4 text-xs text-gray-600 mt-2">
                       <span className="flex items-center gap-1">
                         <Eye className="w-3 h-3" />
-                        {article.views}
+                        {article.views || 0}
                       </span>
                       <span className="flex items-center gap-1">
                         <Heart className="w-3 h-3" />
-                        {article.favorites}
+                        {article.favorites || 0}
                       </span>
                     </div>
                   </div>
-                </Link>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    Modifier
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-2 pt-2 mt-auto">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        window.location.href = `/seller/vendre?edit=${article.id}`
+                      }}
+                    >
+                      Modifier
+                    </Button>
+                    <ArticleActionsDropdown 
+                       articleId={article.id}
+                       articleTitle={article.title}
+                       onStatusChange={() => {
+                         // Recharger la page pour mettre à jour la liste
+                         window.location.reload()
+                       }}
+                     />
+                  </div>
                 </div>
               </div>
             ))}

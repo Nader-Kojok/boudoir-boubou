@@ -80,6 +80,7 @@ function CatalogueContent() {
   const [totalPages, setTotalPages] = useState(1)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [showFilters, setShowFilters] = useState(false)
+  const [favorites, setFavorites] = useState<string[]>([])
   
   const [filters, setFilters] = useState<CatalogueFilters>({
     search: searchParams.get('search') || '',
@@ -104,6 +105,23 @@ function CatalogueContent() {
       }
     }
     fetchCategories()
+  }, [])
+
+  // Fetch user favorites
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const response = await fetch('/api/user/favorites')
+        if (response.ok) {
+          const data = await response.json()
+          const favoriteIds = data.favorites.map((fav: { article: { id: string } }) => fav.article.id)
+          setFavorites(favoriteIds)
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des favoris:', error)
+      }
+    }
+    fetchFavorites()
   }, [])
 
   // Fetch articles with filters
@@ -171,8 +189,22 @@ function CatalogueContent() {
   }
 
   const handleFavoriteToggle = async (articleId: string) => {
-    // TODO: Implement favorite toggle API call
-    console.log('Toggle favorite for article:', articleId)
+    try {
+      const isFavorite = favorites.includes(articleId)
+      const response = await fetch(`/api/articles/${articleId}/favorite`, {
+        method: isFavorite ? 'DELETE' : 'POST',
+      })
+      
+      if (response.ok) {
+        setFavorites(prev => 
+          isFavorite 
+            ? prev.filter(id => id !== articleId)
+            : [...prev, articleId]
+        )
+      }
+    } catch (error) {
+      console.error('Erreur lors de la gestion des favoris:', error)
+    }
   }
 
   const handleWhatsAppContact = (articleId: string, sellerWhatsApp: string, title: string) => {
@@ -468,6 +500,7 @@ function CatalogueContent() {
                     condition={article.condition}
                     images={article.images}
                     category={article.category.name}
+                    isFavorite={favorites.includes(article.id)}
                     sellerWhatsApp={article.seller.whatsappNumber}
                     sellerName={article.seller.name}
                     onFavoriteToggle={handleFavoriteToggle}

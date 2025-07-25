@@ -61,18 +61,18 @@ export function ProductCard({
   return (
     <Card 
       className={cn(
-        "group cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 py-0",
+        "group cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 py-0 gap-0 flex flex-col h-full",
         className
       )}
       onClick={handleCardClick}
     >
-      <CardHeader className="p-0 relative">
+      <CardHeader className="p-0 px-0 relative">
         <div className="relative aspect-square overflow-hidden rounded-t-xl">
           <div className="w-full h-full overflow-hidden rounded-t-xl">
             <ImageGallery 
               images={images} 
               alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 space-y-0"
             />
           </div>
           
@@ -105,14 +105,14 @@ export function ProductCard({
         </div>
       </CardHeader>
       
-      <CardContent className="p-4">
-        <div className="space-y-2">
+      <CardContent className="p-4 flex-grow">
+        <div className="space-y-2 h-full flex flex-col">
           <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-primary transition-colors">
             {title}
           </h3>
           
           {description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
+            <p className="text-sm text-muted-foreground line-clamp-2 flex-grow">
               {description}
             </p>
           )}
@@ -120,7 +120,7 @@ export function ProductCard({
           <PriceDisplay 
             price={price} 
             originalPrice={originalPrice}
-            className="text-lg font-bold"
+            className="text-lg font-bold mt-auto"
           />
         </div>
       </CardContent>

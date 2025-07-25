@@ -157,42 +157,42 @@ export default function BuyerDashboard() {
       {/* Actions rapides */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href="/buyer/commandes">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer flex flex-col h-full">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Package className="h-5 w-5" />
                 <span>Mes commandes</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-grow">
               <p className="text-sm text-gray-600">Suivez l&apos;état de vos commandes et votre historique d&apos;achats</p>
             </CardContent>
           </Card>
         </Link>
         
         <Link href="/buyer/favoris">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer flex flex-col h-full">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Heart className="h-5 w-5" />
                 <span>Mes favoris</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-grow">
               <p className="text-sm text-gray-600">Retrouvez tous les articles que vous avez mis en favoris</p>
             </CardContent>
           </Card>
         </Link>
         
         <Link href="/catalogue">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer flex flex-col h-full">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <ShoppingBag className="h-5 w-5" />
                 <span>Explorer</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-grow">
               <p className="text-sm text-gray-600">Découvrez de nouveaux articles et faites de nouvelles trouvailles</p>
             </CardContent>
           </Card>

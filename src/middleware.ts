@@ -30,13 +30,14 @@ export default withAuth(
     }
 
     // Vérifier les permissions basées sur les rôles pour les routes dashboard
-    if (pathname.startsWith('/seller') && token?.role !== 'SELLER') {
-      console.log('[Middleware] 🚫 Access denied to /seller - Role:', token?.role, 'Required: SELLER')
+    if (pathname.startsWith('/seller') && token?.role !== 'SELLER' && token?.role !== 'ADMIN') {
+      console.log('[Middleware] 🚫 Access denied to /seller - Role:', token?.role, 'Required: SELLER or ADMIN')
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
-    if (pathname.startsWith('/buyer') && token?.role !== 'BUYER') {
-      console.log('[Middleware] 🚫 Access denied to /buyer - Role:', token?.role, 'Required: BUYER')
+    // Allow sellers to access buyer routes (like favorites) since sellers can also be buyers
+    if (pathname.startsWith('/buyer') && token?.role !== 'BUYER' && token?.role !== 'ADMIN' && token?.role !== 'SELLER') {
+      console.log('[Middleware] 🚫 Access denied to /buyer - Role:', token?.role, 'Required: BUYER, SELLER or ADMIN')
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 

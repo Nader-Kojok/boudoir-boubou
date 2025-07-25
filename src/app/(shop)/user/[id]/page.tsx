@@ -221,8 +221,8 @@ export default function UserProfilePage() {
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {user.role === 'SELLER' && (
-              <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/50 dark:to-blue-900/30">
-                <CardContent className="p-6 text-center">
+              <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/50 dark:to-blue-900/30 flex flex-col h-full">
+                <CardContent className="p-6 text-center flex-grow">
                   <div className="w-12 h-12 mx-auto mb-3 bg-blue-500/10 rounded-full flex items-center justify-center">
                     <Package className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
@@ -232,8 +232,8 @@ export default function UserProfilePage() {
               </Card>
             )}
             
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/50 dark:to-red-900/30">
-              <CardContent className="p-6 text-center">
+            <Card className="border-0 shadow-sm bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/50 dark:to-red-900/30 flex flex-col h-full">
+              <CardContent className="p-6 text-center flex-grow">
                 <div className="w-12 h-12 mx-auto mb-3 bg-red-500/10 rounded-full flex items-center justify-center">
                   <Heart className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
@@ -242,8 +242,8 @@ export default function UserProfilePage() {
               </CardContent>
             </Card>
             
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-950/50 dark:to-yellow-900/30">
-              <CardContent className="p-6 text-center">
+            <Card className="border-0 shadow-sm bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-950/50 dark:to-yellow-900/30 flex flex-col h-full">
+              <CardContent className="p-6 text-center flex-grow">
                 <div className="w-12 h-12 mx-auto mb-3 bg-yellow-500/10 rounded-full flex items-center justify-center">
                   <Star className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
                 </div>
@@ -253,8 +253,8 @@ export default function UserProfilePage() {
             </Card>
             
             {user.averageRating && (
-              <Card className="border-0 shadow-sm bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/30">
-                <CardContent className="p-6 text-center">
+              <Card className="border-0 shadow-sm bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/50 dark:to-green-900/30 flex flex-col h-full">
+                <CardContent className="p-6 text-center flex-grow">
                   <div className="w-12 h-12 mx-auto mb-3 bg-green-500/10 rounded-full flex items-center justify-center">
                     <Star className="h-6 w-6 text-green-600 dark:text-green-400 fill-current" />
                   </div>

@@ -274,9 +274,9 @@ export default function ArticlesPage() {
       {displayedArticles.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {displayedArticles.map((article) => (
-            <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col h-full gap-0 py-0">
               <Link href={`/article/${article.id}`} className="block">
-                <div className="aspect-square bg-gray-100 relative">
+                <div className="aspect-square bg-gray-100 relative overflow-hidden">
                   <div className="absolute top-3 left-3 z-10">
                     {getStatusBadge(article.status)}
                   </div>
@@ -287,7 +287,7 @@ export default function ArticlesPage() {
                     <ImageGallery 
                       images={article.images}
                       alt={article.title}
-                      className="w-full h-full"
+                      className="w-full h-full space-y-0"
                       showControls={article.images.length > 1}
                       showThumbnails={false}
                     />
@@ -299,7 +299,7 @@ export default function ArticlesPage() {
                 </div>
               </Link>
               
-              <CardContent className="p-4 space-y-3">
+              <CardContent className="p-4 space-y-3 px-4 flex-grow flex flex-col">
                 <div>
                   <Link href={`/article/${article.id}`}>
                     <h3 className="font-semibold text-lg line-clamp-2 hover:text-boudoir-ocre-600 transition-colors cursor-pointer">{article.title}</h3>
@@ -328,7 +328,7 @@ export default function ArticlesPage() {
                   Créé le {formatDate(article.createdAt)}
                 </div>
                 
-                <div className="flex gap-2 pt-2">
+                <div className="flex gap-2 pt-2 mt-auto">
                   <Link href={`/seller/vendre?edit=${article.id}`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
                       <Edit className="w-3 h-3 mr-1" />

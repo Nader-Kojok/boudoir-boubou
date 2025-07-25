@@ -14,8 +14,9 @@ export default async function BuyerLayout({ children }: BuyerLayoutProps) {
     redirect('/login')
   }
 
-  // Vérifier si l'utilisateur a le rôle d'acheteur
-  if (session.user?.role !== 'BUYER' && session.user?.role !== 'ADMIN') {
+  // Vérifier si l'utilisateur a le rôle d'acheteur, vendeur ou admin
+  // Les vendeurs peuvent aussi être acheteurs et accéder aux favoris
+  if (session.user?.role !== 'BUYER' && session.user?.role !== 'ADMIN' && session.user?.role !== 'SELLER') {
     redirect('/dashboard')
   }
 
@@ -30,9 +31,9 @@ export default async function BuyerLayout({ children }: BuyerLayoutProps) {
                 <Link href="/buyer" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
                   Tableau de bord
                 </Link>
-                <a href="/buyer/favoris" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
+                <Link href="/buyer/favoris" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
                   Mes favoris
-                </a>
+                </Link>
                 <Link href="/catalogue" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
                   Catalogue
                 </Link>
