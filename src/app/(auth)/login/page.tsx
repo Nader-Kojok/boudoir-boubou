@@ -2,8 +2,8 @@
 
 import { Suspense } from 'react'
 import { useState } from 'react'
-import { signIn, getSession } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { signIn } from 'next-auth/react'
+import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
@@ -16,10 +16,8 @@ import { Separator } from '@/components/ui/separator'
 import { Icons } from '@/components/ui/icons'
 import { loginSchema, type LoginInput } from '@/lib/validations/auth'
 import { Eye, EyeOff, Phone, Lock, AlertCircle } from 'lucide-react'
-import { delayedPush } from '@/utils/delayed-navigation'
 
 function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const rawCallbackUrl = searchParams.get('callbackUrl') || '/dashboard'
   // Use local callback URL when running locally
@@ -68,21 +66,17 @@ function LoginForm() {
       const result = await signIn('credentials', {
         phone: data.phone,
         password: data.password,
-        redirect: false,
+        callbackUrl,
+        redirect: true,
       })
 
       if (result?.error) {
         setAuthError('Numéro de téléphone ou mot de passe incorrect')
-      } else {
-        // Vérifier la session et rediriger après un délai
-        const session = await getSession()
-        if (session) {
-          delayedPush(router, callbackUrl, 2000, true)
-        }
+        setIsLoading(false)
       }
+      // No need to handle success case - NextAuth will redirect automatically
     } catch {
       setAuthError('Une erreur est survenue lors de la connexion')
-    } finally {
       setIsLoading(false)
     }
   }
