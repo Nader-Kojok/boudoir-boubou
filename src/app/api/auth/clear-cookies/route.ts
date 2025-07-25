@@ -5,7 +5,7 @@ import { clearAuthCookies } from '@/lib/cookie-utils'
  * API route to clear authentication cookies
  * Useful for resolving header size issues
  */
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const response = NextResponse.json({ 
       success: true, 

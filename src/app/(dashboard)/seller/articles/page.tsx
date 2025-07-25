@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -52,11 +52,7 @@ export default function ArticlesPage() {
   const [sortBy, setSortBy] = useState('recent')
   const { confirm, ConfirmationComponent } = useConfirmation()
 
-  useEffect(() => {
-    fetchArticles()
-  }, [searchTerm, statusFilter, categoryFilter, sortBy])
-
-  const fetchArticles = async () => {
+  const fetchArticles = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -84,7 +80,11 @@ export default function ArticlesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [searchTerm, statusFilter, categoryFilter, sortBy])
+
+  useEffect(() => {
+    fetchArticles()
+  }, [fetchArticles])
 
   // Les articles sont déjà filtrés et triés côté serveur
   const displayedArticles = articles

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -171,7 +171,7 @@ export default function VendrePage() {
   }
 
   // Fonction pour charger les données de l'article à éditer
-  const loadArticleData = async (articleId: string) => {
+  const loadArticleData = useCallback(async (articleId: string) => {
     try {
       setIsLoading(true)
       const response = await fetch(`/api/articles/${articleId}`)
@@ -216,7 +216,7 @@ export default function VendrePage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [form])
 
   // Charger les données au montage du composant
   React.useEffect(() => {
@@ -253,7 +253,7 @@ export default function VendrePage() {
       }
       setIsLoading(false)
     }
-  }, [form, isEditing, editId])
+  }, [form, isEditing, editId, loadArticleData])
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true)

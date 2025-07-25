@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -210,10 +211,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
           <div className="flex items-center space-x-4">
              {imagePreview && (
                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200">
-                 <img
+                 <Image
                    src={imagePreview}
                    alt="Aperçu photo de profil"
-                   className="w-full h-full object-cover"
+                   fill
+                   className="object-cover"
                  />
                  <button
                    type="button"
@@ -257,10 +259,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
           <div className="space-y-2">
              {bannerPreview && (
                <div className="relative w-full h-32 rounded-lg overflow-hidden border-2 border-gray-200">
-                 <img
+                 <Image
                    src={bannerPreview}
                    alt="Aperçu image de bannière"
-                   className="w-full h-full object-cover"
+                   fill
+                   className="object-cover"
                  />
                  <button
                    type="button"
