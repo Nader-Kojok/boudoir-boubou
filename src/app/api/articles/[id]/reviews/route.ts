@@ -4,6 +4,14 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 
+// Type definition for Prisma groupBy result
+type RatingGroupBy = {
+  rating: number
+  _count: {
+    rating: number
+  }
+}
+
 const createReviewSchema = z.object({
   rating: z.number().min(1).max(5),
   comment: z.string().optional()
@@ -157,7 +165,7 @@ export async function GET(
     })
 
     const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
-    ratingDistribution.forEach(item => {
+    ;(ratingDistribution as RatingGroupBy[]).forEach(item => {
       distribution[item.rating as keyof typeof distribution] = item._count?.rating || 0
     })
 

@@ -4,6 +4,25 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { startOfDay, endOfDay, subDays, format, startOfMonth, endOfMonth } from 'date-fns'
 
+// Types for Prisma groupBy results
+type PaymentMethodGroupBy = {
+  method: string
+  _count: { id: number }
+  _sum: { amount: number | null }
+}
+
+type PaymentTimeGroupBy = {
+  completedAt: Date | null
+  _count: { id: number }
+  _sum: { amount: number | null }
+}
+
+type SellerGroupBy = {
+  userId: string
+  _count: { id: number }
+  _sum: { amount: number | null }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -143,7 +162,7 @@ export async function GET(request: NextRequest) {
 
     // Enrichir les données des vendeurs
     const enrichedSellersData = await Promise.all(
-      topSellersByRevenue.map(async (item) => {
+      (topSellersByRevenue as SellerGroupBy[]).map(async (item) => {
         const seller = await prisma.user.findUnique({
           where: { id: item.userId },
           select: { 
@@ -157,7 +176,7 @@ export async function GET(request: NextRequest) {
           sellerName: seller?.name || 'Inconnu',
           sellerImage: seller?.image,
           sellerLocation: seller?.location,
-          totalRevenue: item._sum.amount || 0,
+          totalRevenue: item._sum?.amount || 0,
           transactionCount: item._count?.id || 0
         }
       })
@@ -241,7 +260,7 @@ export async function GET(request: NextRequest) {
       },
       
       distribution: {
-        byPaymentMethod: revenueByMethod.map((item: { method: string; _count: { id: number } | null; _sum: { amount: number | null } | null }) => ({
+        byPaymentMethod: (revenueByMethod as PaymentMethodGroupBy[]).map(item => ({
           method: item.method,
           count: item._count?.id || 0,
           totalRevenue: item._sum?.amount || 0,
@@ -258,7 +277,7 @@ export async function GET(request: NextRequest) {
       },
       
       chartData: {
-        revenueOverTime: revenueOverTime.map((item: { completedAt: Date | null; _sum: { amount: number | null } | null; _count: { id: number } | null }) => ({
+        revenueOverTime: (revenueOverTime as PaymentTimeGroupBy[]).map(item => ({
           date: format(new Date(item.completedAt!), 'yyyy-MM-dd'),
           revenue: item._sum?.amount || 0,
           transactions: item._count?.id || 0

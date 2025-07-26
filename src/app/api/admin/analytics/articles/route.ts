@@ -4,6 +4,31 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { startOfDay, endOfDay, subDays, format } from 'date-fns'
 
+// Types for Prisma groupBy results
+type CategoryGroupBy = {
+  categoryId: string
+  _count: { id: number }
+  _avg: { price: number | null }
+}
+
+type StatusGroupBy = {
+  isAvailable: boolean
+  _count: { id: number }
+  _sum: { views: number | null }
+}
+
+type ConditionGroupBy = {
+  condition: string
+  _count: { id: number }
+  _avg: { price: number | null }
+}
+
+type TimeGroupBy = {
+  createdAt: Date
+  _count: { id: number }
+  _avg: { price: number | null }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -167,7 +192,7 @@ export async function GET(request: NextRequest) {
 
     // Enrichir les données de catégorie
     const enrichedCategoryData = await Promise.all(
-      articlesByCategory.map(async (item) => {
+      (articlesByCategory as CategoryGroupBy[]).map(async (item) => {
         const category = await prisma.category.findUnique({
           where: { id: item.categoryId },
           select: { name: true }
@@ -176,15 +201,15 @@ export async function GET(request: NextRequest) {
           categoryId: item.categoryId,
           categoryName: category?.name || 'Inconnu',
           count: item._count?.id || 0,
-          averagePrice: item._avg.price || 0
+          averagePrice: item._avg?.price || 0
         }
       })
     )
 
     // Calculs de performance
     const totalArticles = articleStats._count?.id || 0
-    const availableArticles = articlesByStatus.find(item => item.isAvailable)?._count?.id || 0
-    const soldArticles = articlesByStatus.find(item => !item.isAvailable)?._count?.id || 0
+    const availableArticles = (articlesByStatus as StatusGroupBy[]).find(item => item.isAvailable)?._count?.id || 0
+    const soldArticles = (articlesByStatus as StatusGroupBy[]).find(item => !item.isAvailable)?._count?.id || 0
     const conversionRate = totalArticles > 0 ? (soldArticles / totalArticles) * 100 : 0
 
     // Formatage des données
@@ -201,23 +226,23 @@ export async function GET(request: NextRequest) {
       
       distribution: {
         byCategory: enrichedCategoryData,
-        byCondition: articlesByCondition.map(item => ({
+        byCondition: (articlesByCondition as ConditionGroupBy[]).map(item => ({
           condition: item.condition,
           count: item._count?.id || 0,
-          averagePrice: item._avg.price || 0
+          averagePrice: item._avg?.price || 0
         })),
-        byStatus: articlesByStatus.map(item => ({
+        byStatus: (articlesByStatus as StatusGroupBy[]).map(item => ({
           status: item.isAvailable ? 'AVAILABLE' : 'SOLD',
           count: item._count?.id || 0,
-          totalViews: item._sum.views || 0
+          totalViews: item._sum?.views || 0
         }))
       },
       
       chartData: {
-        articlesOverTime: articlesOverTime.map(item => ({
+        articlesOverTime: (articlesOverTime as TimeGroupBy[]).map(item => ({
           date: format(new Date(item.createdAt), 'yyyy-MM-dd'),
           count: item._count?.id || 0,
-          averagePrice: item._avg.price || 0
+          averagePrice: item._avg?.price || 0
         }))
       },
       

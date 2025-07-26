@@ -3,6 +3,14 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
+// Type definition for Prisma groupBy result
+type UserRoleGroupBy = {
+  role: string
+  _count: {
+    id: number
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -125,7 +133,7 @@ export async function GET(request: NextRequest) {
         hasPrev: page > 1
       },
       stats: {
-        byRole: userStats.reduce((acc, stat) => {
+        byRole: (userStats as UserRoleGroupBy[]).reduce((acc, stat) => {
           acc[stat.role] = stat._count?.id || 0
           return acc
         }, {} as Record<string, number>),

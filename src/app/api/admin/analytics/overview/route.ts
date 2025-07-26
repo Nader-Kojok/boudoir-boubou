@@ -4,6 +4,23 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { startOfDay, endOfDay, subDays, format } from 'date-fns'
 
+// Types for Prisma groupBy results
+type UserGroupBy = {
+  createdAt: Date
+  _count: { id: number }
+}
+
+type ArticleGroupBy = {
+  createdAt: Date
+  _count: { id: number }
+}
+
+type PaymentGroupBy = {
+  completedAt: Date | null
+  _count: { id: number }
+  _sum: { amount: number | null }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -150,18 +167,18 @@ export async function GET(request: NextRequest) {
       newArticles: Array<{ date: string; count: number }>;
       sales: Array<{ date: string; count: number; revenue: number }>;
     } = {
-      newUsers: newUsersData.map((item: { createdAt: Date; _count: { id: number } }) => ({
+      newUsers: (newUsersData as UserGroupBy[]).map(item => ({
         date: format(new Date(item.createdAt), 'yyyy-MM-dd'),
         count: item._count?.id || 0
       })),
-      newArticles: newArticlesData.map((item: { createdAt: Date; _count: { id: number } }) => ({
+      newArticles: (newArticlesData as ArticleGroupBy[]).map(item => ({
         date: format(new Date(item.createdAt), 'yyyy-MM-dd'),
         count: item._count?.id || 0
       })),
-      sales: salesData.map((item: { completedAt: Date | null; _count: { id: number }; _sum: { amount: number | null } }) => ({
+      sales: (salesData as PaymentGroupBy[]).map(item => ({
         date: format(new Date(item.completedAt!), 'yyyy-MM-dd'),
         count: item._count?.id || 0,
-        revenue: item._sum.amount || 0
+        revenue: item._sum?.amount || 0
       }))
     }
 

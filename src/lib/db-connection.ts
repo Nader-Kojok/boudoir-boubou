@@ -1,84 +1,108 @@
-import { prisma } from './db'
+import { PrismaClient } from '@prisma/client'
+import { withConnectionPool, forceDisconnectPool } from './connection-pool'
 
-// Configuration pour la gestion des connexions
-const CONNECTION_CONFIG = {
+interface RetryConfig {
+  maxRetries: number
+  baseDelay: number
+  maxDelay: number
+}
+
+const DEFAULT_RETRY_CONFIG: RetryConfig = {
   maxRetries: 3,
-  retryDelay: 1000, // 1 seconde
-  connectionTimeout: 10000, // 10 secondes
+  baseDelay: 1000,
+  maxDelay: 5000,
 }
 
-// Fonction pour exécuter une requête avec retry et gestion d'erreurs
-export async function executeWithRetry<T>(
-  operation: () => Promise<T>,
-  retries = CONNECTION_CONFIG.maxRetries
-): Promise<T> {
-  try {
-    return await operation()
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    const errorCode = error && typeof error === 'object' && 'code' in error ? error.code : undefined
-    console.error(`[DB] Operation failed:`, {
-      error: errorMessage,
-      code: errorCode,
-      retriesLeft: retries,
-      timestamp: new Date().toISOString()
-    })
-
-    // Si c'est une erreur de connexion et qu'il reste des tentatives
-    if (retries > 0 && isConnectionError(error)) {
-      console.log(`[DB] Retrying operation in ${CONNECTION_CONFIG.retryDelay}ms...`)
-      await new Promise(resolve => setTimeout(resolve, CONNECTION_CONFIG.retryDelay))
-      return executeWithRetry(operation, retries - 1)
-    }
-
-    throw error
-  }
-}
-
-// Vérifier si l'erreur est liée à la connexion
-function isConnectionError(error: unknown): boolean {
-  const connectionErrors = [
-    'too many connections',
-    'connection timeout',
-    'connection refused',
-    'connection reset',
-    'ECONNRESET',
-    'ECONNREFUSED',
-    'ETIMEDOUT',
-    'P1001', // Prisma connection error
-    'P1008', // Operations timed out
-    'P1017', // Server has closed the connection
-  ]
-
-  const errorMessage = (error instanceof Error ? error.message : String(error)).toLowerCase()
-  const errorCode = (error && typeof error === 'object' && 'code' in error ? String(error.code) : '').toLowerCase()
-
-  return connectionErrors.some(errorType => 
-    errorMessage.includes(errorType) || errorCode.includes(errorType)
+// Fonction pour vérifier si une erreur est liée à la connexion
+export function isConnectionError(error: unknown): boolean {
+  if (!error) return false
+  
+  const errorMessage = (error as Error).message?.toLowerCase() || ''
+  const errorCode = (error as { code?: string }).code?.toLowerCase() || ''
+  
+  return (
+    errorMessage.includes('connection') ||
+    errorMessage.includes('timeout') ||
+    errorMessage.includes('network') ||
+    errorMessage.includes('econnrefused') ||
+    errorMessage.includes('enotfound') ||
+    errorMessage.includes('too many connections') ||
+    errorMessage.includes('prisma_migration') ||
+    errorCode.includes('p1001') || // Prisma connection error
+    errorCode.includes('p1008') || // Prisma timeout
+    errorCode.includes('p1017')    // Prisma server closed connection
   )
 }
 
-// Fonction pour nettoyer les connexions inactives
-export async function cleanupConnections() {
+// Fonction pour calculer le délai avec backoff exponentiel
+function calculateDelay(attempt: number, config: RetryConfig): number {
+  const delay = config.baseDelay * Math.pow(2, attempt - 1)
+  return Math.min(delay, config.maxDelay)
+}
+
+// Fonction pour exécuter une opération avec retry
+export async function executeWithRetry<T>(
+  operation: () => Promise<T>,
+  config: RetryConfig = DEFAULT_RETRY_CONFIG,
+  operationName = 'database-operation'
+): Promise<T> {
+  let lastError: Error
+  
+  for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
+    try {
+      console.log(`[DB] Starting operation: ${operationName}`)
+      const result = await operation()
+      
+      if (attempt > 1) {
+        console.log(`[DB] Operation succeeded after ${attempt} attempts: ${operationName}`)
+      }
+      
+      return result
+    } catch (error) {
+      lastError = error as Error
+      
+      console.error(`[DB] Operation failed:`, {
+         error: lastError.message,
+         code: (lastError as { code?: string }).code,
+         retriesLeft: config.maxRetries - attempt,
+         timestamp: new Date().toISOString()
+       })
+      
+      // Si c'est une erreur de connexion, forcer la déconnexion du pool
+      if (isConnectionError(lastError)) {
+        console.log('[DB] Connection error detected, forcing pool disconnect...')
+        await forceDisconnectPool().catch(() => {})
+      }
+      
+      // Si ce n'est pas une erreur de connexion ou si c'est la dernière tentative
+      if (!isConnectionError(lastError) || attempt === config.maxRetries) {
+        throw lastError
+      }
+      
+      // Attendre avant la prochaine tentative
+      const delay = calculateDelay(attempt, config)
+      console.log(`[DB] Retrying operation in ${delay}ms...`)
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
+  }
+  
+  throw lastError!
+}
+
+// Fonction pour nettoyer les connexions
+export async function cleanupConnections(prisma: PrismaClient): Promise<void> {
   try {
     await prisma.$disconnect()
     console.log('[DB] Connections cleaned up successfully')
   } catch (error) {
-    console.error('[DB] Error cleaning up connections:', error)
+    console.error('[DB] Error during cleanup:', error)
   }
 }
 
-// Fonction pour vérifier la santé de la base de données avec timeout
-export async function healthCheck(): Promise<boolean> {
+// Fonction pour vérifier la santé de la base de données
+export async function healthCheck(prisma: PrismaClient): Promise<boolean> {
   try {
-    await Promise.race([
-      prisma.$queryRaw`SELECT 1 as health`,
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Health check timeout')), CONNECTION_CONFIG.connectionTimeout)
-      )
-    ])
-    
-    console.log('[DB] Health check passed')
+    await prisma.$queryRaw`SELECT 1`
     return true
   } catch (error) {
     console.error('[DB] Health check failed:', error)
@@ -86,35 +110,27 @@ export async function healthCheck(): Promise<boolean> {
   }
 }
 
-// Wrapper pour les opérations de base de données critiques
+// Fonction wrapper pour les opérations critiques
 export async function safeDbOperation<T>(
-  operation: () => Promise<T>,
-  operationName: string
+  operation: (prisma: PrismaClient) => Promise<T>,
+  operationName = 'safe-operation'
 ): Promise<T> {
-  const startTime = Date.now()
-  
-  try {
-    console.log(`[DB] Starting operation: ${operationName}`)
-    
-    const result = await executeWithRetry(operation)
-    
-    const duration = Date.now() - startTime
-    console.log(`[DB] Operation completed: ${operationName} (${duration}ms)`)
-    
-    return result
-  } catch (error: unknown) {
-    const duration = Date.now() - startTime
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    const errorCode = error && typeof error === 'object' && 'code' in error ? error.code : undefined
-    const errorStack = error instanceof Error ? error.stack?.split('\n').slice(0, 3).join('\n') : undefined
-    
-    console.error(`[DB] Operation failed: ${operationName} (${duration}ms)`, {
-      error: errorMessage,
-      code: errorCode,
-      stack: errorStack
-    })
-    
-    throw error
+  if (process.env.NODE_ENV === 'production') {
+    // En production, utiliser le pool de connexions avec retry
+    return executeWithRetry(
+      () => withConnectionPool(operation),
+      DEFAULT_RETRY_CONFIG,
+      operationName
+    )
+  } else {
+    // En développement, utiliser executeWithRetry directement
+    const { prisma } = await import('./db')
+    return executeWithRetry(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      () => operation(prisma as any),
+      DEFAULT_RETRY_CONFIG,
+      operationName
+    )
   }
 }
 

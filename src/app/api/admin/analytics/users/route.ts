@@ -5,6 +5,28 @@ import { prisma, checkDatabaseConnection } from '@/lib/db'
 import { safeDbOperation } from '@/lib/db-connection'
 import { startOfDay, endOfDay, subDays, format } from 'date-fns'
 
+// Type definitions for Prisma groupBy results
+type UserTimeGroupBy = {
+  createdAt: Date
+  _count: {
+    id: number
+  }
+}
+
+type UserActivityGroupBy = {
+  updatedAt: Date
+  _count: {
+    id: number
+  }
+}
+
+type UserRoleGroupBy = {
+  role: string
+  _count: {
+    id: number
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -174,11 +196,11 @@ export async function GET(request: Request) {
         totalUsers: userStats._count?.id || 0,
         activeUsers: recentlyActiveUsers,
         retentionRate: Math.round(retentionRate * 100) / 100,
-        newUsersThisPeriod: newUsersOverTime.reduce((sum, item) => sum + (item._count?.id || 0), 0)
+        newUsersThisPeriod: (newUsersOverTime as UserTimeGroupBy[]).reduce((sum, item) => sum + (item._count?.id || 0), 0)
       },
       
       distribution: {
-        byRole: usersByRole.map(item => ({
+        byRole: (usersByRole as UserRoleGroupBy[]).map(item => ({
           role: item.role,
           count: item._count?.id || 0
         })),
@@ -189,11 +211,11 @@ export async function GET(request: Request) {
       },
       
       chartData: {
-        newUsers: newUsersOverTime.map(item => ({
+        newUsers: (newUsersOverTime as UserTimeGroupBy[]).map(item => ({
           date: format(new Date(item.createdAt), 'yyyy-MM-dd'),
           count: item._count?.id || 0
         })),
-        activeUsers: activeUsersOverTime.map(item => ({
+        activeUsers: (activeUsersOverTime as UserActivityGroupBy[]).map(item => ({
           date: format(new Date(item.updatedAt), 'yyyy-MM-dd'),
           count: item._count?.id || 0
         }))

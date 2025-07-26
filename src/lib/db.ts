@@ -1,32 +1,45 @@
 import { PrismaClient, Prisma } from '@prisma/client'
+import { withAccelerate } from '@prisma/extension-accelerate'
 import type { Article, Category, User, ArticleCondition, UserRole } from '@prisma/client'
 
+// Type for the extended Prisma client
+type ExtendedPrismaClient = ReturnType<typeof createPrismaClient>
+
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
+  prisma: ExtendedPrismaClient | undefined
 }
 
-// Configuration optimisée pour la production avec gestion des connexions
+// Configuration optimisée pour le développement
 const createPrismaClient = () => {
-  // Configuration de l'URL avec paramètres de pool de connexions
-  const databaseUrl = process.env.DATABASE_URL
-  const connectionUrl = databaseUrl?.includes('?') 
-    ? `${databaseUrl}&connection_limit=5&pool_timeout=20&connect_timeout=60`
-    : `${databaseUrl}?connection_limit=5&pool_timeout=20&connect_timeout=60`
-
-  return new PrismaClient({
-    datasources: {
-      db: {
-        url: connectionUrl,
-      },
-    },
+  const client = new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   })
+  
+  // Extend with Accelerate for connection pooling and caching
+  return client.$extends(withAccelerate())
 }
 
+// Instance globale pour le développement uniquement
 export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
+}
+
+// Wrapper pour les opérations de base de données avec gestion automatique des connexions
+export async function withPrisma<T>(operation: (client: ExtendedPrismaClient) => Promise<T>): Promise<T> {
+  if (process.env.NODE_ENV === 'production') {
+    // En production, créer une nouvelle instance avec Accelerate pour chaque opération
+    const client = createPrismaClient()
+    try {
+      return await operation(client)
+    } finally {
+      // Accelerate gère automatiquement les connexions, pas besoin de disconnect explicite
+    }
+  } else {
+    // En développement, utiliser l'instance globale
+    return await operation(prisma)
+  }
 }
 
 // Gestion automatique de la déconnexion en production
@@ -171,8 +184,8 @@ export async function getArticles(filters?: {
   }
 
   try {
-    const articles = await safeDbOperation(
-      () => prisma.article.findMany({
+    const articles = await withPrisma(
+      (client) => client.article.findMany({
         where,
         include: {
           seller: {
@@ -195,10 +208,9 @@ export async function getArticles(filters?: {
         orderBy: {
           createdAt: 'desc',
         },
-      }),
-      'getArticles'
+      })
     )
-    
+
     return articles.map(transformArticle) as ArticleWithDetails[]
   } catch (error) {
     handleDatabaseError(error, 'getArticles')
@@ -239,7 +251,7 @@ export async function getArticleById(id: string): Promise<Prisma.ArticleGetPaylo
     }
   }
 }> | null> {
-  const article = await prisma.article.findUnique({
+  const article = await withPrisma((client) => client.article.findUnique({
     where: { id },
     include: {
       seller: {
@@ -273,7 +285,7 @@ export async function getArticleById(id: string): Promise<Prisma.ArticleGetPaylo
         },
       },
     },
-  })
+  }))
   
   return article ? (transformArticle(article) as typeof article) : null
 }
