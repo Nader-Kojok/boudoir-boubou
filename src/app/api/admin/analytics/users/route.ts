@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
     const sellersData = await prisma.$queryRaw<{
       id: string;
       name: string | null;
-      email: string;
+      phone: string;
       articlesCount: bigint;
       salesCount: bigint;
       totalRevenue: number | null;
@@ -96,15 +96,15 @@ export async function GET(request: NextRequest) {
       SELECT 
         u.id,
         u.name,
-        u.email,
+        u.phone,
         COUNT(DISTINCT a.id) as "articlesCount",
-        COUNT(DISTINCT o.id) as "salesCount",
-        SUM(o."totalAmount") as "totalRevenue"
+        COUNT(DISTINCT p.id) as "salesCount",
+        SUM(p.amount) as "totalRevenue"
       FROM "User" u
-      LEFT JOIN "Article" a ON u.id = a."userId" AND a."isAvailable" = true
-      LEFT JOIN "Order" o ON u.id = o."sellerId" AND o.status = 'COMPLETED'
+      LEFT JOIN "Article" a ON u.id = a."sellerId" AND a."isAvailable" = true
+      LEFT JOIN "Payment" p ON a.id = p."articleId" AND p.status = 'COMPLETED'
       WHERE u.role = 'SELLER'
-      GROUP BY u.id, u.name, u.email
+      GROUP BY u.id, u.name, u.phone
       ORDER BY "articlesCount" DESC, "salesCount" DESC
       LIMIT 10
     `
@@ -173,10 +173,10 @@ export async function GET(request: NextRequest) {
       },
       
       topUsers: {
-        sellers: sellersData.map((seller: { id: string; name: string | null; email: string; articlesCount: bigint; salesCount: bigint; totalRevenue: number | null }) => ({
+        sellers: sellersData.map((seller: { id: string; name: string | null; phone: string; articlesCount: bigint; salesCount: bigint; totalRevenue: number | null }) => ({
           id: seller.id,
           name: seller.name,
-          email: seller.email,
+          phone: seller.phone,
           articlesCount: Number(seller.articlesCount),
           salesCount: Number(seller.salesCount),
           totalRevenue: seller.totalRevenue || 0
