@@ -7,10 +7,16 @@ const globalForPrisma = globalThis as unknown as {
 
 // Configuration optimisée pour la production avec gestion des connexions
 const createPrismaClient = () => {
+  // Configuration de l'URL avec paramètres de pool de connexions
+  const databaseUrl = process.env.DATABASE_URL
+  const connectionUrl = databaseUrl?.includes('?') 
+    ? `${databaseUrl}&connection_limit=5&pool_timeout=20&connect_timeout=60`
+    : `${databaseUrl}?connection_limit=5&pool_timeout=20&connect_timeout=60`
+
   return new PrismaClient({
     datasources: {
       db: {
-        url: process.env.DATABASE_URL,
+        url: connectionUrl,
       },
     },
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
@@ -21,6 +27,24 @@ export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
+}
+
+// Gestion automatique de la déconnexion en production
+if (process.env.NODE_ENV === 'production') {
+  // Déconnexion propre lors de l'arrêt du processus
+  process.on('beforeExit', async () => {
+    await prisma.$disconnect()
+  })
+  
+  process.on('SIGINT', async () => {
+    await prisma.$disconnect()
+    process.exit(0)
+  })
+  
+  process.on('SIGTERM', async () => {
+    await prisma.$disconnect()
+    process.exit(0)
+  })
 }
 
 // Fonction pour fermer proprement les connexions
