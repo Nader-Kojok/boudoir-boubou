@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
 import { Filter, X } from 'lucide-react'
+import { formatPrice } from '@/lib/utils'
 
 interface Category {
   id: string
@@ -151,8 +152,8 @@ export function CatalogueFilters({
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground mt-2">
-              <span>{priceRange[0].toLocaleString()}</span>
-              <span>{priceRange[1].toLocaleString()}</span>
+              <span>{formatPrice(priceRange[0])}</span>
+              <span>{formatPrice(priceRange[1])}</span>
             </div>
           </div>
           <div className="flex gap-2">

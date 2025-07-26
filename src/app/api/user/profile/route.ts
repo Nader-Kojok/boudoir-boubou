@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
+import { validateBase64Image } from '@/lib/image-validation'
 
 const updateProfileSchema = z.object({
   name: z
@@ -46,6 +47,33 @@ export async function PATCH(request: NextRequest) {
     // Validation des données
     const validatedData = updateProfileSchema.parse(body)
     const { name, phone, role, image, bannerImage } = validatedData
+    
+    // Validation des images base64 si présentes
+    if (image && image.startsWith('data:image/')) {
+      const imageValidation = validateBase64Image(image)
+      if (!imageValidation.isValid) {
+        return NextResponse.json(
+          { 
+            message: `Image de profil invalide: ${imageValidation.error}`,
+            errors: [{ field: 'image', message: imageValidation.error }]
+          },
+          { status: 400 }
+        )
+      }
+    }
+    
+    if (bannerImage && bannerImage.startsWith('data:image/')) {
+      const bannerValidation = validateBase64Image(bannerImage)
+      if (!bannerValidation.isValid) {
+        return NextResponse.json(
+          { 
+            message: `Image de bannière invalide: ${bannerValidation.error}`,
+            errors: [{ field: 'bannerImage', message: bannerValidation.error }]
+          },
+          { status: 400 }
+        )
+      }
+    }
 
     // Récupérer l'utilisateur actuel pour vérifier le téléphone
     const currentUser = await prisma.user.findUnique({

@@ -16,6 +16,7 @@ import { User, Phone, AlertCircle, CheckCircle, ShoppingBag, Store } from "lucid
 import type { UserRole } from "@prisma/client"
 import { handleError } from "@/hooks/use-notifications"
 import { delayedRefresh } from "@/utils/delayed-navigation"
+import { validateImageFile, convertToBase64 } from "@/lib/image-validation"
 
 const profileSchema = z.object({
   name: z
@@ -57,31 +58,15 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(user.image || null)
   const [bannerPreview, setBannerPreview] = useState<string | null>(user.bannerImage || null)
 
-  // Helper function to convert file to base64
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = reject
-      reader.readAsDataURL(file)
-    })
-  }
-
   // Handle image upload
-  const handleImageUpload = async (file: File, type: 'image' | 'bannerImage') => {
-    try {
-      // Check file size (5MB max)
-      const maxSize = 5 * 1024 * 1024 // 5MB in bytes
-      if (file.size > maxSize) {
-        setMessage({ type: 'error', text: 'L\'image ne doit pas dépasser 5MB' })
-        return
-      }
-
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        setMessage({ type: 'error', text: 'Veuillez sélectionner un fichier image valide' })
-        return
-      }
+   const handleImageUpload = async (file: File, type: 'image' | 'bannerImage') => {
+     try {
+       // Validate image file using centralized validation
+       const validation = await validateImageFile(file)
+       if (!validation.isValid) {
+         setMessage({ type: 'error', text: validation.error || 'Fichier invalide' })
+         return
+       }
 
       const base64 = await convertToBase64(file)
       if (type === 'image') {

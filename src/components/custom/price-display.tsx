@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { cn, formatPrice as formatPriceUtil } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
 export interface PriceDisplayProps {
@@ -42,10 +42,8 @@ export function PriceDisplay({
   className,
 }: PriceDisplayProps) {
   const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency,
-    }).format(amount)
+    // Use consistent formatting to avoid hydration mismatches
+    return `${formatPriceUtil(amount)} ${currency === 'XOF' ? 'FCFA' : currency}`
   }
 
   const hasDiscount = originalPrice && originalPrice > price

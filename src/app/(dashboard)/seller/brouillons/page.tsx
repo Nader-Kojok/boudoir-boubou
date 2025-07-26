@@ -16,6 +16,8 @@ import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { handleError, handleSuccess } from '@/hooks/use-notifications'
 import { useConfirmation } from '@/components/ui/confirmation-dialog'
+import { cleanupOldDraftsIfNeeded, getStorageInfo } from '@/lib/localStorage-utils'
+import { formatPrice } from '@/lib/utils'
 
 interface Draft {
   id: string
@@ -38,11 +40,18 @@ export default function BrouillonsPage() {
   const { confirm, ConfirmationComponent } = useConfirmation()
 
   useEffect(() => {
+    // Nettoyer automatiquement les anciens brouillons au chargement
+    cleanupOldDraftsIfNeeded()
     loadDrafts()
   }, [])
 
+
+
   const loadDrafts = () => {
     try {
+      // Nettoyer d'abord si nécessaire
+      cleanupOldDraftsIfNeeded()
+      
       // Charger tous les brouillons depuis localStorage
       const savedDrafts = localStorage.getItem('article-drafts')
       if (savedDrafts) {
@@ -62,6 +71,9 @@ export default function BrouillonsPage() {
         }])
       }
     } catch (error) {
+      // En cas d'erreur de parsing, nettoyer le localStorage
+      localStorage.removeItem('article-drafts')
+      localStorage.removeItem('article-draft')
       handleError(error, 'Chargement des brouillons')
     } finally {
       setLoading(false)
@@ -106,6 +118,27 @@ export default function BrouillonsPage() {
         handleSuccess('Brouillon supprimé avec succès')
       } catch (error) {
         handleError(error, 'Suppression du brouillon')
+      }
+    }
+  }
+
+  const clearAllDrafts = async () => {
+    const confirmed = await confirm({
+      title: "Supprimer tous les brouillons",
+      description: "Êtes-vous sûr de vouloir supprimer tous les brouillons ? Cette action libérera de l'espace de stockage mais est irréversible.",
+      confirmText: "Tout supprimer",
+      cancelText: "Annuler",
+      variant: "destructive"
+    })
+
+    if (confirmed) {
+      try {
+        localStorage.removeItem('article-drafts')
+        localStorage.removeItem('article-draft')
+        setDrafts([])
+        handleSuccess('Tous les brouillons ont été supprimés')
+      } catch (error) {
+        handleError(error, 'Suppression des brouillons')
       }
     }
   }
@@ -176,12 +209,24 @@ export default function BrouillonsPage() {
                 Retrouvez et gérez vos articles en cours de rédaction
               </p>
             </div>
-            <Link href="/seller/vendre">
-              <Button className="bg-gradient-to-r from-[#a67c3a] to-[#8b5a2b] hover:from-[#8b5a2b] hover:to-[#6d4422] text-white shadow-lg hover:shadow-xl transition-all duration-300">
-                <Plus className="w-4 h-4 mr-2" />
-                Nouvel article
-              </Button>
-            </Link>
+            <div className="flex gap-3">
+              {drafts.length > 0 && (
+                <Button
+                  onClick={clearAllDrafts}
+                  variant="outline"
+                  className="border-red-200 text-red-600 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Tout supprimer
+                </Button>
+              )}
+              <Link href="/seller/vendre">
+                <Button className="bg-gradient-to-r from-[#a67c3a] to-[#8b5a2b] hover:from-[#8b5a2b] hover:to-[#6d4422] text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouvel article
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -244,7 +289,7 @@ export default function BrouillonsPage() {
                       )}
                       {draft.price && (
                         <Badge variant="outline" className="text-xs">
-                          {parseInt(draft.price).toLocaleString()} FCFA
+                          {formatPrice(parseInt(draft.price))} FCFA
                         </Badge>
                       )}
                     </div>

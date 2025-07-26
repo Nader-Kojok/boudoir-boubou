@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { getArticles, prisma } from '@/lib/db'
-import { ArticleCondition } from '@prisma/client'
+import { ArticleCondition, PaymentMethod, PromotionType } from '@prisma/client'
 import { z } from 'zod'
+import { validateBase64Image } from '@/lib/image-validation'
 
 // Schéma de validation pour la création d'articles
 const createArticleSchema = z.object({
@@ -17,7 +18,13 @@ const createArticleSchema = z.object({
   size: z.string().optional(),
   brand: z.string().optional(),
   color: z.string().optional(),
-  images: z.array(z.string()).min(1, 'Au moins une image est requise')
+  images: z.array(z.string()).min(1, 'Au moins une image est requise'),
+  paymentData: z.object({
+    method: z.enum(['wave', 'orange_money']),
+    amount: z.number().positive(),
+    transactionId: z.string().min(1),
+    promotions: z.array(z.string()).optional()
+  }).optional()
 })
 
 // Mapping des catégories du formulaire vers les IDs de la base de données
@@ -143,6 +150,20 @@ export async function POST(request: NextRequest) {
     // Validation des données
     const validatedData = createArticleSchema.parse(body)
     
+    // Validation des images base64
+    for (const [index, image] of validatedData.images.entries()) {
+      const imageValidation = validateBase64Image(image)
+      if (!imageValidation.isValid) {
+        return NextResponse.json(
+          { 
+            error: `Image ${index + 1} invalide: ${imageValidation.error}`,
+            details: `Vérifiez que l'image respecte les critères: format autorisé (JPEG, PNG, WebP, GIF), taille maximale 5MB, encodage base64 valide`
+          },
+          { status: 400 }
+        )
+      }
+    }
+    
     // Vérifier que la catégorie existe
     const categorySlug = categoryMapping[validatedData.category]
     if (!categorySlug) {
@@ -163,48 +184,114 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Créer l'article
-    const article = await prisma.article.create({
-      data: {
-        title: validatedData.title,
-        description: validatedData.description,
-        price: parseFloat(validatedData.price),
-        images: JSON.stringify(validatedData.images),
-        size: validatedData.size || null,
-        brand: validatedData.brand || null,
-        color: validatedData.color || null,
-        condition: validatedData.condition,
-        sellerId: session.user.id,
-        categoryId: category.id,
-        isAvailable: true
-      },
-      include: {
-        category: {
-          select: {
-            id: true,
-            name: true,
-            slug: true
-          }
+    // Créer l'article avec transaction pour gérer le paiement
+    const result = await prisma.$transaction(async (tx) => {
+      // Créer l'article avec le statut approprié
+      const articleStatus = validatedData.paymentData ? 'PENDING_MODERATION' : 'PENDING_PAYMENT'
+      
+      const article = await tx.article.create({
+        data: {
+          title: validatedData.title,
+          description: validatedData.description,
+          price: parseFloat(validatedData.price),
+          images: JSON.stringify(validatedData.images),
+          size: validatedData.size || null,
+          brand: validatedData.brand || null,
+          color: validatedData.color || null,
+          condition: validatedData.condition,
+          sellerId: session.user.id,
+          categoryId: category.id,
+          status: articleStatus,
+          isAvailable: false // L'article ne sera disponible qu'après approbation
         },
-        seller: {
-          select: {
-            id: true,
-            name: true,
-            image: true
+        include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true
+            }
+          },
+          seller: {
+            select: {
+              id: true,
+              name: true,
+              image: true
+            }
           }
         }
+      })
+
+      // Si des données de paiement sont fournies, créer l'enregistrement de paiement
+      if (validatedData.paymentData) {
+        await tx.payment.create({
+          data: {
+            amount: validatedData.paymentData.amount,
+            method: validatedData.paymentData.method.toUpperCase() as PaymentMethod,
+            status: 'COMPLETED',
+            transactionId: validatedData.paymentData.transactionId,
+            articleId: article.id,
+            userId: session.user.id,
+            completedAt: new Date()
+          }
+        })
+
+        // Créer les promotions si spécifiées
+        if (validatedData.paymentData.promotions && validatedData.paymentData.promotions.length > 0) {
+          const promotionData = validatedData.paymentData.promotions.map(promo => {
+            let price = 0
+            let duration = 0
+            
+            switch (promo) {
+              case 'FEATURED_HOMEPAGE':
+                price = 2000
+                duration = 7
+                break
+              case 'BOOST_SEARCH':
+                price = 1500
+                duration = 14
+                break
+              case 'HIGHLIGHT':
+                price = 1000
+                duration = 7
+                break
+              case 'EXTENDED_VISIBILITY':
+                price = 3000
+                duration = 30
+                break
+            }
+            
+            return {
+              type: promo as PromotionType,
+              price,
+              duration,
+              articleId: article.id,
+              isActive: false // Sera activé après approbation
+            }
+          })
+          
+          await tx.articlePromotion.createMany({
+            data: promotionData
+          })
+        }
       }
+
+      return article
     })
     
     // Formater la réponse
     const formattedArticle = {
-      ...article,
-      images: JSON.parse(article.images)
+      ...result,
+      images: JSON.parse(result.images)
     }
+    
+    const message = validatedData.paymentData 
+      ? 'Article créé avec succès et envoyé en modération'
+      : 'Article créé avec succès, paiement requis pour publication'
     
     return NextResponse.json(
       { 
-        message: 'Article créé avec succès',
+        message,
         article: formattedArticle
       },
       { status: 201 }

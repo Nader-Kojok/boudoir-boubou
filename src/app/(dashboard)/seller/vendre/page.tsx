@@ -23,8 +23,14 @@ import {
 } from '@/components/ui/form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, X, Camera } from 'lucide-react'
+import PaymentSelection from '@/components/forms/payment-selection'
+import PromotionOptions from '@/components/forms/promotion-options'
+import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 import { handleError, handleSuccess } from '@/hooks/use-notifications'
 import { delayedLocationChange } from '@/utils/delayed-navigation'
+import { cleanupDraftsIfNeeded, safeLocalStorageSet } from '@/lib/localStorage-utils'
+import { validateMultipleImageFiles, convertToBase64 } from '@/lib/image-validation'
 
 const formSchema = z.object({
   title: z.string().min(5, {
@@ -85,6 +91,13 @@ export default function VendrePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(isEditing)
   const [apiCategories, setApiCategories] = useState<{id: string, name: string, slug: string}[]>([])
+  const [showPayment, setShowPayment] = useState(false)
+  const [selectedPromotions, setSelectedPromotions] = useState<string[]>([])
+  const [promotionCost, setPromotionCost] = useState(0)
+  const [paymentCompleted, setPaymentCompleted] = useState(false)
+  
+  // Frais de publication de base
+  const BASE_PUBLICATION_FEE = 1000
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -101,24 +114,54 @@ export default function VendrePage() {
     },
   })
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (files) {
-      Array.from(files).forEach((file) => {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          if (e.target?.result) {
-            setUploadedImages((prev) => [...prev, e.target!.result as string])
-          }
-        }
-        reader.readAsDataURL(file)
-      })
-    }
-  }
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+     const files = event.target.files
+     if (!files || files.length === 0) return
+ 
+     try {
+       // Valider les fichiers
+       const validation = await validateMultipleImageFiles(Array.from(files))
+       
+       if (validation.errors.length > 0) {
+         // Afficher les erreurs de validation
+         validation.errors.forEach(error => {
+           handleError(new Error(error), 'Validation des images')
+         })
+       }
+ 
+       if (validation.validFiles.length === 0) {
+         handleError(new Error('Aucun fichier valide sélectionné'), 'Validation des images')
+         return
+       }
+ 
+       // Convertir les fichiers valides en base64
+       const base64Images = await Promise.all(
+         validation.validFiles.map((file: File) => convertToBase64(file))
+       )
+ 
+       // Ajouter les nouvelles images en respectant la limite de 8
+       setUploadedImages(prev => {
+         const newImages = [...prev, ...base64Images]
+         return newImages.slice(0, 8) // Limiter à 8 images maximum
+       })
+ 
+       if (validation.validFiles.length > 0) {
+         handleSuccess(`${validation.validFiles.length} image(s) ajoutée(s) avec succès`)
+       }
+ 
+     } catch (error) {
+       handleError(error, 'Upload des images')
+     }
+ 
+     // Réinitialiser l'input pour permettre de sélectionner les mêmes fichiers
+     event.target.value = ''
+   }
 
   const removeImage = (index: number) => {
     setUploadedImages((prev) => prev.filter((_, i) => i !== index))
   }
+
+
 
   const saveDraft = async () => {
     try {
@@ -127,33 +170,62 @@ export default function VendrePage() {
       // Générer un ID unique pour le brouillon
       const draftId = `draft_${Date.now()}`
       
-      // Sauvegarder en localStorage pour le moment
+      // Créer les données du brouillon avec images optimisées
       const draftData = {
         id: draftId,
         ...formData,
-        images: uploadedImages,
+        images: uploadedImages.slice(0, 5), // Limiter à 5 images max
         savedAt: new Date().toISOString()
       }
       
-      // Récupérer les brouillons existants
+      // Calculer la taille approximative du nouveau brouillon
+      const draftSize = JSON.stringify(draftData).length
+      
+      // Nettoyer si nécessaire avant d'ajouter
+      cleanupDraftsIfNeeded(draftSize)
+      
+      // Récupérer les brouillons existants après nettoyage
       const existingDrafts = JSON.parse(localStorage.getItem('article-drafts') || '[]')
       
       // Ajouter le nouveau brouillon
       const updatedDrafts = [...existingDrafts, draftData]
       
-      // Limiter à 10 brouillons maximum
-      if (updatedDrafts.length > 10) {
+      // Limiter à 5 brouillons maximum pour éviter les problèmes de taille
+      if (updatedDrafts.length > 5) {
         updatedDrafts.shift() // Supprimer le plus ancien
       }
       
-      localStorage.setItem('article-drafts', JSON.stringify(updatedDrafts))
+      // Tenter de sauvegarder avec la fonction sécurisée
+      const draftsSuccess = safeLocalStorageSet('article-drafts', JSON.stringify(updatedDrafts))
+      const currentDraftSuccess = safeLocalStorageSet('article-draft', JSON.stringify(draftData))
       
-      // Aussi sauvegarder le brouillon actuel pour le chargement automatique
-      localStorage.setItem('article-draft', JSON.stringify(draftData))
+      if (draftsSuccess && currentDraftSuccess) {
+        handleSuccess('Brouillon sauvegardé avec succès!')
+      } else if (currentDraftSuccess) {
+        // Si on a pu sauvegarder au moins le brouillon actuel
+        handleSuccess('Brouillon sauvegardé (anciens brouillons supprimés pour libérer de l\'espace)')
+      } else {
+        // En dernier recours, essayer avec un brouillon minimal
+        const minimalDraft = {
+          id: draftId,
+          title: formData.title || '',
+          description: formData.description || '',
+          category: formData.category || '',
+          price: formData.price || '',
+          condition: formData.condition || '',
+          images: uploadedImages.slice(0, 2), // Seulement 2 images
+          savedAt: new Date().toISOString()
+        }
+        
+        if (safeLocalStorageSet('article-draft', JSON.stringify(minimalDraft))) {
+          handleSuccess('Brouillon sauvegardé (version allégée - espace de stockage limité)')
+        } else {
+          throw new Error('Espace de stockage insuffisant')
+        }
+      }
       
-      handleSuccess('Brouillon sauvegardé avec succès!')
     } catch (error) {
-      handleError(error, 'Sauvegarde du brouillon')
+      handleError(new Error('Impossible de sauvegarder le brouillon - espace de stockage insuffisant. Veuillez supprimer des brouillons existants dans la section "Mes brouillons".'), 'Sauvegarde du brouillon')
     }
   }
 
@@ -256,15 +328,63 @@ export default function VendrePage() {
   }, [form, isEditing, editId, loadArticleData])
 
   const onSubmit = async (data: FormData) => {
-    setIsSubmitting(true)
-    try {
-      // Vérifier qu'au moins une image est uploadée
-      if (uploadedImages.length === 0) {
-        handleError(new Error('Veuillez ajouter au moins une photo de votre article.'), 'Validation')
-        return
-      }
+    if (uploadedImages.length === 0) {
+      handleError(new Error('Veuillez ajouter au moins une photo de votre article.'), 'Validation')
+      return
+    }
 
-      // Préparer les données pour l'API
+    // Si c'est une modification, procéder normalement
+    if (isEditing) {
+      setIsSubmitting(true)
+      try {
+        const articleData = {
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          price: data.price,
+          condition: data.condition,
+          size: data.size,
+          brand: data.brand,
+          color: data.color,
+          images: uploadedImages
+        }
+
+        const response = await fetch(`/api/articles/${editId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(articleData)
+        })
+
+        const result = await response.json()
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Erreur lors de la mise à jour de l\'article')
+        }
+
+        handleSuccess('Votre article a été mis à jour avec succès!')
+        delayedLocationChange('/seller/articles', 3000)
+        
+      } catch (error) {
+        handleError(error, 'Mise à jour de l\'article')
+      } finally {
+        setIsSubmitting(false)
+      }
+      return
+    }
+
+    // Pour une nouvelle publication, afficher les options de paiement
+    setShowPayment(true)
+  }
+
+  const handlePaymentSuccess = async (paymentMethod: string, transactionId: string) => {
+    setIsSubmitting(true)
+
+    try {
+      const data = form.getValues()
+      const totalAmount = BASE_PUBLICATION_FEE + promotionCost
+      
       const articleData = {
         title: data.title,
         description: data.description,
@@ -274,15 +394,17 @@ export default function VendrePage() {
         size: data.size,
         brand: data.brand,
         color: data.color,
-        images: uploadedImages
+        images: uploadedImages,
+        paymentData: {
+          method: paymentMethod,
+          amount: totalAmount,
+          transactionId,
+          promotions: selectedPromotions
+        }
       }
 
-      // Envoyer les données à l'API
-      const url = isEditing ? `/api/articles/${editId}` : '/api/articles'
-      const method = isEditing ? 'PUT' : 'POST'
-      
-      const response = await fetch(url, {
-        method,
+      const response = await fetch('/api/articles', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -292,16 +414,22 @@ export default function VendrePage() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || `Erreur lors de ${isEditing ? 'la mise à jour' : 'la création'} de l\'article`)
+        throw new Error(result.error || 'Erreur lors de la publication de l\'article')
       }
 
-      // Succès - rediriger vers la liste des articles après un délai
-      const successMessage = isEditing ? 'Votre article a été mis à jour avec succès!' : 'Votre article a été publié avec succès!'
-      handleSuccess(successMessage)
-      delayedLocationChange('/seller/articles', 3000)
+      // Clear localStorage draft
+      localStorage.removeItem('article-draft')
+      
+      setPaymentCompleted(true)
+      handleSuccess('Paiement effectué! Votre article est en cours de modération.')
+      
+      // Redirect after success
+      setTimeout(() => {
+        delayedLocationChange('/seller/articles')
+      }, 3000)
       
     } catch (error) {
-      handleError(error, isEditing ? 'Mise à jour de l\'article' : 'Publication de l\'article')
+      handleError(error, 'Publication de l\'article')
     } finally {
       setIsSubmitting(false)
     }
@@ -621,6 +749,47 @@ export default function VendrePage() {
                 />
               </CardContent>
             </Card>
+
+            {/* Options de promotion et récapitulatif des frais */}
+            {!isEditing && (
+              <>
+                <PromotionOptions
+                  selectedPromotions={selectedPromotions}
+                  onPromotionChange={setSelectedPromotions}
+                  onCostChange={setPromotionCost}
+                />
+                
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-blue-900 mb-2">Récapitulatif des frais</h3>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span>Frais de publication:</span>
+                      <span>{BASE_PUBLICATION_FEE} FCFA</span>
+                    </div>
+                    {promotionCost > 0 && (
+                      <div className="flex justify-between">
+                        <span>Options de promotion:</span>
+                        <span>{promotionCost} FCFA</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-semibold border-t pt-1">
+                      <span>Total:</span>
+                      <span>{BASE_PUBLICATION_FEE + promotionCost} FCFA</span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Composant de paiement */}
+            {showPayment && !paymentCompleted && (
+              <PaymentSelection
+                amount={BASE_PUBLICATION_FEE + promotionCost}
+                onPaymentSuccess={handlePaymentSuccess}
+                onCancel={() => setShowPayment(false)}
+                isProcessing={isSubmitting}
+              />
+            )}
 
             {/* Boutons d'action */}
             <div className="flex flex-col sm:flex-row gap-4 justify-end">

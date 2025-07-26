@@ -74,6 +74,8 @@ model User {
   articles  Article[]
   reviews   Review[]
   favorites Favorite[]
+  payments  Payment[]
+  moderationLogs ModerationLog[] @relation("ModeratorLogs")
 
 }
 
@@ -101,8 +103,12 @@ model Article {
   condition   ArticleCondition
   isAvailable Boolean         @default(true)
   views       Int             @default(0)
+  status      ArticleStatus   @default(PENDING_PAYMENT)
+  moderationNotes String?
+  rejectionReason String?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
+  publishedAt DateTime?
 
   // Relations
   sellerId   String
@@ -112,6 +118,8 @@ model Article {
 
   reviews    Review[]
   favorites  Favorite[]
+  payment    Payment?
+  promotions ArticlePromotion[]
 
 }
 
@@ -159,4 +167,76 @@ enum ArticleCondition {
   EXCELLENT
   GOOD
   FAIR
+}
+
+enum ArticleStatus {
+  PENDING_PAYMENT
+  PENDING_MODERATION
+  APPROVED
+  REJECTED
+  PUBLISHED
+}
+
+enum PaymentMethod {
+  WAVE
+  ORANGE_MONEY
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PromotionType {
+  FEATURED_HOMEPAGE
+  BOOST_SEARCH
+  HIGHLIGHT
+  EXTENDED_VISIBILITY
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  amount        Float
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  transactionId String        @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  completedAt   DateTime?
+
+  // Relations
+  articleId String  @unique
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+}
+
+model ArticlePromotion {
+  id        String        @id @default(cuid())
+  type      PromotionType
+  price     Float
+  duration  Int // en jours
+  startDate DateTime?
+  endDate   DateTime?
+  isActive  Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Relations
+  articleId String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
+
+model ModerationLog {
+  id        String   @id @default(cuid())
+  action    String // APPROVED, REJECTED, PENDING
+  notes     String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  articleId   String
+  moderatorId String
+  moderator   User   @relation("ModeratorLogs", fields: [moderatorId], references: [id])
 }
