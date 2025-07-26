@@ -235,7 +235,7 @@ export default function ArticlePage() {
             <PriceDisplay price={article.price} className="text-3xl font-bold mb-4" />
 
             {/* Avis */}
-            {article._count.reviews > 0 && (
+            {(article._count?.reviews || 0) > 0 && (
               <div className="flex items-center space-x-2 mb-4">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
@@ -251,7 +251,7 @@ export default function ArticlePage() {
                   ))}
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  {article.averageRating?.toFixed(1)} ({article._count.reviews} avis)
+                  {article.averageRating?.toFixed(1)} ({article._count?.reviews || 0} avis)
                 </span>
               </div>
             )}
@@ -328,7 +328,7 @@ export default function ArticlePage() {
         articleId={article.id}
         reviews={reviews}
         averageRating={article.averageRating}
-        totalReviews={article._count.reviews}
+        totalReviews={article._count?.reviews || 0}
       />
 
       {/* Articles similaires */}

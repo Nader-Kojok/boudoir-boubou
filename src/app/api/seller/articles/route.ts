@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
       images: JSON.parse(article.images),
       condition: article.condition,
       isAvailable: article.isAvailable,
-      favorites: article._count.favorites,
+      favorites: article._count?.favorites || 0,
       views: article.views,
       createdAt: article.createdAt.toISOString(),
       updatedAt: article.updatedAt.toISOString(),

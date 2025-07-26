@@ -115,8 +115,8 @@ export async function GET(
         ...seller,
         averageRating: reviewStats._avg.rating || 0,
         _count: {
-          articles: seller._count.articles,
-          reviews: seller._count.reviews
+          articles: seller._count?.articles || 0,
+          reviews: seller._count?.reviews || 0
         }
       },
       articles: articlesWithRatings,

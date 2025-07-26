@@ -159,11 +159,11 @@ export default function SellerPage() {
                 <div className="flex items-center space-x-2">
                   <Package className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    <span className="font-semibold">{seller._count.articles}</span> articles
+                    <span className="font-semibold">{seller._count?.articles || 0}</span> articles
                   </span>
                 </div>
                 
-                {seller._count.reviews > 0 && (
+                {(seller._count?.reviews || 0) > 0 && (
                   <div className="flex items-center space-x-2">
                     <div className="flex items-center">
                       {[...Array(5)].map((_, i) => (
@@ -179,7 +179,7 @@ export default function SellerPage() {
                       ))}
                     </div>
                     <span className="text-sm">
-                      {seller.averageRating?.toFixed(1)} ({seller._count.reviews} avis)
+                      {seller.averageRating?.toFixed(1)} ({seller._count?.reviews || 0} avis)
                     </span>
                   </div>
                 )}
@@ -216,14 +216,14 @@ export default function SellerPage() {
           size="sm"
           onClick={() => setActiveTab('articles')}
         >
-          Articles ({seller._count.articles})
+          Articles ({seller._count?.articles || 0})
         </Button>
         <Button
           variant={activeTab === 'reviews' ? 'default' : 'ghost'}
           size="sm"
           onClick={() => setActiveTab('reviews')}
         >
-          Avis ({seller._count.reviews})
+          Avis ({seller._count?.reviews || 0})
         </Button>
       </div>
 
@@ -270,7 +270,7 @@ export default function SellerPage() {
 
       {activeTab === 'reviews' && (
         <div className="space-y-4">
-          {seller._count.reviews > 0 ? (
+          {(seller._count?.reviews || 0) > 0 ? (
             <div className="text-center py-12">
               <Star className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-semibold mb-2">Avis des clients</h3>

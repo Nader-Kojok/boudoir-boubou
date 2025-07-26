@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Auth.js required models
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -24,8 +20,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -46,37 +41,45 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Application models
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  phone         String    @unique
-  phoneVerified DateTime?
-  image         String?
-  bannerImage   String?
-  password      String?
-  role          UserRole  @default(BUYER)
-  bio           String?
-  location      String?
-  whatsappNumber String?
-  resetToken    String?
-  resetTokenExpiry DateTime?
-  phoneVerificationToken String?
+  id                      String          @id @default(cuid())
+  name                    String?
+  phone                   String          @unique
+  phoneVerified           DateTime?
+  image                   String?
+  bannerImage             String?
+  password                String?
+  role                    UserRole        @default(BUYER)
+  bio                     String?
+  location                String?
+  whatsappNumber          String?
+  resetToken              String?
+  resetTokenExpiry        DateTime?
+  phoneVerificationToken  String?
   phoneVerificationExpiry DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  // Auth.js relations
-  accounts Account[]
-  sessions Session[]
-
-  // Application relations
-  articles  Article[]
-  reviews   Review[]
-  favorites Favorite[]
-  payments  Payment[]
-  moderationLogs ModerationLog[] @relation("ModeratorLogs")
-
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+  
+  // Nouveaux champs pour la gestion avancée des utilisateurs
+  status                  UserStatus      @default(ACTIVE)
+  lastLoginAt             DateTime?
+  loginCount              Int             @default(0)
+  isVerified              Boolean         @default(false)
+  verifiedAt              DateTime?
+  suspendedAt             DateTime?
+  suspensionReason        String?
+  notes                   String?
+  tags                    String[]
+  
+  accounts                Account[]
+  articles                Article[]
+  favorites               Favorite[]
+  moderationLogs          ModerationLog[] @relation("ModeratorLogs")
+  payments                Payment[]
+  reviews                 Review[]
+  sessions                Session[]
+  activities              UserActivity[]
+  stats                   UserStats?
 }
 
 model Category {
@@ -87,56 +90,47 @@ model Category {
   image       String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
-  articles Article[]
+  articles    Article[]
 }
 
 model Article {
-  id          String          @id @default(cuid())
-  title       String
-  description String
-  price       Float
-  images      String // JSON string of image URLs
-  size        String?
-  brand       String?
-  color       String?
-  condition   ArticleCondition
-  isAvailable Boolean         @default(true)
-  views       Int             @default(0)
-  status      ArticleStatus   @default(PENDING_PAYMENT)
+  id              String             @id @default(cuid())
+  title           String
+  description     String
+  price           Float
+  images          String
+  size            String?
+  condition       ArticleCondition
+  isAvailable     Boolean            @default(true)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  sellerId        String
+  categoryId      String
+  brand           String?
+  color           String?
+  views           Int                @default(0)
   moderationNotes String?
+  publishedAt     DateTime?
   rejectionReason String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  publishedAt DateTime?
-
-  // Relations
-  sellerId   String
-  seller     User      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
-  categoryId String
-  category   Category  @relation(fields: [categoryId], references: [id])
-
-  reviews    Review[]
-  favorites  Favorite[]
-  payment    Payment?
-  promotions ArticlePromotion[]
-
+  status          ArticleStatus      @default(PENDING_PAYMENT)
+  category        Category           @relation(fields: [categoryId], references: [id])
+  seller          User               @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  promotions      ArticlePromotion[]
+  favorites       Favorite[]
+  payment         Payment?
+  reviews         Review[]
 }
 
-
-
 model Review {
-  id        String   @id @default(cuid())
-  rating    Int // 1-5 stars
-  comment   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
+  id         String   @id @default(cuid())
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   reviewerId String
-  reviewer   User    @relation(fields: [reviewerId], references: [id])
   articleId  String
-  article    Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  reviewer   User     @relation(fields: [reviewerId], references: [id])
 
   @@unique([reviewerId, articleId])
 }
@@ -144,19 +138,53 @@ model Review {
 model Favorite {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-
-  // Relations
   userId    String
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   articleId String
-  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, articleId])
 }
 
+model Payment {
+  id            String        @id @default(cuid())
+  amount        Float
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  transactionId String        @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  completedAt   DateTime?
+  articleId     String        @unique
+  userId        String
+  article       Article       @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id])
+}
 
+model ArticlePromotion {
+  id        String        @id @default(cuid())
+  type      PromotionType
+  price     Float
+  duration  Int
+  startDate DateTime?
+  endDate   DateTime?
+  isActive  Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  articleId String
+  article   Article       @relation(fields: [articleId], references: [id], onDelete: Cascade)
+}
 
-// Enums
+model ModerationLog {
+  id          String   @id @default(cuid())
+  action      String
+  notes       String?
+  createdAt   DateTime @default(now())
+  articleId   String
+  moderatorId String
+  moderator   User     @relation("ModeratorLogs", fields: [moderatorId], references: [id])
+}
+
 enum UserRole {
   BUYER
   SELLER
@@ -196,47 +224,51 @@ enum PromotionType {
   EXTENDED_VISIBILITY
 }
 
-model Payment {
-  id            String        @id @default(cuid())
-  amount        Float
-  method        PaymentMethod
-  status        PaymentStatus @default(PENDING)
-  transactionId String        @unique
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  completedAt   DateTime?
-
-  // Relations
-  articleId String  @unique
-  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User    @relation(fields: [userId], references: [id])
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  PENDING_VERIFICATION
 }
 
-model ArticlePromotion {
-  id        String        @id @default(cuid())
-  type      PromotionType
-  price     Float
-  duration  Int // en jours
-  startDate DateTime?
-  endDate   DateTime?
-  isActive  Boolean       @default(false)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-
-  // Relations
-  articleId String
-  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
-}
-
-model ModerationLog {
+// Modèles pour l'analytics et la gestion avancée des utilisateurs
+model Analytics {
   id        String   @id @default(cuid())
-  action    String // APPROVED, REJECTED, PENDING
-  notes     String?
+  date      DateTime @unique @default(now())
+  users     Int      @default(0)
+  articles  Int      @default(0)
+  sales     Int      @default(0)
+  revenue   Float    @default(0)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
-  // Relations
-  articleId   String
-  moderatorId String
-  moderator   User   @relation("ModeratorLogs", fields: [moderatorId], references: [id])
+model UserActivity {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model UserStats {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  articlesPosted  Int      @default(0)
+  articlesSold    Int      @default(0)
+  totalRevenue    Float    @default(0)
+  averageRating   Float    @default(0)
+  totalViews      Int      @default(0)
+  favoriteCount   Int      @default(0)
+  lastActiveAt    DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

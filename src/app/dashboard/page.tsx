@@ -50,7 +50,12 @@ export default async function DashboardPage() {
   }
 
   // Redirect based on user role
-  if (user.role === 'SELLER') {
+  if (user.role === 'ADMIN') {
+    if (process.env.NODE_ENV === 'production') {
+      console.log('[Dashboard] Redirecting to /admin/moderation')
+    }
+    redirect('/admin/moderation')
+  } else if (user.role === 'SELLER') {
     if (process.env.NODE_ENV === 'production') {
       console.log('[Dashboard] Redirecting to /seller')
     }

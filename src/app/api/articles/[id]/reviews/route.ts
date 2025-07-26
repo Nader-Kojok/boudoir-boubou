@@ -158,7 +158,7 @@ export async function GET(
 
     const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
     ratingDistribution.forEach(item => {
-      distribution[item.rating as keyof typeof distribution] = item._count.rating
+      distribution[item.rating as keyof typeof distribution] = item._count?.rating || 0
     })
 
     return NextResponse.json({

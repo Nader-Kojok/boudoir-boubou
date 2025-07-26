@@ -30,6 +30,11 @@ export default withAuth(
     }
 
     // Vérifier les permissions basées sur les rôles pour les routes dashboard
+    if (pathname.startsWith('/admin') && token?.role !== 'ADMIN') {
+      console.log('[Middleware] 🚫 Access denied to /admin - Role:', token?.role, 'Required: ADMIN')
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
+
     if (pathname.startsWith('/seller') && token?.role !== 'SELLER' && token?.role !== 'ADMIN') {
       console.log('[Middleware] 🚫 Access denied to /seller - Role:', token?.role, 'Required: SELLER or ADMIN')
       return NextResponse.redirect(new URL('/dashboard', req.url))
@@ -53,16 +58,16 @@ export default withAuth(
           pathname,
           hasToken: !!token,
           tokenSub: token?.sub,
-          isProtectedRoute: pathname.startsWith('/dashboard') || pathname.startsWith('/seller') || pathname.startsWith('/buyer')
+          isProtectedRoute: pathname.startsWith('/dashboard') || pathname.startsWith('/seller') || pathname.startsWith('/buyer') || pathname.startsWith('/admin')
         })
         
         // Permettre l'accès aux routes publiques
-        if (!pathname.startsWith('/dashboard') && !pathname.startsWith('/seller') && !pathname.startsWith('/buyer')) {
+        if (!pathname.startsWith('/dashboard') && !pathname.startsWith('/seller') && !pathname.startsWith('/buyer') && !pathname.startsWith('/admin')) {
           console.log('[Middleware] ✅ Public route access granted:', pathname)
           return true
         }
         
-        // Exiger une authentification pour les routes du dashboard, seller et buyer
+        // Exiger une authentification pour les routes du dashboard, seller, buyer et admin
         const isAuthorized = !!token
         console.log('[Middleware] Auth result for protected route:', {
           pathname,

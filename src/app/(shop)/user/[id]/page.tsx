@@ -211,7 +211,7 @@ export default function UserProfilePage() {
                   <div className="flex items-center gap-2">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     <span className="font-medium text-foreground">{user.averageRating.toFixed(1)}</span>
-                    <span>({user._count.reviews} avis)</span>
+                    <span>({user._count?.reviews || 0} avis)</span>
                   </div>
                 )}
               </div>
@@ -226,7 +226,7 @@ export default function UserProfilePage() {
                   <div className="w-12 h-12 mx-auto mb-3 bg-blue-500/10 rounded-full flex items-center justify-center">
                     <Package className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">{user._count.articles}</div>
+                  <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">{user._count?.articles || 0}</div>
                   <div className="text-sm text-blue-700 dark:text-blue-300 font-medium">Articles en vente</div>
                 </CardContent>
               </Card>
@@ -237,7 +237,7 @@ export default function UserProfilePage() {
                 <div className="w-12 h-12 mx-auto mb-3 bg-red-500/10 rounded-full flex items-center justify-center">
                   <Heart className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
-                <div className="text-2xl font-bold text-red-900 dark:text-red-100">{user._count.favorites}</div>
+                <div className="text-2xl font-bold text-red-900 dark:text-red-100">{user._count?.favorites || 0}</div>
                 <div className="text-sm text-red-700 dark:text-red-300 font-medium">Favoris</div>
               </CardContent>
             </Card>
@@ -247,7 +247,7 @@ export default function UserProfilePage() {
                 <div className="w-12 h-12 mx-auto mb-3 bg-yellow-500/10 rounded-full flex items-center justify-center">
                   <Star className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
                 </div>
-                <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{user._count.reviews}</div>
+                <div className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{user._count?.reviews || 0}</div>
                 <div className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">Avis reçus</div>
               </CardContent>
             </Card>

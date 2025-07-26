@@ -150,7 +150,7 @@ export default function CategoriesPage() {
                 name={category.name}
                 description={category.description || ''}
                 image={category.image || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop&crop=center&auto=format&q=80'}
-                productCount={category._count.articles}
+                productCount={category._count?.articles || 0}
                 onClick={handleCategoryClick}
                 className="h-full hover:shadow-lg transition-shadow duration-300"
               />
