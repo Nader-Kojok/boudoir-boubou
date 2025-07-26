@@ -5,8 +5,8 @@ import { prisma } from '@/lib/db'
 import { z } from 'zod'
 
 // Schéma de validation pour les actions de modération
-const moderationSchema = z.object({
-  articleId: z.string().min(1, 'ID de l\'article requis'),
+  const moderationSchema = z.object({
+  articleId: z.string().min(1, 'ID de l&apos;article requis'),
   action: z.enum(['APPROVE', 'REJECT'], {
     required_error: 'Action requise'
   }),
@@ -15,7 +15,7 @@ const moderationSchema = z.object({
 })
 
 // GET - Récupérer les articles en attente de modération
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             name: true,
-            email: true,
+            phone: true,
             image: true
           }
         },
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
 
     if (article.status !== 'PENDING_MODERATION') {
       return NextResponse.json(
-        { error: 'Cet article n\'est pas en attente de modération' },
+        { error: 'Cet article n&apos;est pas en attente de modération' },
         { status: 400 }
       )
     }
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
             select: {
               id: true,
               name: true,
-              email: true
+              phone: true
             }
           }
         }

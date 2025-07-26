@@ -35,7 +35,6 @@ export function PriceDisplay({
   price,
   originalPrice,
   currency = "XOF",
-  locale = "fr-FR",
   showDiscount = true,
   discountFormat = "percentage",
   size = "md",

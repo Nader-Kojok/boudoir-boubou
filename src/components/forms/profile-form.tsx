@@ -81,7 +81,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
       setMessage(null)
     } catch (error) {
       handleError(error, 'Téléchargement image')
-      setMessage({ type: 'error', text: 'Erreur lors du téléchargement de l\'image' })
+      setMessage({ type: 'error', text: 'Erreur lors du téléchargement de l&apos;image' })
     }
   }
 

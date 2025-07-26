@@ -10,7 +10,7 @@ const MAX_STORAGE_SIZE = 4 * 1024 * 1024
  */
 export const getLocalStorageSize = (): number => {
   let total = 0
-  for (let key in localStorage) {
+  for (const key in localStorage) {
     if (localStorage.hasOwnProperty(key)) {
       total += localStorage[key].length + key.length
     }
@@ -36,12 +36,12 @@ export const cleanupDraftsIfNeeded = (newDataSize: number = 0): void => {
       const existingDrafts = JSON.parse(localStorage.getItem('article-drafts') || '[]')
       
       // Trier par date (plus ancien en premier)
-      const sortedDrafts = existingDrafts.sort((a: any, b: any) => 
+      const sortedDrafts = existingDrafts.sort((a: { savedAt: string }, b: { savedAt: string }) => 
         new Date(a.savedAt).getTime() - new Date(b.savedAt).getTime()
       )
       
       // Supprimer les brouillons un par un jusqu'à avoir assez d'espace
-      let cleanedDrafts = [...sortedDrafts]
+      const cleanedDrafts = [...sortedDrafts]
       while (cleanedDrafts.length > 0 && getLocalStorageSize() + newDataSize > MAX_STORAGE_SIZE) {
         cleanedDrafts.shift() // Supprimer le plus ancien
         localStorage.setItem('article-drafts', JSON.stringify(cleanedDrafts))
@@ -52,7 +52,7 @@ export const cleanupDraftsIfNeeded = (newDataSize: number = 0): void => {
         localStorage.removeItem('article-drafts')
         localStorage.removeItem('article-draft')
       }
-    } catch (error) {
+    } catch {
       // En cas d'erreur, vider le localStorage des brouillons
       localStorage.removeItem('article-drafts')
       localStorage.removeItem('article-draft')
@@ -72,12 +72,12 @@ export const cleanupOldDraftsIfNeeded = (): void => {
         
         // Garder seulement les 3 brouillons les plus récents
         const recentDrafts = draftsData
-          .sort((a: any, b: any) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime())
+          .sort((a: { savedAt: string }, b: { savedAt: string }) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime())
           .slice(0, 3)
         
         localStorage.setItem('article-drafts', JSON.stringify(recentDrafts))
       }
-    } catch (error) {
+    } catch {
       // En cas d'erreur, vider complètement
       localStorage.removeItem('article-drafts')
     }
@@ -98,7 +98,7 @@ export const safeLocalStorageSet = (key: string, value: string): boolean => {
       try {
         localStorage.setItem(key, value)
         return true
-      } catch (retryError) {
+      } catch {
         return false
       }
     }

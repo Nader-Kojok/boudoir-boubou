@@ -5,9 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { QrCode, Smartphone, CreditCard, CheckCircle } from 'lucide-react'
-import Image from 'next/image'
 import { formatPrice } from '@/lib/utils'
 
 interface PaymentSelectionProps {
@@ -17,11 +15,7 @@ interface PaymentSelectionProps {
   isProcessing: boolean
 }
 
-interface PaymentData {
-  method: 'wave' | 'orange_money'
-  transactionId: string
-  amount: number
-}
+
 
 const PAYMENT_METHODS = [
   {
@@ -80,14 +74,7 @@ export default function PaymentSelection({ amount, onPaymentSuccess, onCancel, i
     }, 1500)
   }
 
-  const generateQRData = (method: 'wave' | 'orange_money') => {
-    // En production, ceci devrait générer un vrai lien de paiement
-    const baseUrl = method === 'wave' 
-      ? 'https://wave.com/pay'
-      : 'https://orangemoney.com/pay'
-    
-    return `${baseUrl}?amount=${amount}&merchant=boudoir&ref=${transactionId || Date.now()}`
-  }
+
 
   if (paymentConfirmed) {
     return (
@@ -121,7 +108,7 @@ export default function PaymentSelection({ amount, onPaymentSuccess, onCancel, i
               {formatPrice(amount)} F CFA
             </div>
             <p className="text-sm text-gray-600">
-              Frais de publication d'annonce
+              Frais de publication d&apos;annonce
             </p>
           </div>
 
@@ -146,7 +133,7 @@ export default function PaymentSelection({ amount, onPaymentSuccess, onCancel, i
               disabled={isProcessingPayment || isProcessing}
               className="w-full bg-green-600 hover:bg-green-700"
             >
-              {isProcessingPayment ? 'Vérification...' : isProcessing ? 'Traitement...' : 'J\'ai effectué le paiement'}
+              {isProcessingPayment ? 'Vérification...' : isProcessing ? 'Traitement...' : 'J&apos;ai effectué le paiement'}
             </Button>
             
             <Button 

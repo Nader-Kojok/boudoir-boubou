@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { CheckCircle, XCircle, Eye, Clock, CreditCard } from 'lucide-react'
+import { CheckCircle, XCircle, Clock, CreditCard } from 'lucide-react'
 import Image from 'next/image'
 
 interface Article {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Star, TrendingUp, Eye, Clock, Zap } from 'lucide-react'
@@ -28,12 +28,12 @@ interface PromotionOptionsProps {
 const PROMOTION_OPTIONS: PromotionOption[] = [
   {
     id: 'featured_homepage',
-    name: 'Mise en avant page d\'accueil',
-    description: 'Votre article apparaîtra dans la section "Articles en vedette" de la page d\'accueil',
+    name: 'Mise en avant page d&apos;accueil',
+    description: 'Votre article apparaîtra dans la section "Articles en vedette" de la page d&apos;accueil',
     price: 2000,
     duration: '7 jours',
     features: [
-      'Position privilégiée sur la page d\'accueil',
+      'Position privilégiée sur la page d&apos;accueil',
       'Badge "En vedette"',
       'Visibilité maximale',
       'Augmentation des vues de +300%'
@@ -64,7 +64,7 @@ const PROMOTION_OPTIONS: PromotionOption[] = [
     features: [
       'Bordure colorée distinctive',
       'Badge "Highlight"',
-      'Attire l\'attention',
+      'Attire l&apos;attention',
       'Augmentation des clics de +50%'
     ],
     icon: <Zap className="w-5 h-5" />
@@ -224,7 +224,7 @@ export default function PromotionOptions({ selectedPromotions, onPromotionChange
         
         <div className="bg-blue-50 p-4 rounded-lg">
           <p className="text-xs text-blue-800">
-            <strong>💡 Conseil :</strong> Les articles avec options promotionnelles ont 5x plus de chances d'être vendus rapidement !
+            <strong>💡 Conseil :</strong> Les articles avec options promotionnelles ont 5x plus de chances d&apos;être vendus rapidement !
           </p>
         </div>
       </CardContent>

@@ -25,8 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, X, Camera } from 'lucide-react'
 import PaymentSelection from '@/components/forms/payment-selection'
 import PromotionOptions from '@/components/forms/promotion-options'
-import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+
 import { handleError, handleSuccess } from '@/hooks/use-notifications'
 import { delayedLocationChange } from '@/utils/delayed-navigation'
 import { cleanupDraftsIfNeeded, safeLocalStorageSet } from '@/lib/localStorage-utils'
@@ -224,7 +223,7 @@ export default function VendrePage() {
         }
       }
       
-    } catch (error) {
+    } catch {
       handleError(new Error('Impossible de sauvegarder le brouillon - espace de stockage insuffisant. Veuillez supprimer des brouillons existants dans la section "Mes brouillons".'), 'Sauvegarde du brouillon')
     }
   }

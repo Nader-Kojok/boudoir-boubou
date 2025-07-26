@@ -16,7 +16,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { handleError, handleSuccess } from '@/hooks/use-notifications'
 import { useConfirmation } from '@/components/ui/confirmation-dialog'
-import { cleanupOldDraftsIfNeeded, getStorageInfo } from '@/lib/localStorage-utils'
+import { cleanupOldDraftsIfNeeded } from '@/lib/localStorage-utils'
 import { formatPrice } from '@/lib/utils'
 
 interface Draft {

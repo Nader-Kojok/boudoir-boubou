@@ -521,4 +521,4 @@ npx prisma studio
 - **Application stable et prête pour production**
 - **Base solide pour la monétisation**
 
-*Dernière mise à jour: Décembre 2024*
+*Dernière mise à jour: Décembre 2024 - Validation d'images et corrections d'hydratation*
