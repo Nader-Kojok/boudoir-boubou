@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 model Account {
@@ -60,8 +59,6 @@ model User {
   phoneVerificationExpiry DateTime?
   createdAt               DateTime        @default(now())
   updatedAt               DateTime        @updatedAt
-  
-  // Nouveaux champs pour la gestion avancée des utilisateurs
   status                  UserStatus      @default(ACTIVE)
   lastLoginAt             DateTime?
   loginCount              Int             @default(0)
@@ -71,7 +68,6 @@ model User {
   suspensionReason        String?
   notes                   String?
   tags                    String[]
-  
   accounts                Account[]
   articles                Article[]
   favorites               Favorite[]
@@ -186,6 +182,47 @@ model ModerationLog {
   moderator   User     @relation("ModeratorLogs", fields: [moderatorId], references: [id])
 }
 
+model Analytics {
+  id        String   @id @default(cuid())
+  date      DateTime @unique @default(now())
+  users     Int      @default(0)
+  articles  Int      @default(0)
+  sales     Int      @default(0)
+  revenue   Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserActivity {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model UserStats {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  articlesPosted Int      @default(0)
+  articlesSold   Int      @default(0)
+  totalRevenue   Float    @default(0)
+  averageRating  Float    @default(0)
+  totalViews     Int      @default(0)
+  favoriteCount  Int      @default(0)
+  lastActiveAt   DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 enum UserRole {
   BUYER
   SELLER
@@ -230,46 +267,4 @@ enum UserStatus {
   SUSPENDED
   BANNED
   PENDING_VERIFICATION
-}
-
-// Modèles pour l'analytics et la gestion avancée des utilisateurs
-model Analytics {
-  id        String   @id @default(cuid())
-  date      DateTime @unique @default(now())
-  users     Int      @default(0)
-  articles  Int      @default(0)
-  sales     Int      @default(0)
-  revenue   Float    @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model UserActivity {
-  id        String   @id @default(cuid())
-  userId    String
-  action    String
-  details   Json?
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([action])
-  @@index([createdAt])
-}
-
-model UserStats {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  articlesPosted  Int      @default(0)
-  articlesSold    Int      @default(0)
-  totalRevenue    Float    @default(0)
-  averageRating   Float    @default(0)
-  totalViews      Int      @default(0)
-  favoriteCount   Int      @default(0)
-  lastActiveAt    DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

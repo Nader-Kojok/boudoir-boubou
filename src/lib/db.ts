@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client/edge'
 import { withAccelerate } from '@prisma/extension-accelerate'
 import type { Article, Category, User, ArticleCondition, UserRole } from '@prisma/client'
 
@@ -208,6 +208,7 @@ export async function getArticles(filters?: {
         orderBy: {
           createdAt: 'desc',
         },
+        cacheStrategy: { ttl: 180 }, // Cache for 3 minutes
       })
     )
 
@@ -444,6 +445,7 @@ export async function getUserById(id: string): Promise<UserWithCounts | null> {
             },
           },
         },
+        cacheStrategy: { ttl: 300 }, // Cache for 5 minutes
       }),
       'getUserById'
     )
@@ -529,6 +531,7 @@ export async function getUserFavorites(userId: string): Promise<Prisma.FavoriteG
     orderBy: {
       createdAt: 'desc',
     },
+    cacheStrategy: { ttl: 240 }, // Cache for 4 minutes
   })
 }
 
@@ -588,5 +591,6 @@ export async function getArticleReviews(articleId: string): Promise<Prisma.Revie
     orderBy: {
       createdAt: 'desc',
     },
+    cacheStrategy: { ttl: 600 }, // Cache for 10 minutes
   })
 }
