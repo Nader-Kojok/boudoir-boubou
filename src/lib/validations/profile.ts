@@ -32,7 +32,7 @@ export const profileSchema = z.object({
       /^\+?[1-9]\d{1,14}$/,
       'Format de téléphone invalide (format international recommandé)'
     ),
-  role: z.enum(['seller', 'buyer']),
+  role: z.enum(['seller', 'buyer', 'admin', 'moderator']),
 });
 
 export const profileUpdateSchema = profileSchema.partial().omit({ role: true });
@@ -117,13 +117,15 @@ export type PrivacySettingsInput = z.infer<typeof privacySettingsSchema>;
 export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
 
 // Constantes pour les énumérations
-export const USER_ROLES = ['seller', 'buyer'] as const;
+export const USER_ROLES = ['seller', 'buyer', 'admin', 'moderator'] as const;
 export const PROFILE_VISIBILITY = ['public', 'private'] as const;
 
 // Labels pour l'affichage
 export const ROLE_LABELS = {
   seller: 'Vendeur/Vendeuse',
   buyer: 'Acheteur/Acheteuse',
+  admin: 'Administrateur',
+  moderator: 'Modérateur',
 } as const;
 
 export const VISIBILITY_LABELS = {

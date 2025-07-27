@@ -12,11 +12,15 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   Users,
   ShoppingBag,
   Store,
-  Shield
+  Shield,
+  Plus
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -27,7 +31,7 @@ interface User extends Record<string, unknown> {
   name: string | null
   phone: string | null
   image: string | null
-  role: 'ADMIN' | 'BUYER' | 'SELLER'
+  role: 'ADMIN' | 'BUYER' | 'SELLER' | 'MODERATOR'
   createdAt: string
   updatedAt: string
   phoneVerified: Date | null
@@ -44,6 +48,7 @@ interface UserStats {
     ADMIN: number
     BUYER: number
     SELLER: number
+    MODERATOR: number
   }
 }
 
@@ -59,6 +64,17 @@ export function UserManagement({ className }: UserManagementProps) {
   const [actionData, setActionData] = useState({ reason: '', notes: '' })
   const [stats, setStats] = useState<UserStats | null>(null)
   const [selectedUsersForAction, setSelectedUsersForAction] = useState<User[]>([])
+  const [isCreateUserDialogOpen, setIsCreateUserDialogOpen] = useState(false)
+  const [createUserData, setCreateUserData] = useState({
+    name: '',
+    phone: '',
+    password: '',
+    role: 'BUYER' as 'BUYER' | 'SELLER' | 'ADMIN' | 'MODERATOR',
+    bio: '',
+    location: '',
+    whatsappNumber: ''
+  })
+  const [isCreatingUser, setIsCreatingUser] = useState(false)
 
   const fetchUsers = async () => {
     try {
@@ -117,6 +133,46 @@ export function UserManagement({ className }: UserManagementProps) {
     }
   }
 
+  const handleCreateUser = async () => {
+    if (!createUserData.name || !createUserData.phone || !createUserData.password) {
+      toast.error('Veuillez remplir tous les champs obligatoires')
+      return
+    }
+
+    setIsCreatingUser(true)
+    try {
+      const response = await fetch('/api/admin/users/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createUserData)
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Erreur lors de la création')
+      }
+      
+      const result = await response.json()
+      toast.success(result.message)
+      setIsCreateUserDialogOpen(false)
+      setCreateUserData({
+        name: '',
+        phone: '',
+        password: '',
+        role: 'BUYER',
+        bio: '',
+        location: '',
+        whatsappNumber: ''
+      })
+      fetchUsers()
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la création de l\'utilisateur'
+      toast.error(errorMessage)
+    } finally {
+      setIsCreatingUser(false)
+    }
+  }
+
   const handleExport = async (data: User[], filters: Record<string, unknown>) => {
     try {
       const response = await fetch('/api/admin/users/export', {
@@ -150,12 +206,20 @@ export function UserManagement({ className }: UserManagementProps) {
     const variants = {
       ADMIN: 'destructive',
       SELLER: 'default',
-      BUYER: 'secondary'
+      BUYER: 'secondary',
+      MODERATOR: 'outline'
+    } as const
+    
+    const labels = {
+      ADMIN: 'Admin',
+      SELLER: 'Vendeur',
+      BUYER: 'Acheteur',
+      MODERATOR: 'Modérateur'
     } as const
     
     return (
       <Badge variant={variants[role as keyof typeof variants] || 'secondary'}>
-        {role}
+        {labels[role as keyof typeof labels] || role}
       </Badge>
     )
   }
@@ -231,7 +295,8 @@ export function UserManagement({ className }: UserManagementProps) {
         { value: 'ALL', label: 'Tous les rôles' },
         { value: 'ADMIN', label: 'Administrateurs' },
         { value: 'SELLER', label: 'Vendeurs' },
-        { value: 'BUYER', label: 'Acheteurs' }
+        { value: 'BUYER', label: 'Acheteurs' },
+        { value: 'MODERATOR', label: 'Modérateurs' }
       ]
     },
     {
@@ -343,12 +408,27 @@ export function UserManagement({ className }: UserManagementProps) {
               </div>
             </CardContent>
           </Card>
+          <Card>
+            <CardContent className="flex items-center p-6">
+              <Shield className="h-8 w-8 text-purple-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Modérateurs</p>
+                <p className="text-2xl font-bold">{stats.byRole.MODERATOR || 0}</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle>Gestion des Utilisateurs</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Gestion des Utilisateurs</CardTitle>
+            <Button onClick={() => setIsCreateUserDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Créer un utilisateur
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <DataTable
@@ -399,6 +479,103 @@ export function UserManagement({ className }: UserManagementProps) {
               </Button>
               <Button onClick={handleActionSubmit}>
                 Confirmer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog pour créer un utilisateur */}
+      <Dialog open={isCreateUserDialogOpen} onOpenChange={setIsCreateUserDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Créer un nouvel utilisateur</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nom complet *</Label>
+              <Input
+                id="name"
+                value={createUserData.name}
+                onChange={(e) => setCreateUserData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Nom complet"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="phone">Numéro de téléphone *</Label>
+              <Input
+                id="phone"
+                value={createUserData.phone}
+                onChange={(e) => setCreateUserData(prev => ({ ...prev, phone: e.target.value }))}
+                placeholder="+33 6 12 34 56 78"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe *</Label>
+              <Input
+                id="password"
+                type="password"
+                value={createUserData.password}
+                onChange={(e) => setCreateUserData(prev => ({ ...prev, password: e.target.value }))}
+                placeholder="Mot de passe (min. 6 caractères)"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="role">Rôle *</Label>
+              <Select value={createUserData.role} onValueChange={(value: 'BUYER' | 'SELLER' | 'ADMIN' | 'MODERATOR') => setCreateUserData(prev => ({ ...prev, role: value }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BUYER">Acheteur</SelectItem>
+                  <SelectItem value="SELLER">Vendeur</SelectItem>
+                  <SelectItem value="MODERATOR">Modérateur</SelectItem>
+                  <SelectItem value="ADMIN">Administrateur</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="location">Localisation</Label>
+              <Input
+                id="location"
+                value={createUserData.location}
+                onChange={(e) => setCreateUserData(prev => ({ ...prev, location: e.target.value }))}
+                placeholder="Ville, Région"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="whatsapp">WhatsApp</Label>
+              <Input
+                id="whatsapp"
+                value={createUserData.whatsappNumber}
+                onChange={(e) => setCreateUserData(prev => ({ ...prev, whatsappNumber: e.target.value }))}
+                placeholder="Numéro WhatsApp"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="bio">Biographie</Label>
+              <Textarea
+                id="bio"
+                value={createUserData.bio}
+                onChange={(e) => setCreateUserData(prev => ({ ...prev, bio: e.target.value }))}
+                placeholder="Description de l'utilisateur..."
+                rows={3}
+              />
+            </div>
+            
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setIsCreateUserDialogOpen(false)}>
+                Annuler
+              </Button>
+              <Button onClick={handleCreateUser} disabled={isCreatingUser}>
+                {isCreatingUser ? 'Création...' : 'Créer l\'utilisateur'}
               </Button>
             </div>
           </div>

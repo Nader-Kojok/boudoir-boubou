@@ -30,8 +30,8 @@ export default withAuth(
     }
 
     // Vérifier les permissions basées sur les rôles pour les routes dashboard
-    if (pathname.startsWith('/admin') && token?.role !== 'ADMIN') {
-      console.log('[Middleware] 🚫 Access denied to /admin - Role:', token?.role, 'Required: ADMIN')
+    if (pathname.startsWith('/admin') && token?.role !== 'ADMIN' && token?.role !== 'MODERATOR') {
+      console.log('[Middleware] 🚫 Access denied to /admin - Role:', token?.role, 'Required: ADMIN or MODERATOR')
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 

@@ -227,6 +227,7 @@ enum UserRole {
   BUYER
   SELLER
   ADMIN
+  MODERATOR
 }
 
 enum ArticleCondition {

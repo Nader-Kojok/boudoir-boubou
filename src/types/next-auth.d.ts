@@ -20,3 +20,6 @@ declare module 'next-auth/jwt' {
     role: UserRole
   }
 }
+
+// Ensure MODERATOR role is recognized
+export type ExtendedUserRole = UserRole | 'MODERATOR'

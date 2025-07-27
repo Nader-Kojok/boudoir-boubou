@@ -18,7 +18,7 @@ const updateProfileSchema = z.object({
       /^(\+221|221)?[0-9]{9}$/,
       'Format de numéro invalide (ex: +221771234567 ou 771234567)'
     ),
-  role: z.enum(['SELLER', 'BUYER', 'ADMIN'], {
+  role: z.enum(['SELLER', 'BUYER', 'ADMIN', 'MODERATOR'], {
     required_error: 'Veuillez sélectionner un rôle',
   }),
   image: z.string().optional().or(z.literal('')).refine(

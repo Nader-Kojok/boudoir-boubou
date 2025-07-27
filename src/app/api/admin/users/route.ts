@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
+
 // Type definition for Prisma groupBy result
 type UserRoleGroupBy = {
   role: string
@@ -10,6 +11,8 @@ type UserRoleGroupBy = {
     id: number
   }
 }
+
+
 
 export async function GET(request: NextRequest) {
   try {
