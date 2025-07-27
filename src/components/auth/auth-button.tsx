@@ -68,6 +68,14 @@ export function AuthButton() {
               </Link>
             </DropdownMenuItem>
           )}
+          {session.user.role === "MODERATOR" && (
+            <DropdownMenuItem asChild>
+              <Link href="/moderator">
+                <Shield className="mr-2 h-4 w-4" />
+                <span>Interface modérateur</span>
+              </Link>
+            </DropdownMenuItem>
+          )}
           {session.user.role === "SELLER" && (
             <DropdownMenuItem asChild>
               <Link href="/seller">

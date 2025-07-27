@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProductCard } from '@/components/custom/product-card'
 import { Pagination } from '@/components/custom/pagination'
+import { ReportButton } from '@/components/ui/report-button'
 import { Calendar, Package, Star, User, Heart } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -194,12 +195,20 @@ export default function UserProfilePage() {
             </Avatar>
             
             <div className="flex-1 space-y-3 bg-background/80 backdrop-blur-sm rounded-xl p-6 border">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                 <h1 className="text-3xl font-bold tracking-tight">{user.name}</h1>
-                 <Badge variant="secondary" className="w-fit">
-                   {getRoleLabel(user.role)}
-                 </Badge>
-               </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <h1 className="text-3xl font-bold tracking-tight">{user.name}</h1>
+                  <Badge variant="secondary" className="w-fit">
+                    {getRoleLabel(user.role)}
+                  </Badge>
+                </div>
+                <ReportButton
+                  type="USER"
+                  targetId={user.id}
+                  variant="outline"
+                  size="sm"
+                />
+              </div>
               
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">

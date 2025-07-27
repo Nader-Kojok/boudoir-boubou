@@ -120,7 +120,7 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 7 * 24 * 60 * 60, // 7 days (reduced from 30 for better security)
     updateAge: 24 * 60 * 60, // 24 hours
   },
   cookies: {
@@ -133,7 +133,7 @@ export const authOptions: NextAuthOptions = {
         secure: process.env.NODE_ENV === 'production',
         // Don't set domain for Vercel deployments to avoid cookie issues
         domain: undefined,
-        maxAge: 30 * 24 * 60 * 60, // 30 days
+        maxAge: 7 * 24 * 60 * 60, // 7 days
       },
     },
     callbackUrl: {
@@ -161,61 +161,71 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
-        console.log('[NextAuth JWT] Creating token for user:', user.id)
-        // Store essential user data in token to reduce DB queries
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[NextAuth JWT] Creating token for user:', user.id)
+        }
+        // Store only essential user data in token to minimize size
         token.role = user.role
         token.name = user.name
-        // Remove any large data that might be in the token
+        // Explicitly remove any large data that might be in the token
         delete token.picture
         delete token.image
+        delete token.email // Remove email if not needed
       }
       
-      console.log('[NextAuth JWT] Token created/updated:', {
-        sub: token.sub,
-        role: token.role,
-        tokenSize: JSON.stringify(token).length
-      })
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[NextAuth JWT] Token created/updated:', {
+          sub: token.sub,
+          role: token.role,
+          tokenSize: JSON.stringify(token).length
+        })
+      }
       
       return token
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      console.log('[NextAuth Session] Creating session for token:', token.sub)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[NextAuth Session] Creating session for token:', token.sub)
+      }
       
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as UserRole
         
-        // Toujours récupérer les données utilisateur fraîches depuis la DB
-        // pour avoir l'image de profil à jour
-        if (token.sub) {
+        // Use token data to avoid database queries on every session check
+        // This prevents session size issues and improves performance
+        session.user.name = token.name || 'Utilisateur'
+        
+        // Only fetch fresh user data in development or when explicitly needed
+        // In production, rely on token data for better performance
+        if (process.env.NODE_ENV === 'development' && token.sub) {
           try {
             const user = await safeDbOperation(
               () => prisma.user.findUnique({
                 where: { id: token.sub },
-                select: { name: true, image: true, phone: true }
+                select: { name: true, image: true }
               }),
               'session-getUserData'
             )
             if (user) {
               session.user.name = user.name
               session.user.image = user.image
-              console.log('[NextAuth Session] User data fetched successfully')
-            } else {
-              console.warn('[NextAuth Session] User not found in database:', token.sub)
             }
           } catch (error) {
             console.error('[NextAuth Session] Error fetching user data:', error)
-            // En cas d'erreur DB, utiliser les données du token si disponibles
+            // Fallback to token data
             session.user.name = token.name || 'Utilisateur'
           }
         }
       }
       
-      console.log('[NextAuth Session] Session created:', {
-        userId: session.user?.id,
-        userRole: session.user?.role,
-        environment: process.env.NODE_ENV
-      })
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[NextAuth Session] Session created:', {
+          userId: session.user?.id,
+          userRole: session.user?.role,
+          sessionSize: JSON.stringify(session).length
+        })
+      }
       
       return session
     },

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ReportButton } from '@/components/ui/report-button'
 import { Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSession } from 'next-auth/react'
@@ -247,6 +248,12 @@ export function ReviewSection({
                             </span>
                           </div>
                         </div>
+                        <ReportButton
+                          type="REVIEW"
+                          targetId={review.id}
+                          variant="ghost"
+                          size="sm"
+                        />
                       </div>
                       {review.comment && (
                         <p className="text-muted-foreground">{review.comment}</p>

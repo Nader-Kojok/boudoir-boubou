@@ -127,7 +127,7 @@ export async function safeDbOperation<T>(
     const { prisma } = await import('./db')
     return executeWithRetry(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      () => operation(prisma as any),
+    () => operation(prisma as any),
       DEFAULT_RETRY_CONFIG,
       operationName
     )

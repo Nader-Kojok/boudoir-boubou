@@ -77,6 +77,9 @@ model User {
   sessions                Session[]
   activities              UserActivity[]
   stats                   UserStats?
+  reports                 Report[]        @relation("UserReports")
+  reportedContent         Report[]        @relation("ReportedUser")
+  moderatedReports        Report[]        @relation("ModeratedReports")
 }
 
 model Category {
@@ -116,6 +119,7 @@ model Article {
   favorites       Favorite[]
   payment         Payment?
   reviews         Review[]
+  reports         Report[]           @relation("ReportedArticle")
 }
 
 model Review {
@@ -128,6 +132,7 @@ model Review {
   articleId  String
   article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
   reviewer   User     @relation(fields: [reviewerId], references: [id])
+  reports    Report[] @relation("ReportedReview")
 
   @@unique([reviewerId, articleId])
 }
@@ -261,6 +266,58 @@ enum PromotionType {
   BOOST_SEARCH
   HIGHLIGHT
   EXTENDED_VISIBILITY
+}
+
+model Report {
+  id          String      @id @default(cuid())
+  type        ReportType
+  reason      ReportReason
+  description String?
+  status      ReportStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  resolvedAt  DateTime?
+  reporterId  String
+  moderatorId String?
+  
+  // Relations pour le contenu signalé
+  articleId   String?
+  userId      String?
+  reviewId    String?
+  
+  // Relations
+  reporter    User     @relation("UserReports", fields: [reporterId], references: [id])
+  moderator   User?    @relation("ModeratedReports", fields: [moderatorId], references: [id])
+  article     Article? @relation("ReportedArticle", fields: [articleId], references: [id], onDelete: Cascade)
+  user        User?    @relation("ReportedUser", fields: [userId], references: [id], onDelete: Cascade)
+  review      Review?  @relation("ReportedReview", fields: [reviewId], references: [id], onDelete: Cascade)
+  
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+enum ReportType {
+  ARTICLE
+  USER
+  REVIEW
+}
+
+enum ReportReason {
+  INAPPROPRIATE_CONTENT
+  SPAM
+  FAKE_PRODUCT
+  HARASSMENT
+  FRAUD
+  COPYRIGHT_VIOLATION
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
 }
 
 enum UserStatus {

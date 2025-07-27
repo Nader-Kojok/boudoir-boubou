@@ -5,22 +5,35 @@ import { checkHeaderSize, logCookieInfo, clearAuthCookies } from '@/lib/cookie-u
 export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl
-    const token = req.nextauth.token
+    let token
+    
+    try {
+      token = req.nextauth.token
+    } catch (error) {
+      console.error('[Middleware] Error accessing session token:', error)
+      // If there's an error accessing the token (possibly due to oversized session),
+      // clear auth cookies and redirect to login
+      const response = NextResponse.redirect(new URL('/login?error=SessionError', req.url))
+      return clearAuthCookies(response)
+    }
 
-    // Enhanced logging for debugging
-    console.log('[Middleware] Request details:', {
-      pathname,
-      hasToken: !!token,
-      tokenSub: token?.sub,
-      tokenRole: token?.role,
-      environment: process.env.NODE_ENV,
-      userAgent: req.headers.get('user-agent')?.substring(0, 50),
-      referer: req.headers.get('referer'),
-      timestamp: new Date().toISOString()
-    })
+    // Enhanced logging for debugging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Middleware] Request details:', {
+        pathname,
+        hasToken: !!token,
+        tokenSub: token?.sub,
+        tokenRole: token?.role,
+        userAgent: req.headers.get('user-agent')?.substring(0, 50),
+        referer: req.headers.get('referer'),
+        timestamp: new Date().toISOString()
+      })
+    }
 
     // Check for large headers and log cookie info in development
-    logCookieInfo(req)
+    if (process.env.NODE_ENV === 'development') {
+      logCookieInfo(req)
+    }
     
     // If headers are too large, clear auth cookies and redirect to login
     if (checkHeaderSize(req)) {
@@ -31,22 +44,37 @@ export default withAuth(
 
     // Vérifier les permissions basées sur les rôles pour les routes dashboard
     if (pathname.startsWith('/admin') && token?.role !== 'ADMIN' && token?.role !== 'MODERATOR') {
-      console.log('[Middleware] 🚫 Access denied to /admin - Role:', token?.role, 'Required: ADMIN or MODERATOR')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Middleware] 🚫 Access denied to /admin - Role:', token?.role, 'Required: ADMIN or MODERATOR')
+      }
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
+
+    if (pathname.startsWith('/moderator') && token?.role !== 'MODERATOR' && token?.role !== 'ADMIN') {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Middleware] 🚫 Access denied to /moderator - Role:', token?.role, 'Required: MODERATOR or ADMIN')
+      }
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
     if (pathname.startsWith('/seller') && token?.role !== 'SELLER' && token?.role !== 'ADMIN') {
-      console.log('[Middleware] 🚫 Access denied to /seller - Role:', token?.role, 'Required: SELLER or ADMIN')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Middleware] 🚫 Access denied to /seller - Role:', token?.role, 'Required: SELLER or ADMIN')
+      }
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
     // Allow sellers to access buyer routes (like favorites) since sellers can also be buyers
     if (pathname.startsWith('/buyer') && token?.role !== 'BUYER' && token?.role !== 'ADMIN' && token?.role !== 'SELLER') {
-      console.log('[Middleware] 🚫 Access denied to /buyer - Role:', token?.role, 'Required: BUYER, SELLER or ADMIN')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Middleware] 🚫 Access denied to /buyer - Role:', token?.role, 'Required: BUYER, SELLER or ADMIN')
+      }
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
-    console.log('[Middleware] ✅ Access granted to:', pathname)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Middleware] ✅ Access granted to:', pathname)
+    }
     return NextResponse.next()
   },
   {
@@ -54,26 +82,32 @@ export default withAuth(
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl
         
-        console.log('[Middleware Auth Check]', {
-          pathname,
-          hasToken: !!token,
-          tokenSub: token?.sub,
-          isProtectedRoute: pathname.startsWith('/dashboard') || pathname.startsWith('/seller') || pathname.startsWith('/buyer') || pathname.startsWith('/admin')
-        })
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Middleware Auth Check]', {
+            pathname,
+            hasToken: !!token,
+            tokenSub: token?.sub,
+            isProtectedRoute: pathname.startsWith('/dashboard') || pathname.startsWith('/seller') || pathname.startsWith('/buyer') || pathname.startsWith('/admin') || pathname.startsWith('/moderator')
+          })
+        }
         
         // Permettre l'accès aux routes publiques
-        if (!pathname.startsWith('/dashboard') && !pathname.startsWith('/seller') && !pathname.startsWith('/buyer') && !pathname.startsWith('/admin')) {
-          console.log('[Middleware] ✅ Public route access granted:', pathname)
+        if (!pathname.startsWith('/dashboard') && !pathname.startsWith('/seller') && !pathname.startsWith('/buyer') && !pathname.startsWith('/admin') && !pathname.startsWith('/moderator')) {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[Middleware] ✅ Public route access granted:', pathname)
+          }
           return true
         }
         
-        // Exiger une authentification pour les routes du dashboard, seller, buyer et admin
+        // Exiger une authentification pour les routes du dashboard, seller, buyer, admin et moderator
         const isAuthorized = !!token
-        console.log('[Middleware] Auth result for protected route:', {
-          pathname,
-          isAuthorized,
-          tokenPresent: !!token
-        })
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Middleware] Auth result for protected route:', {
+            pathname,
+            isAuthorized,
+            tokenPresent: !!token
+          })
+        }
         
         return isAuthorized
       },
