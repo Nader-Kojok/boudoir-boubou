@@ -509,7 +509,7 @@ export function UserManagement({ className }: UserManagementProps) {
                 id="phone"
                 value={createUserData.phone}
                 onChange={(e) => setCreateUserData(prev => ({ ...prev, phone: e.target.value }))}
-                placeholder="+33 6 12 34 56 78"
+                placeholder="+221 77 444 56 78"
               />
             </div>
             

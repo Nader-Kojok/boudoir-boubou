@@ -55,6 +55,11 @@ export default async function DashboardPage() {
       console.log('[Dashboard] Redirecting to /admin/moderation')
     }
     redirect('/admin/moderation')
+  } else if (user.role === 'MODERATOR') {
+    if (process.env.NODE_ENV === 'production') {
+      console.log('[Dashboard] Redirecting to /admin/users')
+    }
+    redirect('/admin/users')
   } else if (user.role === 'SELLER') {
     if (process.env.NODE_ENV === 'production') {
       console.log('[Dashboard] Redirecting to /seller')
