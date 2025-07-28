@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'tpdjnzkbsqf0k5kz.public.blob.vercel-storage.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
     // Permettre les data URLs (base64) pour les images uploadées
     dangerouslyAllowSVG: true,

@@ -4,7 +4,6 @@ import { authOptions } from '@/lib/auth'
 import { getArticles, prisma } from '@/lib/db'
 import { ArticleCondition, PaymentMethod, PromotionType } from '@prisma/client'
 import { z } from 'zod'
-import { validateBase64Image } from '@/lib/image-validation'
 
 // Schéma de validation pour la création d'articles
 const createArticleSchema = z.object({
@@ -18,7 +17,7 @@ const createArticleSchema = z.object({
   size: z.string().optional(),
   brand: z.string().optional(),
   color: z.string().optional(),
-  images: z.array(z.string()).min(1, 'Au moins une image est requise'),
+  images: z.array(z.string().url('URL d\'image invalide')).min(1, 'Au moins une image est requise'),
   paymentData: z.object({
     method: z.enum(['wave', 'orange_money']),
     amount: z.number().positive(),
@@ -150,14 +149,13 @@ export async function POST(request: NextRequest) {
     // Validation des données
     const validatedData = createArticleSchema.parse(body)
     
-    // Validation des images base64
-    for (const [index, image] of validatedData.images.entries()) {
-      const imageValidation = validateBase64Image(image)
-      if (!imageValidation.isValid) {
+    // Validation des URLs d'images (Vercel Blob)
+    for (const [index, imageUrl] of validatedData.images.entries()) {
+      if (!imageUrl.includes('blob.vercel-storage.com')) {
         return NextResponse.json(
           { 
-            error: `Image ${index + 1} invalide: ${imageValidation.error}`,
-            details: `Vérifiez que l'image respecte les critères: format autorisé (JPEG, PNG, WebP, GIF), taille maximale 5MB, encodage base64 valide`
+            error: `Image ${index + 1} invalide: URL non autorisée`,
+            details: `Les images doivent être uploadées via notre système de stockage`
           },
           { status: 400 }
         )

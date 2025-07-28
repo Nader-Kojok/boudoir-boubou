@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       where: { id: session.user.id }
     })
 
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'MODERATOR')) {
       return NextResponse.json(
         { error: 'Accès non autorisé' },
         { status: 403 }

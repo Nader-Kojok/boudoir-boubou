@@ -29,7 +29,7 @@ import PromotionOptions from '@/components/forms/promotion-options'
 import { handleError, handleSuccess } from '@/hooks/use-notifications'
 import { delayedLocationChange } from '@/utils/delayed-navigation'
 import { cleanupDraftsIfNeeded, safeLocalStorageSet } from '@/lib/localStorage-utils'
-import { validateMultipleImageFiles, convertToBase64 } from '@/lib/image-validation'
+import { validateMultipleImageFiles as validateBlobFiles } from '@/lib/blob-storage'
 
 const formSchema = z.object({
   title: z.string().min(5, {
@@ -118,35 +118,51 @@ export default function VendrePage() {
      if (!files || files.length === 0) return
  
      try {
-       // Valider les fichiers
-       const validation = await validateMultipleImageFiles(Array.from(files))
+       const fileArray = Array.from(files)
        
-       if (validation.errors.length > 0) {
-         // Afficher les erreurs de validation
-         validation.errors.forEach(error => {
-           handleError(new Error(error), 'Validation des images')
-         })
-       }
- 
-       if (validation.validFiles.length === 0) {
-         handleError(new Error('Aucun fichier valide sélectionné'), 'Validation des images')
+       // Valider les fichiers
+       const validation = validateBlobFiles(fileArray)
+       
+       if (!validation.isValid) {
+         handleError(new Error(validation.error || 'Fichiers invalides'), 'Validation des images')
          return
        }
  
-       // Convertir les fichiers valides en base64
-       const base64Images = await Promise.all(
-         validation.validFiles.map((file: File) => convertToBase64(file))
-       )
+       // Vérifier la limite de 8 images
+       const remainingSlots = 8 - uploadedImages.length
+       if (remainingSlots <= 0) {
+         handleError(new Error('Vous avez atteint la limite de 8 images'), 'Upload des images')
+         return
+       }
  
-       // Ajouter les nouvelles images en respectant la limite de 8
+       const filesToUpload = fileArray.slice(0, remainingSlots)
+       
+       // Créer FormData pour l'upload
+       const formData = new FormData()
+       filesToUpload.forEach((file, index) => {
+         formData.append(`file${index}`, file)
+       })
+       
+       // Uploader vers Vercel Blob via API
+       const response = await fetch('/api/upload/multiple', {
+         method: 'POST',
+         body: formData,
+       })
+       
+       if (!response.ok) {
+         const errorData = await response.json()
+         throw new Error(errorData.error || 'Erreur lors de l\'upload')
+       }
+       
+       const uploadData = await response.json()
+       
+       // Ajouter les nouvelles URLs d'images
        setUploadedImages(prev => {
-         const newImages = [...prev, ...base64Images]
+         const newImages = [...prev, ...uploadData.images.map((img: {url: string}) => img.url)]
          return newImages.slice(0, 8) // Limiter à 8 images maximum
        })
  
-       if (validation.validFiles.length > 0) {
-         handleSuccess(`${validation.validFiles.length} image(s) ajoutée(s) avec succès`)
-       }
+       handleSuccess(`${uploadData.count} image(s) uploadée(s) avec succès`)
  
      } catch (error) {
        handleError(error, 'Upload des images')
