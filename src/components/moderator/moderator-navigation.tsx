@@ -17,6 +17,11 @@ const navigationItems = [
     icon: Shield
   },
   {
+    name: 'Historique Modération',
+    href: '/moderator/moderation-history',
+    icon: Shield
+  },
+  {
     name: 'Signalements',
     href: '/moderator/signalements',
     icon: AlertTriangle

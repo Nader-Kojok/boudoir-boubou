@@ -10,6 +10,10 @@ const adminNavItems = [
     label: 'Modération'
   },
   {
+    href: '/admin/moderation-history',
+    label: 'Historique Modération'
+  },
+  {
     href: '/admin/analytics',
     label: 'Analytics'
   },

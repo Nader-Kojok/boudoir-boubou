@@ -1,6 +1,6 @@
 import { PrismaClient, Prisma } from '@prisma/client/edge'
 import { withAccelerate } from '@prisma/extension-accelerate'
-import type { Article, Category, User, ArticleCondition, UserRole } from '@prisma/client'
+import type { Article, Category, User, ArticleCondition, UserRole, ArticleStatus } from '@prisma/client'
 
 // Type for the extended Prisma client
 type ExtendedPrismaClient = ReturnType<typeof createPrismaClient>
@@ -77,7 +77,7 @@ export async function checkDatabaseConnection() {
 }
 
 // Export types from Prisma
-export type { Article, Category, User, ArticleCondition, UserRole }
+export type { Article, Category, User, ArticleCondition, UserRole, ArticleStatus }
 
 // Types for better type safety
 type ArticleWithDetails = Prisma.ArticleGetPayload<{
@@ -136,7 +136,7 @@ function transformArticle(article: Record<string, unknown>): Record<string, unkn
 }
 
 // Import des utilitaires de connexion
-import { safeDbOperation, handleDatabaseError } from './db-connection'
+import { safeDbOperation } from './db-connection'
 
 // Article functions
 export async function getArticles(filters?: {
@@ -149,6 +149,7 @@ export async function getArticles(filters?: {
 }): Promise<ArticleWithDetails[]> {
   const where: {
     isAvailable: boolean;
+    status: ArticleStatus;
     categoryId?: string;
     price?: { gte?: number; lte?: number };
     condition?: ArticleCondition;
@@ -156,6 +157,7 @@ export async function getArticles(filters?: {
     OR?: Array<{ title?: { contains: string; mode: Prisma.QueryMode } } | { description?: { contains: string; mode: Prisma.QueryMode } }>;
   } = {
     isAvailable: true,
+    status: 'APPROVED' as ArticleStatus,
   }
 
   if (filters?.categoryId) {
@@ -214,7 +216,8 @@ export async function getArticles(filters?: {
 
     return articles.map(transformArticle) as ArticleWithDetails[]
   } catch (error) {
-    handleDatabaseError(error, 'getArticles')
+    console.error('Erreur lors de la récupération des articles:', error)
+    return []
   }
 }
 
@@ -450,7 +453,8 @@ export async function getUserById(id: string): Promise<UserWithCounts | null> {
       'getUserById'
     )
   } catch (error) {
-    handleDatabaseError(error, 'getUserById')
+    console.error('Erreur lors de la récupération de l\'utilisateur:', error)
+    return null
   }
 }
 
