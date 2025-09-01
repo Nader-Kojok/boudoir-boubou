@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -84,7 +84,7 @@ export default function ModerationHistoryPage() {
   }, [])
 
   // Charger l'historique
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     setLoading(true)
     setError(null)
     
@@ -115,7 +115,7 @@ export default function ModerationHistoryPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentPage, searchTerm, actionFilter, moderatorFilter, startDate, endDate])
 
   useEffect(() => {
     fetchHistory()

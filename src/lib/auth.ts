@@ -273,9 +273,9 @@ export const authOptions: NextAuthOptions = {
         return url
       }
       
-      // Default redirect to dashboard instead of baseUrl
-      const defaultRedirect = `${productionUrl}/dashboard`
-      console.log('[NextAuth] Default redirect to dashboard:', defaultRedirect)
+      // Default redirect based on user role
+      const defaultRedirect = `${productionUrl}/feed`
+      console.log('[NextAuth] Default redirect to feed:', defaultRedirect)
       return defaultRedirect
     },
   },

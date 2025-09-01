@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Instagram, Facebook, Mail, Phone, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -78,11 +79,14 @@ export function Footer({ className }: FooterProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             {/* Brand */}
             <div className="lg:col-span-1">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#a67c3a] to-[#9bc5c0]" />
-                <span className="text-lg font-bold text-foreground">
-                  Le Boudoir du BouBou
-                </span>
+              <div className="flex items-center mb-4">
+                <Image
+                  src="/boudoir_logo-white.svg"
+                  alt="Le Boudoir du BouBou"
+                  width={374}
+                  height={96}
+                  className="h-24 w-auto"
+                />
               </div>
               <p className="text-sm text-muted-foreground mb-4">
                 La première plateforme sénégalaise de vente de vêtements entre particuliers.

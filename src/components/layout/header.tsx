@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Menu, X, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuthButton } from "@/components/auth/auth-button"
@@ -27,11 +28,14 @@ export function Header({ className }: HeaderProps) {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#a67c3a] to-[#9bc5c0]" />
-              <span className="text-xl font-bold text-foreground">
-                Le Boudoir du Boubou
-              </span>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/boudoir_logo-white.svg"
+                alt="Le Boudoir du BouBou"
+                width={187}
+                height={48}
+                className="h-12 w-auto"
+              />
             </Link>
           </div>
 

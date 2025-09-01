@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -63,7 +63,7 @@ export default function ModeratorHistoryPage() {
   const [endDate, setEndDate] = useState('')
 
   // Charger l'historique (filtré par le modérateur connecté)
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     setLoading(true)
     setError(null)
     
@@ -94,7 +94,7 @@ export default function ModeratorHistoryPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentPage, searchTerm, actionFilter, startDate, endDate, session?.user?.id])
 
   useEffect(() => {
     if (session?.user?.id) {

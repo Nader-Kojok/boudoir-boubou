@@ -57,9 +57,16 @@ export async function POST(request: NextRequest) {
     // Envoyer le SMS de réinitialisation
     await sendPasswordResetSMS(phone, resetToken)
 
+    // En mode développement, inclure le token dans la réponse
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    
     return NextResponse.json(
       {
         message: 'Si un compte avec ce numéro existe, vous recevrez un SMS de réinitialisation.',
+        ...(isDevelopment && {
+          developmentToken: resetToken,
+          resetLink: `${process.env.NEXTAUTH_URL}/reset-password?token=${resetToken}`
+        })
       },
       { status: 200 }
     )

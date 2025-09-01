@@ -15,8 +15,8 @@ const featuredProducts = [
     originalPrice: 800000,
     condition: "EXCELLENT" as const,
     images: [
-      "https://images.unsplash.com/photo-1519741497674-611481863552?w=500&h=600&fit=crop&crop=center&auto=format&q=80",
-      "https://images.unsplash.com/photo-1465495976277-4387d4b0e4a6?w=500&h=600&fit=crop&crop=center&auto=format&q=80"
+      "/categories/mariage.webp",
+      "/categories/mariage.webp"
     ],
     category: "Mariage",
     sellerWhatsApp: "221771234567",
@@ -29,8 +29,8 @@ const featuredProducts = [
     price: 180000,
     condition: "EXCELLENT" as const,
     images: [
-      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=600&fit=crop&crop=center&auto=format&q=80",
-      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=600&fit=crop&crop=center&auto=format&q=80"
+      "/categories/tradi.webp",
+      "/categories/tradi.webp"
     ],
     category: "Traditionnel",
     sellerWhatsApp: "221772345678",
@@ -44,8 +44,8 @@ const featuredProducts = [
     originalPrice: 200000,
     condition: "EXCELLENT" as const,
     images: [
-      "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=500&h=600&fit=crop&crop=center&auto=format&q=80",
-      "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=500&h=600&fit=crop&crop=center&auto=format&q=80"
+      "/categories/soiree.webp",
+      "/categories/soiree.webp"
     ],
     category: "Soirée",
     sellerWhatsApp: "221773456789",
@@ -58,8 +58,8 @@ const featuredProducts = [
     price: 95000,
     condition: "GOOD" as const,
     images: [
-      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=500&h=600&fit=crop&crop=center&auto=format&q=80",
-      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=600&fit=crop&crop=center&auto=format&q=80"
+      "/categories/tradi.webp",
+      "/categories/tradi.webp"
     ],
     category: "Traditionnel",
     sellerWhatsApp: "221774567890",

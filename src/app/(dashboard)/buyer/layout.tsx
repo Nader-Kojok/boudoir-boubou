@@ -28,6 +28,9 @@ export default async function BuyerLayout({ children }: BuyerLayoutProps) {
             <div className="flex items-center space-x-8">
               <h2 className="text-xl font-semibold text-gray-900">Espace Acheteur</h2>
               <div className="hidden md:flex space-x-6">
+                <Link href="/buyer/feed" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
+                  Mon Feed
+                </Link>
                 <Link href="/buyer" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
                   Tableau de bord
                 </Link>

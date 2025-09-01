@@ -17,6 +17,7 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [smsSent, setSmsSent] = useState(false)
+  const [developmentResetLink, setDevelopmentResetLink] = useState<string | null>(null)
 
   const {
     register,
@@ -51,6 +52,11 @@ export default function ForgotPasswordPage() {
         type: 'success',
         text: 'Un SMS de réinitialisation a été envoyé à votre numéro.',
       })
+      
+      // En mode développement, stocker le lien de réinitialisation
+      if (result.resetLink) {
+        setDevelopmentResetLink(result.resetLink)
+      }
     } catch (error) {
       setMessage({
         type: 'error',
@@ -87,6 +93,11 @@ export default function ForgotPasswordPage() {
         type: 'success',
         text: 'SMS renvoyé avec succès.',
       })
+      
+      // En mode développement, mettre à jour le lien de réinitialisation
+      if (result.resetLink) {
+        setDevelopmentResetLink(result.resetLink)
+      }
     } catch (error) {
       setMessage({
         type: 'error',
@@ -177,6 +188,28 @@ export default function ForgotPasswordPage() {
                     Le SMS peut prendre quelques minutes à arriver.
                   </p>
                 </div>
+
+                {/* Mode développement : Afficher le lien direct */}
+                {developmentResetLink && (
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="text-center space-y-3">
+                      <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                        🔧 Mode Développement
+                      </p>
+                      <p className="text-xs text-blue-700 dark:text-blue-300">
+                        Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe directement :
+                      </p>
+                      <Button
+                        asChild
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <a href={developmentResetLink} target="_blank" rel="noopener noreferrer">
+                          Réinitialiser le mot de passe
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 <Button
                   type="button"

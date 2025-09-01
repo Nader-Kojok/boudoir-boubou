@@ -7,9 +7,11 @@ import {
   ShoppingBag, 
   Heart, 
   Package, 
-  Plus
+  Plus,
+  Users
 } from 'lucide-react'
 import Link from 'next/link'
+import { SocialFeed } from '@/components/custom/social-feed'
 
 interface BuyerStats {
   totalOrders: number
@@ -78,12 +80,20 @@ export default function BuyerDashboard() {
           <h1 className="text-3xl font-bold text-gray-900">Tableau de bord</h1>
           <p className="text-gray-600 mt-2">Gérez vos achats et suivez vos commandes</p>
         </div>
-        <Button asChild>
-          <Link href="/catalogue">
-            <Plus className="h-4 w-4 mr-2" />
-            Continuer mes achats
-          </Link>
-        </Button>
+        <div className="flex gap-3">
+          <Button asChild variant="outline">
+            <Link href="/buyer/feed">
+              <Users className="h-4 w-4 mr-2" />
+              Mon Feed
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/catalogue">
+              <Plus className="h-4 w-4 mr-2" />
+              Continuer mes achats
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Statistiques */}
@@ -154,8 +164,64 @@ export default function BuyerDashboard() {
         </CardContent>
       </Card>
 
-      {/* Actions rapides */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Flux d'actualités */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <SocialFeed />
+        </div>
+        
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Suggestions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Découvrez de nouveaux vendeurs à suivre
+              </p>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/sellers">
+                  Découvrir des vendeurs
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Actions rapides</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link href="/catalogue">
+                  <ShoppingBag className="h-4 w-4 mr-2" />
+                  Parcourir le catalogue
+                </Link>
+              </Button>
+              
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link href="/buyer/favoris">
+                  <Heart className="h-4 w-4 mr-2" />
+                  Mes favoris
+                </Link>
+              </Button>
+              
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link href="/buyer/commandes">
+                  <Package className="h-4 w-4 mr-2" />
+                  Mes commandes
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+      
+      {/* Actions rapides - Version mobile */}
+      <div className="lg:hidden grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href="/buyer/commandes">
           <Card className="hover:shadow-md transition-shadow cursor-pointer flex flex-col h-full">
             <CardHeader>

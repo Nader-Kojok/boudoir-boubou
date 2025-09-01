@@ -10,28 +10,28 @@ const categories = [
     id: "mariage",
     name: "Mariage",
     description: "Robes de mariée, tenues de cérémonie et accessoires",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop&crop=center&auto=format&q=80",
+    image: "/categories/mariage.webp",
     productCount: 156
   },
   {
     id: "traditionnel",
     name: "Traditionnel",
     description: "Boubous, bazin riche et tenues traditionnelles",
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&crop=center&auto=format&q=80",
+    image: "/categories/tradi.webp",
     productCount: 243
   },
   {
     id: "soiree",
     name: "Soirée",
     description: "Robes de soirée, tenues de gala et événements",
-    image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=300&fit=crop&crop=center&auto=format&q=80",
+    image: "/categories/soiree.webp",
     productCount: 189
   },
   {
     id: "casual",
     name: "Décontracté",
     description: "Tenues du quotidien, robes et ensembles casual",
-    image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=300&fit=crop&crop=center&auto=format&q=80",
+    image: "/categories/tradi-casual.webp",
     productCount: 312
   }
 ]

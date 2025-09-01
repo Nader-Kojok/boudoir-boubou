@@ -80,6 +80,11 @@ model User {
   reports                 Report[]        @relation("UserReports")
   reportedContent         Report[]        @relation("ReportedUser")
   moderatedReports        Report[]        @relation("ModeratedReports")
+  followers               Follow[]        @relation("UserFollowing")
+  following               Follow[]        @relation("UserFollowers")
+  feedItems               FeedItem[]      @relation("UserFeedItems")
+  notifications           Notification[]  @relation("UserNotifications")
+  triggeredNotifications  Notification[]  @relation("ActorNotifications")
 }
 
 model Category {
@@ -120,6 +125,7 @@ model Article {
   payment         Payment?
   reviews         Review[]
   reports         Report[]           @relation("ReportedArticle")
+  feedItems       FeedItem[]         @relation("ArticleFeedItems")
 }
 
 model Review {
@@ -325,4 +331,70 @@ enum UserStatus {
   SUSPENDED
   BANNED
   PENDING_VERIFICATION
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+  
+  follower    User @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+  
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+model FeedItem {
+  id        String       @id @default(cuid())
+  type      FeedItemType
+  userId    String       // L'utilisateur qui a créé l'action
+  articleId String?      // L'article concerné (si applicable)
+  content   String?      // Contenu additionnel (description, etc.)
+  createdAt DateTime     @default(now())
+  
+  user      User     @relation("UserFeedItems", fields: [userId], references: [id], onDelete: Cascade)
+  article   Article? @relation("ArticleFeedItems", fields: [articleId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@index([type])
+}
+
+enum FeedItemType {
+  NEW_ARTICLE
+  ARTICLE_SOLD
+  PROFILE_UPDATE
+  ACHIEVEMENT
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  userId    String           // L'utilisateur qui reçoit la notification
+  actorId   String?          // L'utilisateur qui a déclenché la notification
+  entityId  String?          // ID de l'entité concernée (article, etc.)
+  entityType String?         // Type d'entité (article, user, etc.)
+  createdAt DateTime         @default(now())
+  readAt    DateTime?
+  
+  user      User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  actor     User? @relation("ActorNotifications", fields: [actorId], references: [id], onDelete: SetNull)
+  
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  NEW_FOLLOWER
+  NEW_ARTICLE_FROM_FOLLOWED
+  ARTICLE_SOLD
+  ARTICLE_LIKED
+  SYSTEM
 }
