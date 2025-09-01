@@ -3,7 +3,7 @@
  * Teste les différents scénarios de validation d'images
  */
 
-const { validateBase64Image, MAX_FILE_SIZE } = require('./src/lib/image-validation.ts')
+const { validateBase64Image, MAX_FILE_SIZE } = require('../src/lib/image-validation.ts')
 
 // Test 1: Image valide (petit pixel rouge)
 const validImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='

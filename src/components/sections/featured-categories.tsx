@@ -4,39 +4,72 @@ import { CategoryCard } from "@/components/custom/category-card"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
-const categories = [
+interface CategoryStats {
+  id: string
+  name: string
+  description: string
+  image: string
+  productCount: number
+}
+
+// Données de fallback en cas d'erreur API
+const fallbackCategories: CategoryStats[] = [
   {
     id: "mariage",
     name: "Mariage",
     description: "Robes de mariée, tenues de cérémonie et accessoires",
     image: "/categories/mariage.webp",
-    productCount: 156
+    productCount: 0
   },
   {
     id: "traditionnel",
     name: "Traditionnel",
     description: "Boubous, bazin riche et tenues traditionnelles",
     image: "/categories/tradi.webp",
-    productCount: 243
+    productCount: 0
   },
   {
     id: "soiree",
     name: "Soirée",
     description: "Robes de soirée, tenues de gala et événements",
     image: "/categories/soiree.webp",
-    productCount: 189
+    productCount: 0
   },
   {
     id: "casual",
     name: "Décontracté",
     description: "Tenues du quotidien, robes et ensembles casual",
     image: "/categories/tradi-casual.webp",
-    productCount: 312
+    productCount: 0
   }
 ]
 
 export function FeaturedCategories() {
+  const [categories, setCategories] = useState<CategoryStats[]>(fallbackCategories)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchCategoryStats = async () => {
+      try {
+        const response = await fetch('/api/categories/stats')
+        if (response.ok) {
+          const data = await response.json()
+          setCategories(data)
+        } else {
+          console.warn('Impossible de récupérer les statistiques des catégories, utilisation des données de fallback')
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des statistiques:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCategoryStats()
+  }, [])
+
   const handleCategoryClick = (categoryId: string) => {
     // Navigation vers la catégorie dans le catalogue
     window.location.href = `/catalogue?categoryId=${categoryId}`
@@ -58,18 +91,29 @@ export function FeaturedCategories() {
         
         {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {categories.map((category) => (
-            <CategoryCard
-              key={category.id}
-              id={category.id}
-              name={category.name}
-              description={category.description}
-              image={category.image}
-              productCount={category.productCount}
-              onClick={handleCategoryClick}
-              className="h-full"
-            />
-          ))}
+          {isLoading ? (
+            // Skeleton loading state
+            Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="animate-pulse">
+                <div className="bg-gray-200 aspect-[4/5] rounded-lg mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+              </div>
+            ))
+          ) : (
+            categories.slice(0, 4).map((category) => (
+              <CategoryCard
+                key={category.id}
+                id={category.id}
+                name={category.name}
+                description={category.description}
+                image={category.image}
+                productCount={category.productCount}
+                onClick={handleCategoryClick}
+                className="h-full"
+              />
+            ))
+          )}
         </div>
         
         {/* CTA */}

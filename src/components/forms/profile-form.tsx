@@ -14,9 +14,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Icons } from "@/components/ui/icons"
 import { User, Phone, AlertCircle, CheckCircle, ShoppingBag, Store } from "lucide-react"
 import type { UserRole } from "@prisma/client"
-import { handleError } from "@/hooks/use-notifications"
+import { handleError, handleSuccess } from "@/hooks/use-notifications"
 import { delayedRefresh } from "@/utils/delayed-navigation"
 import { validateImageFile, convertToBase64 } from "@/lib/image-validation"
+import { cacheManager, CACHE_KEYS } from '@/lib/cache-manager'
 
 const profileSchema = z.object({
   name: z
@@ -122,10 +123,22 @@ export function ProfileForm({ user }: ProfileFormProps) {
         throw new Error(errorData.message || "Erreur lors de la mise à jour")
       }
 
-      setMessage({
-        type: "success",
-        text: "Profil mis à jour avec succès",
-      })
+      // Invalider le cache utilisateur
+      const userCacheKey = CACHE_KEYS.USER.PROFILE(user.id)
+      cacheManager.delete(userCacheKey)
+      
+      // Invalider aussi le cache des articles de l'utilisateur
+      const userArticlesCacheKey = CACHE_KEYS.USER.ARTICLES(user.id)
+      cacheManager.delete(userArticlesCacheKey)
+      
+      // Émettre un événement pour notifier les autres composants
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('cache-invalidated', {
+          detail: { keys: [userCacheKey, userArticlesCacheKey] }
+        }))
+      }
+      
+      handleSuccess("Profil mis à jour avec succès")
 
       // Rafraîchir la page pour mettre à jour les données après un délai
       delayedRefresh(router, 2000)

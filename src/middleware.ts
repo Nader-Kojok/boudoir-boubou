@@ -57,11 +57,15 @@ export default withAuth(
       return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
-    if (pathname.startsWith('/seller') && token?.role !== 'SELLER' && token?.role !== 'ADMIN') {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Middleware] 🚫 Access denied to /seller - Role:', token?.role, 'Required: SELLER or ADMIN')
+    // Permettre l'accès aux profils publics des vendeurs (/seller/[id])
+    // Mais restreindre l'accès au dashboard vendeur (/seller sans ID)
+    if (pathname === '/seller' || pathname.startsWith('/seller/dashboard')) {
+      if (token?.role !== 'SELLER' && token?.role !== 'ADMIN') {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Middleware] 🚫 Access denied to seller dashboard - Role:', token?.role, 'Required: SELLER or ADMIN')
+        }
+        return NextResponse.redirect(new URL('/dashboard', req.url))
       }
-      return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
     // Allow sellers to access buyer routes (like favorites) since sellers can also be buyers
@@ -91,8 +95,24 @@ export default withAuth(
           })
         }
         
-        // Permettre l'accès aux routes publiques
-        if (!pathname.startsWith('/dashboard') && !pathname.startsWith('/seller') && !pathname.startsWith('/buyer') && !pathname.startsWith('/admin') && !pathname.startsWith('/moderator')) {
+        // Permettre l'accès aux routes publiques (incluant les routes du groupe (shop))
+        const publicRoutes = [
+          '/catalogue',
+          '/sellers',
+          '/article',
+          '/categories',
+          '/how-it-works',
+          '/seller/', // Pour les profils publics des vendeurs
+          '/user/' // Pour les profils publics des utilisateurs
+        ]
+        
+        const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route)) || 
+                             (!pathname.startsWith('/dashboard') && 
+                              !pathname.startsWith('/buyer') && 
+                              !pathname.startsWith('/admin') && 
+                              !pathname.startsWith('/moderator'))
+        
+        if (isPublicRoute) {
           if (process.env.NODE_ENV === 'development') {
             console.log('[Middleware] ✅ Public route access granted:', pathname)
           }

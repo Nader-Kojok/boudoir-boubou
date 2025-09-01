@@ -76,9 +76,9 @@ export function Footer({ className }: FooterProps) {
 
         {/* Main footer content */}
         <div className="py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
             {/* Brand */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-2">
               <div className="flex items-center mb-4">
                 <Image
                   src="/boudoir_logo-white.svg"
@@ -109,77 +109,81 @@ export function Footer({ className }: FooterProps) {
             </div>
 
             {/* Navigation sections */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-                Catégories
-              </h3>
-              <ul className="space-y-3">
-                {footerNavigation.boutique.map((item) => (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <div className="lg:col-span-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
+                    Catégories
+                  </h3>
+                  <ul className="space-y-3">
+                    {footerNavigation.boutique.map((item) => (
+                      <li key={item.name}>
+                        <Link
+                          href={item.href}
+                          className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                        >
+                          {item.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-            <div>
-              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-                Aide
-              </h3>
-              <ul className="space-y-3">
-                {footerNavigation.aide.map((item) => (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
+                    Aide
+                  </h3>
+                  <ul className="space-y-3">
+                    {footerNavigation.aide.map((item) => (
+                      <li key={item.name}>
+                        <Link
+                          href={item.href}
+                          className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                        >
+                          {item.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-            <div>
-              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-                Entreprise
-              </h3>
-              <ul className="space-y-3">
-                {footerNavigation.entreprise.map((item) => (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
+                    Entreprise
+                  </h3>
+                  <ul className="space-y-3">
+                    {footerNavigation.entreprise.map((item) => (
+                      <li key={item.name}>
+                        <Link
+                          href={item.href}
+                          className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+                        >
+                          {item.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
 
             {/* Contact info */}
-            <div>
+            <div className="lg:col-span-1">
               <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
                 Contact
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
+                  <MapPin className="h-5 w-5" />
                   <span>Paris, France</span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <Phone className="h-4 w-4" />
+                  <Phone className="h-5 w-5" />
                   <span>+221 77 444 56 78</span>
                 </div>
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <Mail className="h-4 w-4" />
-                  <span>contact@leboudoirduboubou.fr</span>
+                <div className="flex items-center space-x-3 text-sm text-muted-foreground">
+                  <Mail className="h-5 w-5 flex-shrink-0" />
+                  <span className="break-all">contact@leboudoirduboubou.fr</span>
                 </div>
               </div>
             </div>

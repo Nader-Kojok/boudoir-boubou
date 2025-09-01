@@ -2,52 +2,124 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
+import { cacheManager, CACHE_KEYS, CACHE_TTL, forceDataRefresh } from '@/lib/cache-manager'
 
-// Interface for analytics data structure
-// Currently unused but kept for future implementation
-// interface AnalyticsData {
-//   overview: {
-//     totalUsers: number
-//     totalArticles: number
-//     totalSales: number
-//     totalRevenue: number
-//     chartData: {
-//       newUsers: Array<{ date: string; count: number }>
-//       newArticles: Array<{ date: string; count: number }>
-//       sales: Array<{ date: string; amount: number }>
-//     }
-//   }
-//   users: {
-//     totalCount: number
-//     distributionByRole: Array<{ role: string; count: number; percentage: number }>
-//     topSellers: Array<{ id: string; name: string; email: string; articlesCount: number; salesCount: number; totalRevenue: number }>
-//   }
-//   articles: {
-//     totalCount: number
-//     distributionByCategory: Array<{ category: string; count: number; percentage: number }>
-//     distributionByCondition: Array<{ condition: string; count: number; percentage: number }>
-//     topViewed: Array<{ id: string; title: string; views: number; category: string }>
-//   }
-//   revenue: {
-//     totalRevenue: number
-//     revenueOverTime: Array<{ date: string; amount: number }>
-//     distributionByPaymentMethod: Array<{ method: string; amount: number; percentage: number }>
-//     byCategory: Array<{ category: string; amount: number; percentage: number }>
-//   }
-//   activities: Array<{
-//     id: string
-//     type: string
-//     description: string
-//     createdAt: string
-//     user?: { name: string; email: string }
-//   }>
-// }
+interface AnalyticsOverview {
+  totalUsers: number
+  totalArticles: number
+  totalRevenue: number
+  activeUsers: number
+  pendingArticles: number
+  recentActivities: Array<{
+    id: string
+    type: string
+    description: string
+    timestamp: string
+    user?: {
+      name: string
+      image?: string
+    }
+  }>
+}
+
+interface AnalyticsUsers {
+  totalUsers: number
+  newUsers: number
+  activeUsers: number
+  userGrowth: number
+  usersByRole: Array<{
+    role: string
+    count: number
+    percentage: number
+  }>
+  recentUsers: Array<{
+    id: string
+    name: string
+    email?: string
+    phone: string
+    role: string
+    createdAt: string
+    image?: string
+  }>
+  userActivity: Array<{
+    date: string
+    newUsers: number
+    activeUsers: number
+  }>
+}
+
+interface AnalyticsArticles {
+  totalArticles: number
+  activeArticles: number
+  soldArticles: number
+  pendingArticles: number
+  articleGrowth: number
+  averagePrice: number
+  topCategories: Array<{
+    category: string
+    count: number
+    percentage: number
+  }>
+  recentArticles: Array<{
+    id: string
+    title: string
+    price: number
+    status: string
+    createdAt: string
+    category: string
+    seller: string
+  }>
+  recentlySold: Array<{
+    id: string
+    title: string
+    price: number
+    soldAt: string
+    category: string
+    seller: string
+  }>
+}
+
+interface AnalyticsRevenue {
+  totalRevenue: number
+  monthlyRevenue: number
+  revenueGrowth: number
+  averageOrderValue: number
+  totalTransactions: number
+  revenueByCategory: Array<{
+    category: string
+    revenue: number
+    percentage: number
+  }>
+  monthlyTrend: Array<{
+    month: string
+    revenue: number
+    transactions: number
+  }>
+  recentTransactions: Array<{
+    id: string
+    amount: number
+    method: string
+    completedAt: string
+    buyer: {
+      name: string
+      image?: string
+    }
+    seller: {
+      name: string
+      image?: string
+    }
+    article: {
+      title: string
+      category: string
+    }
+  }>
+}
 
 interface AnalyticsState {
-  overview: unknown
-  users: unknown
-  articles: unknown
-  revenue: unknown
+  overview: AnalyticsOverview | null
+  users: AnalyticsUsers | null
+  articles: AnalyticsArticles | null
+  revenue: AnalyticsRevenue | null
   loading: boolean
   error: string | null
   lastUpdated: Date | null
@@ -59,9 +131,6 @@ interface UseAnalyticsOptions {
   refreshInterval?: number
   enableCache?: boolean
 }
-
-const CACHE_KEY = 'analytics-cache'
-const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
 export function useAnalytics(options: UseAnalyticsOptions = {}) {
   const {
@@ -90,14 +159,18 @@ export function useAnalytics(options: UseAnalyticsOptions = {}) {
     if (!enableCache) return null
     
     try {
-      const cached = localStorage.getItem(`${CACHE_KEY}-${period}`)
-      if (cached) {
-        const { data, timestamp } = JSON.parse(cached)
-        const isExpired = Date.now() - timestamp > CACHE_DURATION
-        
-        if (!isExpired) {
-          return data
-        }
+      const overviewKey = CACHE_KEYS.ANALYTICS.OVERVIEW(period)
+      const usersKey = CACHE_KEYS.ANALYTICS.USERS(period)
+      const articlesKey = CACHE_KEYS.ANALYTICS.ARTICLES(period)
+      const revenueKey = CACHE_KEYS.ANALYTICS.REVENUE(period)
+      
+      const overview = cacheManager.get(overviewKey, { ttl: CACHE_TTL.ANALYTICS })
+      const users = cacheManager.get(usersKey, { ttl: CACHE_TTL.ANALYTICS })
+      const articles = cacheManager.get(articlesKey, { ttl: CACHE_TTL.ANALYTICS })
+      const revenue = cacheManager.get(revenueKey, { ttl: CACHE_TTL.ANALYTICS })
+      
+      if (overview && users && articles && revenue) {
+        return { overview, users, articles, revenue }
       }
     } catch (error) {
       console.warn('Failed to load from cache:', error)
@@ -107,14 +180,19 @@ export function useAnalytics(options: UseAnalyticsOptions = {}) {
   }, [period, enableCache])
 
   // Fonction pour sauvegarder en cache
-  const saveToCache = useCallback((data: unknown) => {
+  const saveToCache = useCallback((data: { overview: unknown, users: unknown, articles: unknown, revenue: unknown }) => {
     if (!enableCache) return
     
     try {
-      localStorage.setItem(`${CACHE_KEY}-${period}`, JSON.stringify({
-        data,
-        timestamp: Date.now()
-      }))
+      const overviewKey = CACHE_KEYS.ANALYTICS.OVERVIEW(period)
+      const usersKey = CACHE_KEYS.ANALYTICS.USERS(period)
+      const articlesKey = CACHE_KEYS.ANALYTICS.ARTICLES(period)
+      const revenueKey = CACHE_KEYS.ANALYTICS.REVENUE(period)
+      
+      cacheManager.set(overviewKey, data.overview, { ttl: CACHE_TTL.ANALYTICS })
+      cacheManager.set(usersKey, data.users, { ttl: CACHE_TTL.ANALYTICS })
+      cacheManager.set(articlesKey, data.articles, { ttl: CACHE_TTL.ANALYTICS })
+      cacheManager.set(revenueKey, data.revenue, { ttl: CACHE_TTL.ANALYTICS })
     } catch (error) {
       console.warn('Failed to save to cache:', error)
     }
@@ -132,12 +210,15 @@ export function useAnalytics(options: UseAnalyticsOptions = {}) {
       const cachedData = loadFromCache()
       if (cachedData) {
         setState(prev => ({
-          ...prev,
-          ...cachedData,
-          loading: false,
-          error: null,
-          lastUpdated: new Date()
-        }))
+        ...prev,
+        overview: cachedData.overview as AnalyticsOverview,
+        users: cachedData.users as AnalyticsUsers,
+        articles: cachedData.articles as AnalyticsArticles,
+        revenue: cachedData.revenue as AnalyticsRevenue,
+        loading: false,
+        error: null,
+        lastUpdated: new Date()
+      }))
         return
       }
     }
@@ -179,7 +260,10 @@ export function useAnalytics(options: UseAnalyticsOptions = {}) {
 
       setState(prev => ({
         ...prev,
-        ...newData,
+        overview: newData.overview as AnalyticsOverview,
+        users: newData.users as AnalyticsUsers,
+        articles: newData.articles as AnalyticsArticles,
+        revenue: newData.revenue as AnalyticsRevenue,
         loading: false,
         error: null,
         lastUpdated: new Date()
@@ -209,7 +293,14 @@ export function useAnalytics(options: UseAnalyticsOptions = {}) {
   // Fonction pour vider le cache
   const clearCache = useCallback(() => {
     try {
-      localStorage.removeItem(`${CACHE_KEY}-${period}`)
+      const keys = [
+        CACHE_KEYS.ANALYTICS.OVERVIEW(period),
+        CACHE_KEYS.ANALYTICS.USERS(period),
+        CACHE_KEYS.ANALYTICS.ARTICLES(period),
+        CACHE_KEYS.ANALYTICS.REVENUE(period)
+      ]
+      
+      keys.forEach(key => cacheManager.delete(key))
       toast.success('Cache vidé')
     } catch (error) {
       console.warn('Failed to clear cache:', error)
@@ -252,7 +343,7 @@ export function useAnalytics(options: UseAnalyticsOptions = {}) {
     ...state,
     refresh,
     clearCache,
-    isStale: state.lastUpdated ? Date.now() - state.lastUpdated.getTime() > CACHE_DURATION : false
+    isStale: state.lastUpdated ? Date.now() - state.lastUpdated.getTime() > CACHE_TTL.ANALYTICS : false
   }
 }
 

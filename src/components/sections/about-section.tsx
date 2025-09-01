@@ -80,7 +80,7 @@ export function AboutSection() {
             <div className="relative">
               <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl">
                 <Image 
-                  src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=750&fit=crop&crop=center"
+                  src="/categories/tradi.webp"
                   alt="Boutique Le Boudoir du Boubou"
                   className="w-full h-full object-cover"
                   fill

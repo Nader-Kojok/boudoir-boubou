@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { createCachedApiResponse, invalidateApiCache, CACHE_TAGS, CACHE_DURATIONS } from '@/lib/api-cache-middleware'
 
 export async function GET(
   request: NextRequest,
@@ -122,13 +123,16 @@ export async function GET(
       })
     )
 
-    return NextResponse.json({
+    return createCachedApiResponse({
       article: {
         ...article,
         averageRating
       },
       reviews,
       similarArticles: similarArticlesWithRating
+    }, {
+      maxAge: CACHE_DURATIONS.MEDIUM,
+      tags: [CACHE_TAGS.ARTICLES, `article-${id}`]
     })
 
   } catch (error) {
@@ -188,9 +192,18 @@ export async function PATCH(
       }
     })
 
-    return NextResponse.json({
+    // Invalider le cache après la mise à jour
+    await invalidateApiCache([
+      CACHE_TAGS.ARTICLES,
+      CACHE_TAGS.ANALYTICS,
+      CACHE_TAGS.FEED
+    ])
+
+    return createCachedApiResponse({
       message: 'Statut de l\'article mis à jour avec succès',
       article: updatedArticle
+    }, {
+      noCache: true // Les mutations ne doivent pas être mises en cache
     })
 
   } catch (error) {
@@ -302,9 +315,19 @@ export async function PUT(
       }
     })
 
-    return NextResponse.json({
+    // Invalider le cache après la mise à jour
+    await invalidateApiCache([
+      CACHE_TAGS.ARTICLES,
+      CACHE_TAGS.ANALYTICS,
+      CACHE_TAGS.FEED,
+      `article-${id}`
+    ])
+
+    return createCachedApiResponse({
       message: 'Article mis à jour avec succès',
       article: updatedArticle
+    }, {
+      noCache: true // Les mutations ne doivent pas être mises en cache
     })
 
   } catch (error) {
@@ -369,9 +392,20 @@ export async function DELETE(
       where: { id }
     })
 
-    return NextResponse.json({
-      message: 'Article supprimé avec succès'
-    })
+    // Invalider le cache après la suppression
+    await invalidateApiCache([
+      CACHE_TAGS.ARTICLES,
+      CACHE_TAGS.ANALYTICS,
+      CACHE_TAGS.FEED,
+      `article-${id}`
+    ])
+
+    return createCachedApiResponse(
+      { message: 'Article supprimé avec succès' },
+      { 
+        noCache: true // Les mutations ne doivent pas être mises en cache
+      }
+    )
 
   } catch (error) {
     console.error('Erreur lors de la suppression de l\'article:', error)

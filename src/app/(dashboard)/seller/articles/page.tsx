@@ -23,6 +23,7 @@ import { ConditionBadge } from '@/components/custom/condition-badge'
 import { ImageGallery } from '@/components/custom/image-gallery'
 import { handleError, handleSuccess } from '@/hooks/use-notifications'
 import { useConfirmation } from '@/components/ui/confirmation-dialog'
+import { cacheManager, CACHE_KEYS } from '@/lib/cache-manager'
 
 interface Article {
   id: string
@@ -139,6 +140,14 @@ export default function ArticlesPage() {
         throw new Error('Erreur lors de la mise à jour du statut')
       }
       
+      // Invalider le cache et mettre à jour l'état local
+      const cacheKey = CACHE_KEYS.ARTICLES.DETAIL(articleId)
+      cacheManager.delete(cacheKey)
+      
+      // Invalider aussi le cache de la liste d'articles
+      const listCacheKey = CACHE_KEYS.USER.ARTICLES('seller')
+      cacheManager.delete(listCacheKey)
+      
       // Mettre à jour l'état local
       setArticles(prev => prev.map(article => {
         if (article.id === articleId) {
@@ -146,6 +155,8 @@ export default function ArticlesPage() {
         }
         return article
       }))
+      
+      handleSuccess(`Article ${newStatus === 'ACTIVE' ? 'activé' : 'mis en pause'} avec succès`)
       
     } catch (error) {
       handleError(error, 'Changement de statut de l\'article')
@@ -174,6 +185,16 @@ export default function ArticlesPage() {
         const errorData = await response.json()
         throw new Error(errorData.message || 'Erreur lors de la suppression')
       }
+      
+      // Invalider tous les caches liés à cet article
+      const articleCacheKey = CACHE_KEYS.ARTICLES.DETAIL(articleId)
+      const listCacheKey = CACHE_KEYS.USER.ARTICLES('seller')
+      
+      cacheManager.delete(articleCacheKey)
+      cacheManager.delete(listCacheKey)
+      
+      // Invalider aussi le cache analytics qui pourrait contenir des données sur cet article
+      cacheManager.invalidate('analytics')
       
       // Mettre à jour l'état local
       setArticles(prev => prev.filter(article => article.id !== articleId))

@@ -39,7 +39,7 @@ export function CategoryCard({
       )}
       onClick={handleClick}
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
+      <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
         <Image 
           src={image} 
           alt={name}
@@ -53,29 +53,29 @@ export function CategoryCard({
         
         {/* Product count badge */}
         {productCount !== undefined && (
-          <div className="absolute top-3 right-3">
-            <Badge variant="secondary" className="bg-white/90 text-black">
+          <div className="absolute top-4 right-4">
+            <Badge variant="secondary" className="bg-white/95 text-black font-medium px-3 py-1 text-xs shadow-sm">
               {productCount} {productCount === 1 ? "article" : "articles"}
             </Badge>
           </div>
         )}
         
         {/* Content overlay */}
-        <CardContent className="absolute bottom-0 left-0 right-0 p-4 text-white">
+        <CardContent className="absolute bottom-0 left-0 right-0 p-5 text-white">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <h3 className="font-semibold text-lg mb-1 group-hover:text-primary-foreground transition-colors">
+              <h3 className="font-semibold text-xl mb-2 group-hover:text-primary-foreground transition-colors">
                 {name}
               </h3>
               
               {description && (
-                <p className="text-sm text-white/80 line-clamp-2">
+                <p className="text-sm text-white/85 line-clamp-3 leading-relaxed">
                   {description}
                 </p>
               )}
             </div>
             
-            <ChevronRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            <ChevronRight className="h-6 w-6 ml-3 group-hover:translate-x-1 transition-transform flex-shrink-0" />
           </div>
         </CardContent>
       </div>

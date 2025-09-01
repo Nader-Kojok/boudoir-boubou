@@ -150,7 +150,7 @@ export function NewsletterSection() {
                         Inscription en cours...
                       </div>
                     ) : (
-                      "S&apos;inscrire à la newsletter"
+                      "S'inscrire à la newsletter"
                     )}
                   </Button>
                   
