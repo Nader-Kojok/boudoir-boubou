@@ -121,7 +121,7 @@ export async function GET() {
         },
         _count: {
           select: {
-            favorites: true
+    
           }
         }
       },
@@ -159,7 +159,7 @@ export async function GET() {
         name: article.category.name
       },
       _count: {
-        favorites: article._count?.favorites || 0
+  
       }
     }))
 

@@ -61,7 +61,7 @@ const categories = [
   { value: 'mariage', label: 'Tenues de mariage' },
   { value: 'soiree', label: 'Tenues de soirée' },
   { value: 'traditionnel', label: 'Vêtements traditionnels' },
-  { value: 'casual', label: 'Vêtements casual' },
+  { value: 'tradi-casual', label: 'Vêtements tradi-casual' },
   { value: 'accessoires', label: 'Accessoires' },
 ]
 

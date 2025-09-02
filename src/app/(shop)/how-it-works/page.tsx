@@ -21,7 +21,7 @@ export default function HowItWorksPage() {
     {
       icon: ShoppingBag,
       title: "Explorez et achetez",
-      description: "Découvrez des pièces uniques vendues par d&apos;autres membres de la communauté.",
+      description: "Découvrez des pièces uniques vendues par d'autres membres de la communauté.",
       details: [
         "Catalogue varié et authentique",
         "Filtres de recherche avancés",
@@ -31,9 +31,9 @@ export default function HowItWorksPage() {
     {
       icon: Heart,
       title: "Vendez vos trésors",
-      description: "Donnez une seconde vie à vos vêtements en les vendant à d&apos;autres passionnées.",
+      description: "Donnez une seconde vie à vos vêtements en les vendant à d'autres passionnées.",
       details: [
-        "Publication facile d&apos;annonces",
+        "Publication facile d'annonces",
         "Gestion simplifiée des ventes",
         "Commission réduite"
       ]
@@ -49,7 +49,7 @@ export default function HowItWorksPage() {
     {
       icon: Star,
       title: "Qualité garantie",
-      description: "Système d&apos;évaluation pour maintenir la qualité."
+      description: "Système d'évaluation pour maintenir la qualité."
     },
     {
       icon: Users,
@@ -61,60 +61,74 @@ export default function HowItWorksPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#faf8f5] via-white to-[#f0f7f6]">
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#faf8f5] via-white to-[#f0f7f6]" />
-        
-        {/* Decorative elements */}
-        <div className="absolute top-20 left-10 w-20 h-20 bg-boudoir-ocre-200 rounded-full opacity-20 animate-pulse" />
-        <div className="absolute bottom-32 right-16 w-32 h-32 bg-boudoir-vert-eau-200 rounded-full opacity-20 animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-boudoir-ocre-300 rounded-full opacity-10 animate-bounce" />
-        <div className="absolute top-1/3 right-1/3 w-12 h-12 bg-boudoir-vert-eau-300 rounded-full opacity-15 animate-pulse delay-500" />
-        
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-boudoir-ocre-200 rounded-full px-4 py-2 mb-8">
-              <Sparkles className="w-4 h-4 text-boudoir-ocre-500" />
-              <span className="text-sm font-medium text-boudoir-ocre-700">
-                Comment ça marche
-              </span>
+      <section className="bg-white border-b border-gray-100 py-16 lg:py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto">
+            {/* Breadcrumb */}
+            <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-8">
+              <Link href="/" className="hover:text-boudoir-ocre-600 transition-colors">
+                Accueil
+              </Link>
+              <span>/</span>
+              <span className="text-gray-900 font-medium">Comment ça marche</span>
+            </nav>
+            
+            {/* Main content */}
+            <div className="text-left">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-boudoir-ocre-700 mb-6 leading-tight">
+                Comment fonctionne{" "}
+                <span className="text-boudoir-ocre-600">
+                  Le Boudoir du Boubou
+                </span>
+                {" "}?
+              </h1>
+              
+              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                Découvrez en quelques étapes simples comment acheter et vendre vos vêtements africains 
+                sur notre plateforme communautaire.
+              </p>
+              
+              {/* Quick navigation */}
+              <div className="flex flex-wrap gap-3">
+                <button 
+                  onClick={() => document.getElementById('steps-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="inline-flex items-center px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium"
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Les étapes
+                </button>
+                <button 
+                  onClick={() => document.getElementById('benefits-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="inline-flex items-center px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium"
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Nos avantages
+                </button>
+                <button 
+                  onClick={() => document.getElementById('faq-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="inline-flex items-center px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium"
+                >
+                  <Star className="w-4 h-4 mr-2" />
+                  Questions fréquentes
+                </button>
+              </div>
             </div>
-            
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Votre{" "}
-              <span className="bg-gradient-to-r from-[#a67c3a] to-[#9bc5c0] bg-clip-text text-transparent font-extrabold inline-block">
-                marketplace
-              </span>
-              {" "}de mode africaine
-            </h1>
-            
-            <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Découvrez comment Le Boudoir du Boubou révolutionne l&apos;achat et la vente de vêtements africains entre particuliers.
-            </p>
-          </div>
-        </div>
-        
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-gray-300 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-gray-300 rounded-full mt-2 animate-pulse" />
           </div>
         </div>
       </section>
 
       {/* Steps Section */}
-      <section className="py-16 lg:py-24 bg-white px-4 sm:px-6 lg:px-8">
+      <section id="steps-section" className="py-16 lg:py-24 bg-white px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <span className="text-boudoir-ocre-600 font-medium text-sm uppercase tracking-wide">
               Processus Simple
             </span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mt-2 mb-4">
+            <h2 className="text-3xl lg:text-4xl font-bold text-boudoir-ocre-700 mt-2 mb-4">
               En 3 étapes simples
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Rejoignez notre communauté et commencez à acheter ou vendre dès aujourd&apos;hui
+              Rejoignez notre communauté et commencez à acheter ou vendre dès aujourd'hui
             </p>
           </div>
 
@@ -124,10 +138,10 @@ export default function HowItWorksPage() {
               return (
                 <Card key={index} className="relative border-0 shadow-lg hover:shadow-xl transition-all duration-300 group flex flex-col h-full">
                   <CardHeader className="text-center pb-4">
-                    <div className="mx-auto w-16 h-16 bg-gradient-to-br from-boudoir-ocre-400 to-boudoir-vert-400 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                      <Icon className="w-8 h-8 text-white" />
+                    <div className="mx-auto w-16 h-16 bg-gradient-to-br from-boudoir-ocre-100 to-boudoir-ocre-200 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                      <Icon className="w-8 h-8 text-boudoir-ocre-700" />
                     </div>
-                    <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-r from-boudoir-ocre-500 to-boudoir-ocre-600 text-white rounded-full flex items-center justify-center font-bold shadow-lg">
+                    <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-r from-boudoir-ocre-100 to-boudoir-ocre-200 text-boudoir-ocre-700 rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-boudoir-ocre-300">
                       {index + 1}
                     </div>
                     <CardTitle className="text-xl text-gray-900">{step.title}</CardTitle>
@@ -153,13 +167,13 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16 lg:py-24 bg-gradient-to-br from-[#faf8f5] to-[#f0f7f6] px-4 sm:px-6 lg:px-8">
+      <section id="benefits-section" className="py-16 lg:py-24 bg-gradient-to-br from-[#faf8f5] to-[#f0f7f6] px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <span className="text-boudoir-ocre-600 font-medium text-sm uppercase tracking-wide">
               Nos Avantages
             </span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mt-2 mb-4">
+            <h2 className="text-3xl lg:text-4xl font-bold text-boudoir-ocre-700 mt-2 mb-4">
               Pourquoi choisir Le Boudoir du Boubou ?
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -176,7 +190,7 @@ export default function HowItWorksPage() {
                     <div className="mx-auto w-16 h-16 bg-gradient-to-br from-[#f5f0e8] to-[#e6f2f1] rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                       <Icon className="w-8 h-8 text-boudoir-ocre-600" />
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                    <h3 className="text-xl font-semibold text-boudoir-ocre-700 mb-3">
                       {benefit.title}
                     </h3>
                     <p className="text-gray-600 leading-relaxed">
@@ -191,13 +205,13 @@ export default function HowItWorksPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 lg:py-24 bg-white px-4 sm:px-6 lg:px-8">
+      <section id="faq-section" className="py-16 lg:py-24 bg-white px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <span className="text-boudoir-ocre-600 font-medium text-sm uppercase tracking-wide">
               Support
             </span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mt-2 mb-4">
+            <h2 className="text-3xl lg:text-4xl font-bold text-boudoir-ocre-700 mt-2 mb-4">
               Questions fréquentes
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -212,7 +226,7 @@ export default function HowItWorksPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 leading-relaxed">
-                  Chaque vendeur dispose d&apos;un système d&apos;évaluation. Les acheteurs peuvent laisser des avis après chaque transaction, 
+                  Chaque vendeur dispose d'un système d'évaluation. Les acheteurs peuvent laisser des avis après chaque transaction, 
                   ce qui permet de maintenir un niveau de qualité élevé dans notre communauté.
                 </p>
               </CardContent>
@@ -224,8 +238,8 @@ export default function HowItWorksPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 leading-relaxed">
-                  Nous appliquons une commission réduite de 5% sur chaque vente réussie. 
-                  Cette commission nous permet de maintenir la plateforme et d&apos;assurer la sécurité des transactions.
+                  Frais de commission : 300 F / article posté. 
+                  Cette commission nous permet de maintenir la plateforme et d'assurer la sécurité des transactions.
                 </p>
               </CardContent>
             </Card>
@@ -236,8 +250,8 @@ export default function HowItWorksPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 leading-relaxed">
-                  La livraison est organisée directement entre l&apos;acheteur et le vendeur. 
-                  Nous recommandons l&apos;utilisation de services de livraison avec suivi pour plus de sécurité.
+                  La livraison est organisée directement entre l'acheteur et le vendeur. 
+                  Nous recommandons l'utilisation de services de livraison avec suivi pour plus de sécurité.
                 </p>
               </CardContent>
             </Card>
@@ -265,7 +279,7 @@ export default function HowItWorksPage() {
         
         <div className="container mx-auto relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl lg:text-4xl font-bold text-boudoir-ocre-700 mb-6">
               Prête à rejoindre la communauté ?
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed">

@@ -23,7 +23,7 @@ export default function FeedRedirectPage() {
     
     switch (userRole) {
       case 'BUYER':
-        router.push('/buyer/feed');
+        router.push('/catalogue');
         break;
       case 'SELLER':
         router.push('/seller');
@@ -35,8 +35,8 @@ export default function FeedRedirectPage() {
         router.push('/moderator');
         break;
       default:
-        // Default to buyer feed for any other case
-        router.push('/buyer/feed');
+        // Default to catalogue for any other case
+        router.push('/catalogue');
         break;
     }
   }, [session, status, router]);

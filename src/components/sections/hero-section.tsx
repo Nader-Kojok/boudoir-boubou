@@ -17,13 +17,6 @@ export function HeroSection() {
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-boudoir-ocre-200 rounded-full px-4 py-2 mb-8">
-            <Sparkles className="w-4 h-4 text-boudoir-ocre-500" />
-            <span className="text-sm font-medium text-boudoir-ocre-700">
-              Plateforme de vente entre particuliers
-            </span>
-          </div>
           
           {/* Main heading */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
@@ -36,7 +29,7 @@ export function HeroSection() {
           
           {/* Subtitle */}
           <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-            La première plateforme sénégalaise dédiée à la vente de vêtements personnels : 
+            La première plateforme Sénégalaise dédiée à la vente de vêtements personnels : 
             mariages, soirées, tenues traditionnelles et bien plus encore.
           </p>
           

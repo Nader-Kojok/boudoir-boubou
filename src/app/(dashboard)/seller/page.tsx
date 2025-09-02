@@ -10,7 +10,6 @@ import {
   TrendingUp, 
   Package, 
   Eye, 
-  Heart, 
   ShoppingCart,
   Plus,
   FileText
@@ -36,7 +35,6 @@ interface Article {
   condition: 'EXCELLENT' | 'GOOD' | 'FAIR'
   isAvailable: boolean
   views: number
-  favorites: number
   createdAt: string
   category: {
     name: string
@@ -300,10 +298,6 @@ export default function SellerDashboard() {
                       <span className="flex items-center gap-1">
                         <Eye className="w-3 h-3" />
                         {article.views || 0}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Heart className="w-3 h-3" />
-                        {article.favorites || 0}
                       </span>
                     </div>
                   </div>

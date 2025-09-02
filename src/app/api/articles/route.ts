@@ -31,7 +31,7 @@ const categoryMapping: Record<string, string> = {
   'mariage': 'mariage',
   'soiree': 'soiree', 
   'traditionnel': 'traditionnel',
-  'casual': 'casual',
+  'tradi-casual': 'tradi-casual',
   'accessoires': 'accessoires'
 }
 

@@ -67,14 +67,14 @@ export default async function DashboardPage() {
     redirect('/seller')
   } else if (user.role === 'BUYER') {
     if (process.env.NODE_ENV === 'production') {
-      console.log('[Dashboard] Redirecting to /buyer')
+      console.log('[Dashboard] Redirecting to /catalogue')
     }
-    redirect('/buyer')
+    redirect('/catalogue')
   } else {
     // Default fallback for other roles
     if (process.env.NODE_ENV === 'production') {
-      console.log('[Dashboard] Unknown role, redirecting to /buyer:', user.role)
+      console.log('[Dashboard] Unknown role, redirecting to /catalogue:', user.role)
     }
-    redirect('/buyer')
+    redirect('/catalogue')
   }
 }

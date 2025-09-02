@@ -6,13 +6,13 @@ const categories = [
   {
     name: 'Mariage',
     slug: 'mariage',
-    description: 'Robes et accessoires de mariage traditionnels sénégalais',
+    description: 'Robes et accessoires de mariage traditionnels Sénégalais',
     image: '/categories/mariage.webp'
   },
   {
     name: 'Traditionnel',
     slug: 'traditionnel', 
-    description: 'Vêtements traditionnels sénégalais',
+    description: 'Vêtements traditionnels Sénégalais',
     image: '/categories/tradi.webp'
   },
   {
@@ -22,8 +22,8 @@ const categories = [
     image: '/categories/soiree.webp'
   },
   {
-    name: 'Casual',
-    slug: 'casual',
+    name: 'Tradi-casual',
+    slug: 'tradi-casual',
     description: 'Vêtements décontractés du quotidien',
     image: '/categories/tradi-casual.webp'
   },

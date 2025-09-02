@@ -19,7 +19,7 @@ async function seedTestData() {
         phone: '+221701234567',
         password: hashedPassword,
         role: 'SELLER',
-        bio: 'Créatrice de mode spécialisée dans les vêtements traditionnels sénégalais',
+        bio: 'Créatrice de mode spécialisée dans les vêtements traditionnels Sénégalais',
         location: 'Dakar, Sénégal',
         whatsappNumber: '+221701234567',
         phoneVerified: new Date()

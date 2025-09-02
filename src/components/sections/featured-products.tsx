@@ -10,7 +10,7 @@ const featuredProducts = [
   {
     id: "robe-mariee-traditionnelle",
     title: "Robe de Mariée Traditionnelle",
-    description: "Magnifique robe de mariée sénégalaise brodée main, portée une seule fois",
+    description: "Magnifique robe de mariée Sénégalaise brodée main, portée une seule fois",
     price: 450000,
     originalPrice: 800000,
     condition: "EXCELLENT" as const,

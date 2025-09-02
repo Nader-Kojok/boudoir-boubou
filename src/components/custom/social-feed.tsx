@@ -159,7 +159,7 @@ export function SocialFeed({ className }: SocialFeedProps) {
       {/* Header avec refresh */}
       <div className="flex items-center justify-between mb-6 sticky top-0 bg-background/80 backdrop-blur-sm z-10 py-4 border-b border-border">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Flux d&apos;actualités</h1>
+          <h1 className="text-2xl font-bold text-foreground">Les nouveautés</h1>
           <p className="text-muted-foreground text-sm">Découvrez les dernières nouveautés</p>
         </div>
         <Button

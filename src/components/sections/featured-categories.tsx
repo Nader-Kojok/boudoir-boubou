@@ -38,9 +38,9 @@ const fallbackCategories: CategoryStats[] = [
     productCount: 0
   },
   {
-    id: "casual",
-    name: "Décontracté",
-    description: "Tenues du quotidien, robes et ensembles casual",
+    id: "tradi-casual",
+    name: "Tradi-casual",
+    description: "Tenues du quotidien, robes et ensembles tradi-casual",
     image: "/categories/tradi-casual.webp",
     productCount: 0
   }
@@ -85,7 +85,7 @@ export function FeaturedCategories() {
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Découvrez les différentes catégories de vêtements mis en vente par notre 
-            communauté de vendeuses sénégalaises.
+            communauté de vendeuses Sénégalaises.
           </p>
         </div>
         

@@ -64,7 +64,7 @@ export default function FeedPage() {
         {/* Header avec identité graphique */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-primary mb-2">
-            Votre Feed Social
+            Mon Boudoir
           </h1>
           <p className="text-muted-foreground text-lg">
             Découvrez les dernières nouveautés de vos vendeurs préférés

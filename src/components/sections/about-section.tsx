@@ -25,7 +25,7 @@ const values = [
   {
     icon: Award,
     title: "Authenticité",
-    description: "Des vêtements uniques avec une histoire, portés avec amour par des femmes sénégalaises."
+    description: "Des vêtements uniques avec une histoire, portés avec amour par des femmes Sénégalaises."
   }
 ]
 
@@ -44,7 +44,7 @@ export function AboutSection() {
                 Le Boudoir du BouBou
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Créée pour les femmes sénégalaises qui souhaitent donner une seconde vie 
+                Créée pour les femmes Sénégalaises qui souhaitent donner une seconde vie 
                 à leurs plus belles tenues, notre plateforme connecte vendeuses et acheteuses 
                 dans un esprit de partage et de durabilité.
               </p>

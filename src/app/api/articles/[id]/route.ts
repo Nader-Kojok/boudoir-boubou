@@ -258,7 +258,7 @@ export async function PUT(
       'mariage': 'mariage',
       'soiree': 'soiree', 
       'traditionnel': 'traditionnel',
-      'casual': 'casual',
+      'tradi-casual': 'tradi-casual',
       'accessoires': 'accessoires'
     }
 

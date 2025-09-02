@@ -22,12 +22,12 @@ async function main() {
     {
       name: 'Vêtements traditionnels',
       slug: 'traditionnel',
-      description: 'Boubous, bazin riche et tenues traditionnelles sénégalaises',
+      description: 'Boubous, bazin riche et tenues traditionnelles Sénégalaises',
       image: '/categories/tradi.webp'
     },
     {
-      name: 'Vêtements casual',
-      slug: 'casual',
+      name: 'Vêtements tradi-casual',
+    slug: 'tradi-casual',
       description: 'Tenues décontractées pour le quotidien',
       image: '/categories/tradi-casual.webp'
     },

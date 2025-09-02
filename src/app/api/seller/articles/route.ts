@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
     let orderBy: {
       createdAt?: 'desc' | 'asc';
       price?: 'desc' | 'asc';
-      favorites?: { _count: 'desc' | 'asc' };
+  
     } = { createdAt: 'desc' } // Par défaut: plus récent
 
     switch (sortBy) {
@@ -94,9 +94,7 @@ export async function GET(request: NextRequest) {
       case 'price-low':
         orderBy = { price: 'asc' }
         break
-      case 'favorites':
-        orderBy = { favorites: { _count: 'desc' } }
-        break
+
       case 'recent':
       default:
         orderBy = { createdAt: 'desc' }
@@ -116,7 +114,7 @@ export async function GET(request: NextRequest) {
           },
           _count: {
             select: {
-              favorites: true
+      
             }
           }
         },
@@ -136,7 +134,7 @@ export async function GET(request: NextRequest) {
       images: JSON.parse(article.images),
       condition: article.condition,
       isAvailable: article.isAvailable,
-      favorites: article._count?.favorites || 0,
+
       views: article.views,
       createdAt: article.createdAt.toISOString(),
       updatedAt: article.updatedAt.toISOString(),

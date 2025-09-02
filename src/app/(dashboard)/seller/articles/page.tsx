@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Package, 
   Eye, 
-  Heart,
   Edit,
   Trash2,
   Search,
@@ -34,7 +33,6 @@ interface Article {
   condition: 'EXCELLENT' | 'GOOD' | 'FAIR'
   isAvailable: boolean
   views: number
-  favorites: number
   createdAt: string
   updatedAt: string
   category: {
@@ -284,7 +282,7 @@ export default function ArticlesPage() {
                 <SelectItem value="price-high">Prix décroissant</SelectItem>
                 <SelectItem value="price-low">Prix croissant</SelectItem>
                 <SelectItem value="views">Plus de vues</SelectItem>
-                <SelectItem value="favorites">Plus de favoris</SelectItem>
+
               </SelectContent>
             </Select>
           </div>
@@ -337,10 +335,6 @@ export default function ArticlesPage() {
                     <span className="flex items-center gap-1">
                       <Eye className="w-3 h-3" />
                       {article.views}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-3 h-3" />
-                      {article.favorites}
                     </span>
                   </div>
                 </div>

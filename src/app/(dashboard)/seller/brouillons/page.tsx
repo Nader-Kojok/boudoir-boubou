@@ -164,7 +164,7 @@ export default function BrouillonsPage() {
       'mariage': 'Tenues de mariage',
       'soiree': 'Tenues de soirée',
       'traditionnel': 'Vêtements traditionnels',
-      'casual': 'Vêtements casual',
+      'tradi-casual': 'Vêtements tradi-casual',
       'accessoires': 'Accessoires'
     }
     return categories[category] || category

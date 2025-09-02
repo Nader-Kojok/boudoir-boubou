@@ -89,7 +89,7 @@ export function Footer({ className }: FooterProps) {
                 />
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                La première plateforme sénégalaise de vente de vêtements entre particuliers.
+                La première plateforme Sénégalaise de vente de vêtements entre particuliers.
               </p>
               <div className="flex space-x-3">
                 {socialLinks.map((item) => {
