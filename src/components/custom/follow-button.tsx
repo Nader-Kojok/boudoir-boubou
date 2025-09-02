@@ -80,7 +80,7 @@ export function FollowButton({
     if (isFollowing) {
       return (
         <>
-          {showIcon && <UserMinus className="h-4 w-4" />}
+          {showIcon ? <UserMinus className="h-4 w-4" /> : size === 'sm' ? <UserMinus className="h-4 w-4" /> : null}
           {size !== 'sm' && 'Ne plus suivre'}
         </>
       );
@@ -88,7 +88,7 @@ export function FollowButton({
 
     return (
       <>
-        {showIcon && <UserPlus className="h-4 w-4" />}
+        {showIcon ? <UserPlus className="h-4 w-4" /> : size === 'sm' ? <UserPlus className="h-4 w-4" /> : null}
         {size !== 'sm' && 'Suivre'}
       </>
     );

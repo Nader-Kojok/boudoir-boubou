@@ -91,6 +91,29 @@ export default function SellerPage() {
     window.open(whatsappUrl, '_blank')
   }
 
+  const handleArticleWhatsAppContact = (articleId: string, sellerWhatsApp: string, title: string) => {
+    const message = encodeURIComponent(
+      `Bonjour, je suis intéressé(e) par votre article "${title}" sur Boudoir.`
+    )
+    const whatsappUrl = `https://wa.me/${sellerWhatsApp}?text=${message}`
+    window.open(whatsappUrl, '_blank')
+  }
+
+  const handleFavoriteToggle = async (articleId: string) => {
+    try {
+      const response = await fetch(`/api/articles/${articleId}/favorite`, {
+        method: 'POST',
+      })
+      
+      if (response.ok) {
+        // Optionally update local state or refetch data
+        console.log('Article ajouté aux favoris')
+      }
+    } catch (error) {
+      console.error('Erreur lors de la gestion des favoris:', error)
+    }
+  }
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -243,6 +266,10 @@ export default function SellerPage() {
                     condition={article.condition as 'EXCELLENT' | 'GOOD' | 'FAIR'}
                     images={article.images ? JSON.parse(article.images as string) : []}
                     category={article.category.name}
+                    sellerWhatsApp={seller?.whatsappNumber}
+                    sellerName={seller?.name}
+                    onFavoriteToggle={handleFavoriteToggle}
+                    onWhatsAppContact={handleArticleWhatsAppContact}
                     onClick={(id) => router.push(`/article/${id}`)}
                   />
                 ))}

@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Menu, X, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuthButton } from "@/components/auth/auth-button"
+import { NotificationBell } from "@/components/custom/notification-bell"
 
 interface HeaderProps {
   className?: string
@@ -54,6 +55,7 @@ export function Header({ className }: HeaderProps) {
 
           {/* Actions desktop */}
           <div className="hidden md:flex items-center space-x-4">
+            <NotificationBell />
             <Button variant="ghost" size="sm" className="relative" asChild>
               <Link href="/buyer/favoris">
                 <Heart className="h-5 w-5" />
@@ -97,6 +99,7 @@ export function Header({ className }: HeaderProps) {
               ))}
               <div className="border-t border-border pt-4 pb-3">
                 <div className="flex items-center px-3 space-x-3">
+                  <NotificationBell />
                   <Button variant="ghost" size="sm" className="flex-1 justify-start" asChild>
                     <Link href="/buyer/favoris" onClick={() => setMobileMenuOpen(false)}>
                       <Heart className="h-5 w-5 mr-2" />

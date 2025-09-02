@@ -63,7 +63,8 @@ export async function GET(
       prisma.article.findMany({
         where: {
           sellerId: id,
-          isAvailable: true
+          isAvailable: true,
+          status: 'APPROVED'
         },
         include: {
           category: {

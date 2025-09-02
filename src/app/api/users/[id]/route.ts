@@ -43,6 +43,8 @@ export async function GET(
         image: true,
         bannerImage: true,
         role: true,
+        location: true,
+        whatsappNumber: true,
         createdAt: true,
         _count: {
           select: {
@@ -90,7 +92,8 @@ export async function GET(
         prisma.article.findMany({
           where: {
             sellerId: id,
-            isAvailable: true
+            isAvailable: true,
+            status: 'APPROVED'
           },
           select: {
             id: true,
@@ -123,7 +126,8 @@ export async function GET(
         prisma.article.count({
           where: {
             sellerId: id,
-            isAvailable: true
+            isAvailable: true,
+            status: 'APPROVED'
           }
         })
       ])

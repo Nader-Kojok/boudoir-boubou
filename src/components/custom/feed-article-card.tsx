@@ -103,7 +103,7 @@ export function FeedArticleCard({
               {/* Category badge */}
               {category && (
                 <div className="absolute bottom-2 left-2">
-                  <Badge variant="secondary" className="bg-white/90 text-black text-xs">
+                  <Badge variant="secondary" className="bg-background/90 text-foreground text-xs">
                     {category.name}
                   </Badge>
                 </div>

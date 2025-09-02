@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
+import { createNewArticleFeedItem } from '@/lib/feed-utils'
+import { createNewArticleNotifications } from '@/lib/notification-utils'
 
 // Schéma de validation pour les actions de modération
   const moderationSchema = z.object({
@@ -214,6 +216,20 @@ export async function POST(request: NextRequest) {
 
       return updatedArticle
     })
+
+    // Si l'article est approuvé, créer le FeedItem et les notifications
+    if (validatedData.action === 'APPROVE') {
+      try {
+        // Créer l'élément de feed
+        await createNewArticleFeedItem(result.sellerId, result.id)
+        
+        // Créer les notifications pour les followers
+        await createNewArticleNotifications(result.sellerId, result.id, result.title)
+      } catch (feedError) {
+        console.error('Erreur lors de la création du feed/notifications:', feedError)
+        // Ne pas faire échouer la modération si le feed/notifications échouent
+      }
+    }
 
     const message = validatedData.action === 'APPROVE' 
       ? 'Article approuvé et publié avec succès'

@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProductCard } from '@/components/custom/product-card'
 import { Pagination } from '@/components/custom/pagination'
 import { ReportButton } from '@/components/ui/report-button'
-import { Calendar, Package, Star, User, Heart } from 'lucide-react'
+import { Calendar, Package, Star, User, Heart, Phone, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -19,6 +19,8 @@ interface User {
   image?: string
   bannerImage?: string
   role: 'BUYER' | 'SELLER'
+  location?: string
+  whatsappNumber?: string
   createdAt: string
   _count: {
     articles: number
@@ -98,6 +100,16 @@ export default function UserProfilePage() {
       default:
         return 'Utilisateur'
     }
+  }
+
+  const handleWhatsAppContact = () => {
+    if (!user?.whatsappNumber) return
+    
+    const message = encodeURIComponent(
+      `Bonjour ${user.name}, j'ai vu votre profil sur Boudoir et j'aimerais discuter avec vous.`
+    )
+    const whatsappUrl = `https://wa.me/${user.whatsappNumber}?text=${message}`
+    window.open(whatsappUrl, '_blank')
   }
 
   if (loading) {
@@ -202,12 +214,20 @@ export default function UserProfilePage() {
                     {getRoleLabel(user.role)}
                   </Badge>
                 </div>
-                <ReportButton
-                  type="USER"
-                  targetId={user.id}
-                  variant="outline"
-                  size="sm"
-                />
+                <div className="flex items-center gap-2">
+                  {user.role === 'SELLER' && user.whatsappNumber && (
+                    <Button onClick={handleWhatsAppContact}>
+                      <Phone className="h-4 w-4 mr-2" />
+                      Contacter
+                    </Button>
+                  )}
+                  <ReportButton
+                    type="USER"
+                    targetId={user.id}
+                    variant="outline"
+                    size="sm"
+                  />
+                </div>
               </div>
               
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -215,6 +235,13 @@ export default function UserProfilePage() {
                   <Calendar className="h-4 w-4" />
                   <span>Membre depuis {formatDate(user.createdAt)}</span>
                 </div>
+                
+                {user.location && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    <span>{user.location}</span>
+                  </div>
+                )}
                 
                 {user.role === 'SELLER' && user.averageRating && (
                   <div className="flex items-center gap-2">

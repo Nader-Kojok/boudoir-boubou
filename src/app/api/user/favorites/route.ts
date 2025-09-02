@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { favoriteFilterSchema } from '@/lib/validations/favorite'
+import { ArticleStatus } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,36 +17,23 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '12')
-    const sortBy = searchParams.get('sortBy') || 'date_desc'
-    const categoryId = searchParams.get('categoryId') || undefined
-
-    // Validate parameters
     const validatedParams = favoriteFilterSchema.parse({
-      page,
-      limit,
-      sortBy,
-      categoryId,
-      userId: session.user.id
+      page: parseInt(searchParams.get('page') || '1'),
+      limit: parseInt(searchParams.get('limit') || '10'),
+      sortBy: searchParams.get('sortBy') || 'date_desc',
+      categoryId: searchParams.get('categoryId') || undefined,
     })
 
+    const skip = (validatedParams.page - 1) * validatedParams.limit
+
     // Build where clause
-    const where: {
-      userId: string;
-      article: {
-        isAvailable: boolean;
-        categoryId?: string;
-      };
-    } = {
+    const where = {
       userId: session.user.id,
       article: {
         isAvailable: true,
-      },
-    }
-
-    if (validatedParams.categoryId) {
-      where.article.categoryId = validatedParams.categoryId
+        status: 'APPROVED' as ArticleStatus,
+        ...(validatedParams.categoryId && { categoryId: validatedParams.categoryId })
+      }
     }
 
     // Build orderBy clause
@@ -57,7 +45,7 @@ export async function GET(request: NextRequest) {
         createdAt?: 'desc' | 'asc';
       };
     } = { createdAt: 'desc' }
-    
+
     switch (validatedParams.sortBy) {
       case 'date_asc':
         orderBy = { createdAt: 'asc' }
@@ -75,72 +63,59 @@ export async function GET(request: NextRequest) {
         orderBy = { createdAt: 'desc' }
     }
 
-    // Get total count
-    const total = await prisma.favorite.count({ where })
-    
-    // Calculate pagination
-    const totalPages = Math.ceil(total / validatedParams.limit)
-    const skip = (validatedParams.page - 1) * validatedParams.limit
-
-    // Fetch favorites with pagination
-    const favorites = await prisma.favorite.findMany({
-      where,
-      include: {
-        article: {
-          include: {
-            seller: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-                whatsappNumber: true
-              }
-            },
-            category: {
-              select: {
-                id: true,
-                name: true,
-                slug: true
-              }
-            },
-            _count: {
-              select: {
-                favorites: true,
-                reviews: true
+    // Get favorites with pagination
+    const [favorites, totalCount] = await Promise.all([
+      prisma.favorite.findMany({
+        where,
+        include: {
+          article: {
+            include: {
+              seller: {
+                select: {
+                  id: true,
+                  name: true,
+                  image: true,
+                  location: true,
+                  whatsappNumber: true
+                }
+              },
+              category: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              },
+              _count: {
+                select: {
+                  favorites: true,
+                  reviews: true
+                }
               }
             }
           }
-        }
-      },
-      orderBy,
-      skip,
-      take: validatedParams.limit
-    })
+        },
+        orderBy,
+        skip,
+        take: validatedParams.limit
+      }),
+      prisma.favorite.count({ where })
+    ])
 
-    // Calculate average rating for each article
-    const favoritesWithRating = await Promise.all(
-      favorites.map(async (favorite) => {
-        const avgRating = await prisma.review.aggregate({
-          where: { articleId: favorite.article.id },
-          _avg: { rating: true }
-        })
+    // Format response
+    const formattedFavorites = favorites.map(favorite => ({
+      id: favorite.id,
+      createdAt: favorite.createdAt,
+      article: favorite.article
+    }))
 
-        return {
-          ...favorite,
-          article: {
-            ...favorite.article,
-            averageRating: avgRating._avg.rating || undefined
-          }
-        }
-      })
-    )
+    const totalPages = Math.ceil(totalCount / validatedParams.limit)
 
     return NextResponse.json({
-      favorites: favoritesWithRating,
+      favorites: formattedFavorites,
       pagination: {
         page: validatedParams.page,
         limit: validatedParams.limit,
-        total,
+        total: totalCount,
         totalPages,
         hasNext: validatedParams.page < totalPages,
         hasPrev: validatedParams.page > 1

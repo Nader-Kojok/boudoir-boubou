@@ -5,7 +5,7 @@ import { SocialFeed } from '@/components/custom/social-feed';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users } from 'lucide-react';
+import { Users, Package } from 'lucide-react';
 import Link from 'next/link';
 import { FollowButton } from '@/components/custom/follow-button';
 import { toast } from 'sonner';
@@ -113,9 +113,16 @@ export default function FeedPage() {
                           <Link href={`/seller/${seller.id}`} className="hover:underline">
                             <p className="font-medium text-sm truncate text-foreground">{seller.name}</p>
                           </Link>
-                          <p className="text-xs text-muted-foreground">
-                            {seller.stats.followersCount} followers • {seller.stats.articlesCount} articles
-                          </p>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              {seller.stats.followersCount}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Package className="h-3 w-3" />
+                              {seller.stats.articlesCount}
+                            </span>
+                          </div>
                         </div>
                         <FollowButton
                           userId={seller.id}

@@ -58,7 +58,8 @@ export async function GET(request: NextRequest) {
           prisma.article.count({
             where: {
               sellerId: seller.id,
-              status: 'PUBLISHED'
+              status: 'APPROVED',
+              isAvailable: true
             }
           }),
           prisma.follow.count({

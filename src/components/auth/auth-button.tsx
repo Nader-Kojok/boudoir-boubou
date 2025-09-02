@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LogIn, LogOut, User, LayoutDashboard, ShoppingBag, Settings, Shield } from "lucide-react"
+import { LogIn, LogOut, User, LayoutDashboard, ShoppingBag, Settings, Shield, Rss } from "lucide-react"
 import Link from "next/link"
 
 export function AuthButton() {
@@ -54,12 +54,6 @@ export function AuthButton() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link href="/dashboard/profile">
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Mon profil</span>
-            </Link>
-          </DropdownMenuItem>
           {session.user.role === "ADMIN" && (
             <DropdownMenuItem asChild>
               <Link href="/admin/moderation">
@@ -86,12 +80,18 @@ export function AuthButton() {
           )}
           {session.user.role === "BUYER" && (
             <DropdownMenuItem asChild>
-              <Link href="/buyer">
-                <ShoppingBag className="mr-2 h-4 w-4" />
-                <span>Mes achats</span>
+              <Link href="/feed">
+                <Rss className="mr-2 h-4 w-4" />
+                <span>Mon feed</span>
               </Link>
             </DropdownMenuItem>
           )}
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/profile">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Mon profil</span>
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => signOut()}>
             <LogOut className="mr-2 h-4 w-4" />

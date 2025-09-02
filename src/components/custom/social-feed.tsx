@@ -157,10 +157,10 @@ export function SocialFeed({ className }: SocialFeedProps) {
   return (
     <div className={className}>
       {/* Header avec refresh */}
-      <div className="flex items-center justify-between mb-6 sticky top-0 bg-white/80 backdrop-blur-sm z-10 py-4 border-b">
+      <div className="flex items-center justify-between mb-6 sticky top-0 bg-background/80 backdrop-blur-sm z-10 py-4 border-b border-border">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Flux d&apos;actualités</h1>
-          <p className="text-gray-600 text-sm">Découvrez les dernières nouveautés</p>
+          <h1 className="text-2xl font-bold text-foreground">Flux d&apos;actualités</h1>
+          <p className="text-muted-foreground text-sm">Découvrez les dernières nouveautés</p>
         </div>
         <Button
           onClick={refreshFeed}
@@ -178,11 +178,11 @@ export function SocialFeed({ className }: SocialFeedProps) {
         <Card className="text-center py-16">
           <CardContent>
             <div className="max-w-md mx-auto">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Package className="h-10 w-10 text-gray-400" />
+              <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                <Package className="h-10 w-10 text-muted-foreground" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Votre feed est vide</h3>
-              <p className="text-gray-600 mb-6">
+              <h3 className="text-xl font-semibold text-foreground mb-2">Votre feed est vide</h3>
+              <p className="text-muted-foreground mb-6">
                 Suivez des vendeurs pour voir leurs dernières actualités et découvrir de nouveaux produits !
               </p>
               <Button asChild size="lg">
@@ -228,7 +228,7 @@ export function SocialFeed({ className }: SocialFeedProps) {
               >
                 {loading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-foreground mr-2"></div>
                     Chargement...
                   </>
                 ) : (
