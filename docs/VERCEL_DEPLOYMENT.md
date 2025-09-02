@@ -14,6 +14,9 @@ NEXTAUTH_SECRET=votre-secret-super-securise-minimum-32-caracteres
 # Base de données (OBLIGATOIRE)
 DATABASE_URL=postgresql://username:password@host:port/database
 
+# Mode développement pour récupération de mot de passe (Optionnel)
+ENABLE_DEV_MODE=true
+
 # Google OAuth (Optionnel)
 GOOGLE_CLIENT_ID=votre-google-client-id
 GOOGLE_CLIENT_SECRET=votre-google-client-secret
@@ -35,6 +38,12 @@ GOOGLE_CLIENT_SECRET=votre-google-client-secret
 - Les cookies sont automatiquement configurés pour la production
 - Utilisation de `__Secure-` et `__Host-` prefixes
 - Domain configuré pour `.vercel.app`
+
+#### 4. ENABLE_DEV_MODE (Optionnel)
+- Permet d'activer le mode développement sur Vercel
+- Affiche les liens directs de réinitialisation de mot de passe
+- Utile pour les tests en production sans service SMS configuré
+- Valeurs : `true` ou `false` (par défaut)
 
 ## Problèmes Courants et Solutions
 

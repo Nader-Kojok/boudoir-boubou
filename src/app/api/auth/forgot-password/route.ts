@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
     // Envoyer le SMS de réinitialisation
     await sendPasswordResetSMS(phone, resetToken)
 
-    // En mode développement, inclure le token dans la réponse
-    const isDevelopment = process.env.NODE_ENV === 'development'
+    // En mode développement ou si ENABLE_DEV_MODE est activé, inclure le token dans la réponse
+    const isDevelopment = process.env.NODE_ENV === 'development' || process.env.ENABLE_DEV_MODE === 'true'
     
     return NextResponse.json(
       {
