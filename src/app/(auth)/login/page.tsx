@@ -112,7 +112,7 @@ function LoginForm() {
             Connexion
           </CardTitle>
           <CardDescription className="text-center">
-            Connectez-vous à votre compte Boudoir
+            Connectez-vous à votre compte Boudoir du Boubou
           </CardDescription>
         </CardHeader>
         

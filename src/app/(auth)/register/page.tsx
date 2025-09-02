@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Separator } from '@/components/ui/separator'
+
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Icons } from '@/components/ui/icons'
@@ -88,26 +88,17 @@ export default function RegisterPage() {
     }
   }
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true)
-    try {
-      await signIn('google', { callbackUrl: '/dashboard' })
-    } catch {
-      setAuthError('Erreur lors de la connexion avec Google')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 py-12 px-4 flex justify-center">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-lg">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             Inscription
           </CardTitle>
           <CardDescription className="text-center">
-            Créez votre compte Boudoir
+            Créez votre compte Boudoir du Boubou
           </CardDescription>
         </CardHeader>
         
@@ -261,23 +252,26 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-start space-x-3">
               <Checkbox
                 id="acceptTerms"
                 checked={watchAcceptTerms}
                 onCheckedChange={(checked) => setValue('acceptTerms', checked as boolean)}
                 disabled={isLoading}
+                className="mt-1 flex-shrink-0"
               />
-              <Label htmlFor="acceptTerms" className="text-sm cursor-pointer">
-                J&apos;accepte les{' '}
-                <Link href="/terms" className="text-primary hover:underline">
-                  conditions d&apos;utilisation
-                </Link>{' '}
-                et la{' '}
-                <Link href="/privacy" className="text-primary hover:underline">
-                  politique de confidentialité
-                </Link>
-              </Label>
+              <div className="flex-1">
+                <Label htmlFor="acceptTerms" className="text-sm cursor-pointer leading-relaxed block">
+                  J&apos;accepte les{' '}
+                  <Link href="/terms" className="text-primary hover:underline">
+                    conditions d&apos;utilisation
+                  </Link>{' '}
+                  et la{' '}
+                  <Link href="/privacy" className="text-primary hover:underline">
+                    politique de confidentialité
+                  </Link>
+                </Label>
+              </div>
             </div>
             {errors.acceptTerms && (
               <p className="text-sm text-destructive">{errors.acceptTerms.message}</p>
@@ -295,31 +289,7 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Ou continuer avec
-              </span>
-            </div>
-          </div>
 
-          <Button
-            variant="outline"
-            type="button"
-            className="w-full"
-            onClick={handleGoogleSignIn}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Icons.google className="mr-2 h-4 w-4" />
-            )}
-            Google
-          </Button>
         </CardContent>
 
         <CardFooter>

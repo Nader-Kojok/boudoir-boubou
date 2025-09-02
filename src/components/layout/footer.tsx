@@ -38,7 +38,7 @@ const footerNavigation = {
 const socialLinks = [
   {
     name: "Instagram",
-    href: "#",
+    href: "https://www.instagram.com/leboudoirduboubou/#",
     icon: Instagram,
   },
   {
@@ -94,6 +94,22 @@ export function Footer({ className }: FooterProps) {
               <div className="flex space-x-3">
                 {socialLinks.map((item) => {
                   const Icon = item.icon
+                  const isExternal = item.href.startsWith('http')
+                  
+                  if (isExternal) {
+                    return (
+                      <a
+                        key={item.name}
+                        href={item.href}
+                        target="_self"
+                        className="text-muted-foreground hover:text-boudoir-ocre-500 transition-colors duration-200"
+                      >
+                        <span className="sr-only">{item.name}</span>
+                        <Icon className="h-5 w-5" />
+                      </a>
+                    )
+                  }
+                  
                   return (
                     <Link
                       key={item.name}
