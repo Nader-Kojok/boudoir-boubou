@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/validations/auth'
@@ -14,6 +15,7 @@ import { Icons } from '@/components/ui/icons'
 import { Phone, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function ForgotPasswordPage() {
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [smsSent, setSmsSent] = useState(false)
@@ -45,6 +47,16 @@ export default function ForgotPasswordPage() {
 
       if (!response.ok) {
         throw new Error(result.message || 'Erreur lors de l&apos;envoi du SMS')
+      }
+
+      // En mode développement, rediriger directement vers la page de changement de mot de passe
+      if (result.resetLink) {
+        const url = new URL(result.resetLink)
+        const token = url.searchParams.get('token')
+        if (token) {
+          router.push(`/reset-password?token=${token}`)
+          return
+        }
       }
 
       setSmsSent(true)
@@ -109,7 +121,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4">
       <Link
         href="/login"
         className="absolute left-4 top-4 md:left-8 md:top-8 flex items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
@@ -118,7 +130,7 @@ export default function ForgotPasswordPage() {
         Retour à la connexion
       </Link>
 
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
+      <div className="w-full max-w-md space-y-6">
         <Card>
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">

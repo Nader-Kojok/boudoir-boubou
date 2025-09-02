@@ -133,7 +133,7 @@ export default function PaymentSelection({ amount, onPaymentSuccess, onCancel, i
               disabled={isProcessingPayment || isProcessing}
               className="w-full bg-green-600 hover:bg-green-700"
             >
-              {isProcessingPayment ? 'Vérification...' : isProcessing ? 'Traitement...' : 'J&apos;ai effectué le paiement'}
+              {isProcessingPayment ? 'Vérification...' : isProcessing ? 'Traitement...' : 'J\'ai effectué le paiement'}
             </Button>
             
             <Button 

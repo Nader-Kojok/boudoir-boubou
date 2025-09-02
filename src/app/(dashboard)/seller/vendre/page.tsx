@@ -493,10 +493,7 @@ export default function VendrePage() {
                   Ajoute des photos
                 </CardTitle>
                 <p className="text-sm text-boudoir-beige-700">
-                  Attire l&apos;œil des acheteurs : utilise des photos de qualité.
-                  <a href="#" className="text-boudoir-ocre-600 hover:underline ml-1">
-                    Découvre comment
-                  </a>
+                  Attire l'œil des acheteurs : utilise des photos de qualité.
                 </p>
               </CardHeader>
               <CardContent className="p-6">
@@ -748,14 +745,10 @@ export default function VendrePage() {
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel className="text-sm text-boudoir-beige-900">
-                          Que penses-tu de notre procédure pour ajouter de nouveaux articles ?
+                          J'accepte les conditions d'utilisation de Boudoir du Boubou
                         </FormLabel>
                         <FormDescription className="text-boudoir-beige-700">
-                          Un vendeur professionnel se faisant passer pour un consommateur ou un non-professionnel sur Vinted encourt les sanctions prévues à l&apos;
-                          <a href="#" className="text-boudoir-ocre-600 hover:underline">
-                            Article L. 132-2
-                          </a>
-                          {' '}du Code de la Consommation.
+                          En cochant cette case, je confirme que je respecte les règles de la plateforme Boudoir du Boubou et que les informations fournies sont exactes. Je m'engage à vendre des articles authentiques et en bon état.
                         </FormDescription>
                         <FormMessage />
                       </div>

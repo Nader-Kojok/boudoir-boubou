@@ -28,12 +28,12 @@ interface PromotionOptionsProps {
 const PROMOTION_OPTIONS: PromotionOption[] = [
   {
     id: 'featured_homepage',
-    name: 'Mise en avant page d&apos;accueil',
+    name: 'Mise en avant page d\'accueil',
     description: 'Votre article apparaîtra dans la section "Articles en vedette" de la page d&apos;accueil',
     price: 2000,
     duration: '7 jours',
     features: [
-      'Position privilégiée sur la page d&apos;accueil',
+      'Position privilégiée sur la page d\'accueil',
       'Badge "En vedette"',
       'Visibilité maximale',
       'Augmentation des vues de +300%'
@@ -64,7 +64,7 @@ const PROMOTION_OPTIONS: PromotionOption[] = [
     features: [
       'Bordure colorée distinctive',
       'Badge "Highlight"',
-      'Attire l&apos;attention',
+      'Attire l\'attention',
       'Augmentation des clics de +50%'
     ],
     icon: <Zap className="w-5 h-5" />
@@ -145,7 +145,7 @@ export default function PromotionOptions({ selectedPromotions, onPromotionChange
                   id={option.id}
                   checked={isSelected}
                   onCheckedChange={(checked) => handleOptionToggle(option.id, checked as boolean)}
-                  className="mt-1"
+                  className="mt-1 border-2 border-gray-400 data-[state=checked]:!bg-amber-700 data-[state=checked]:!border-amber-700 data-[state=checked]:!text-white [&>svg]:data-[state=checked]:!text-white"
                 />
                 
                 <div className="flex-1 space-y-3">
@@ -161,7 +161,7 @@ export default function PromotionOptions({ selectedPromotions, onPromotionChange
                         >
                           <span>{option.name}</span>
                           {option.popular && (
-                            <Badge className="bg-boudoir-ocre-600 text-white text-xs">
+                            <Badge className="bg-amber-700 text-white text-xs">
                               Populaire
                             </Badge>
                           )}
@@ -183,13 +183,48 @@ export default function PromotionOptions({ selectedPromotions, onPromotionChange
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-2">
-                    {option.features.map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-1 text-xs text-boudoir-beige-700">
-                        <div className="w-1 h-1 bg-boudoir-ocre-400 rounded-full"></div>
-                        <span>{feature}</span>
-                      </div>
-                    ))}
+                  <div className="flex flex-wrap gap-2">
+                    {option.features.map((feature, index) => {
+                      // Classification complète et exhaustive des features
+                      let badgeClass = "bg-gray-100 text-gray-800 hover:bg-gray-200" // Couleur par défaut
+                      
+                      const featureLower = feature.toLowerCase()
+                      
+                      // Badges et positions privilégiées (Orange boudoir)
+                      if (featureLower.includes('badge') || featureLower.includes('position') || featureLower.includes('privilégiée') || featureLower.includes('privilégié')) {
+                        badgeClass = "bg-boudoir-ocre-100 text-boudoir-ocre-800 hover:bg-boudoir-ocre-200"
+                      }
+                      // Statistiques et augmentations (Vert)
+                      else if (featureLower.includes('augmentation') || featureLower.includes('+') || featureLower.includes('%') || featureLower.includes('vues') || featureLower.includes('clics')) {
+                        badgeClass = "bg-green-100 text-green-800 hover:bg-green-200"
+                      }
+                      // Visibilité et priorité (Bleu)
+                      else if (featureLower.includes('visibilité') || featureLower.includes('priorité') || featureLower.includes('classement') || featureLower.includes('maximale') || featureLower.includes('constante') || featureLower.includes('résultats') || featureLower.includes('recherche')) {
+                        badgeClass = "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                      }
+                      // Éléments visuels distinctifs (Violet)
+                      else if (featureLower.includes('bordure') || featureLower.includes('attire') || featureLower.includes('distinctive') || featureLower.includes('attention') || featureLower.includes('colorée')) {
+                        badgeClass = "bg-purple-100 text-purple-800 hover:bg-purple-200"
+                      }
+                      // Durée et temporalité (Orange)
+                      else if (featureLower.includes('durée') || featureLower.includes('prolongée') || featureLower.includes('réapparition') || featureLower.includes('périodique') || featureLower.includes('vie')) {
+                        badgeClass = "bg-orange-100 text-orange-800 hover:bg-orange-200"
+                      }
+                      // Améliorations et portée (Teal)
+                      else if (featureLower.includes('meilleur') || featureLower.includes('portée') || featureLower.includes('élargie') || featureLower.includes('étendue')) {
+                        badgeClass = "bg-teal-100 text-teal-800 hover:bg-teal-200"
+                      }
+                      
+                      return (
+                        <Badge 
+                          key={index} 
+                          variant="secondary"
+                          className={`text-xs font-medium transition-colors ${badgeClass}`}
+                        >
+                          {feature}
+                        </Badge>
+                      )
+                    })}
                   </div>
                 </div>
               </div>

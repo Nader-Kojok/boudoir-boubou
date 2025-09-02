@@ -175,7 +175,7 @@ export function Footer({ className }: FooterProps) {
               <div className="space-y-3">
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                   <MapPin className="h-5 w-5" />
-                  <span>Paris, France</span>
+                  <span>Dakar, Sénégal</span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                   <Phone className="h-5 w-5" />
@@ -183,7 +183,7 @@ export function Footer({ className }: FooterProps) {
                 </div>
                 <div className="flex items-center space-x-3 text-sm text-muted-foreground">
                   <Mail className="h-5 w-5 flex-shrink-0" />
-                  <span className="break-all">contact@leboudoirduboubou.fr</span>
+                  <span className="break-all">contact@boudoirduboubou.sn</span>
                 </div>
               </div>
             </div>
