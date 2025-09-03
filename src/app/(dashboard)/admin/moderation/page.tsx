@@ -300,11 +300,12 @@ export default function ModerationPage() {
                           <p><strong>Montant:</strong> {article.payment.amount} FCFA</p>
                           <p><strong>Méthode:</strong> {article.payment.method}</p>
                           <p><strong>Transaction ID:</strong> {article.payment.transactionId}</p>
-                          <p><strong>Statut:</strong> 
-                            <Badge className="ml-1 bg-green-100 text-green-800">
+                          <div className="flex items-center gap-2">
+                            <span><strong>Statut:</strong></span>
+                            <Badge className="bg-green-100 text-green-800">
                               {article.payment.status}
                             </Badge>
-                          </p>
+                          </div>
                         </div>
                       </div>
                     )}

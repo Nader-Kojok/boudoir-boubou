@@ -3,6 +3,25 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
+// Fonction pour mapper le statut de la base de données vers le statut d'affichage
+function getDisplayStatus(dbStatus: string, isAvailable: boolean): string {
+  if (dbStatus === 'PENDING_MODERATION') {
+    return 'PENDING_MODERATION'
+  }
+  if (dbStatus === 'REJECTED') {
+    return 'REJECTED'
+  }
+  if (dbStatus === 'APPROVED') {
+    if (isAvailable) {
+      return 'ACTIVE'
+    } else {
+      return 'PAUSED'
+    }
+  }
+  // Pour les anciens articles ou cas particuliers
+  return isAvailable ? 'ACTIVE' : 'SOLD'
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -46,6 +65,7 @@ export async function GET(request: NextRequest) {
       sellerId: string;
       categoryId?: string;
       isAvailable?: boolean;
+      status?: 'PENDING_PAYMENT' | 'PENDING_MODERATION' | 'APPROVED' | 'REJECTED';
       OR?: Array<{
         title?: { contains: string; mode: 'insensitive' };
         description?: { contains: string; mode: 'insensitive' };
@@ -65,13 +85,19 @@ export async function GET(request: NextRequest) {
     // Filtre de statut
     if (status !== 'all') {
       if (status === 'active') {
+        where.status = 'APPROVED'
         where.isAvailable = true
       } else if (status === 'sold') {
         where.isAvailable = false
       } else if (status === 'paused') {
-        // Pour l'instant, on considère que "paused" = disponible mais pas affiché
-        // Cette logique peut être ajustée selon les besoins
-        where.isAvailable = true
+        where.status = 'APPROVED'
+        where.isAvailable = false
+      } else if (status === 'pending_moderation') {
+        where.status = 'PENDING_MODERATION'
+      } else if (status === 'approved') {
+        where.status = 'APPROVED'
+      } else if (status === 'rejected') {
+        where.status = 'REJECTED'
       }
     }
     
@@ -114,7 +140,8 @@ export async function GET(request: NextRequest) {
           },
           _count: {
             select: {
-      
+              favorites: true,
+              reviews: true
             }
           }
         },
@@ -126,21 +153,32 @@ export async function GET(request: NextRequest) {
     ])
     
     // Formatage des données
-    const formattedArticles = articles.map(article => ({
-      id: article.id,
-      title: article.title,
-      description: article.description,
-      price: article.price,
-      images: JSON.parse(article.images),
-      condition: article.condition,
-      isAvailable: article.isAvailable,
-
-      views: article.views,
-      createdAt: article.createdAt.toISOString(),
-      updatedAt: article.updatedAt.toISOString(),
-      category: article.category,
-      status: article.isAvailable ? 'ACTIVE' : 'SOLD' // Logique simplifiée
-    }))
+    const formattedArticles = articles.map(article => {
+      let images = []
+      try {
+        images = article.images ? JSON.parse(article.images) : []
+      } catch (error) {
+        console.error('Erreur lors du parsing des images pour l\'article', article.id, error)
+        images = []
+      }
+      
+      return {
+        id: article.id,
+        title: article.title,
+        description: article.description,
+        price: article.price,
+        images,
+        condition: article.condition,
+        isAvailable: article.isAvailable,
+        views: article.views,
+        createdAt: article.createdAt.toISOString(),
+        updatedAt: article.updatedAt.toISOString(),
+        category: article.category,
+        status: getDisplayStatus(article.status, article.isAvailable), // Mapper le statut pour l'affichage
+        favoritesCount: article._count.favorites,
+        reviewsCount: article._count.reviews
+      }
+    })
     
     return NextResponse.json({
       articles: formattedArticles,

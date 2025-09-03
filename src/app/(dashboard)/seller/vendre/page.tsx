@@ -60,8 +60,8 @@ type FormData = z.infer<typeof formSchema>
 const categories = [
   { value: 'mariage', label: 'Tenues de mariage' },
   { value: 'soiree', label: 'Tenues de soirée' },
-  { value: 'traditionnel', label: 'Vêtements traditionnels' },
   { value: 'tradi-casual', label: 'Vêtements tradi-casual' },
+  { value: 'casual', label: 'Vêtements casual' },
   { value: 'accessoires', label: 'Accessoires' },
 ]
 
@@ -727,6 +727,46 @@ export default function VendrePage() {
                 />
               </CardContent>
             </Card>
+
+            {/* Information sur la modération */}
+            {!isEditing && (
+              <Card className="border-blue-200 bg-blue-50">
+                <CardHeader className="bg-blue-100/50">
+                  <CardTitle className="text-blue-900 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Processus de modération
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-3 text-sm text-blue-800">
+                    <p className="font-medium">📋 Votre article sera examiné avant publication :</p>
+                    <ul className="space-y-2 ml-4">
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600">•</span>
+                        <span>Après paiement, votre article sera <strong>en attente de modération</strong></span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600">•</span>
+                        <span>Notre équipe vérifiera la qualité des photos et la conformité</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600">•</span>
+                        <span>Une fois approuvé, votre article sera visible sur la plateforme</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600">•</span>
+                        <span>Vous pouvez suivre le statut dans la section "Mes Articles"</span>
+                      </li>
+                    </ul>
+                    <p className="text-xs text-blue-600 mt-3">
+                      ⏱️ Délai de modération : généralement sous 24h
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Section Conditions */}
             <Card className="border-boudoir-beige-200">

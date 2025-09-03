@@ -38,7 +38,7 @@ export async function GET() {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
 
     // Récupérer les statistiques avec gestion sécurisée des connexions
-    const [totalArticles, totalSales, thisMonthSales, lastMonthSales, totalViews] = await Promise.all([
+    const [totalArticles, totalSales, thisMonthSales, lastMonthSales, totalViews, pendingModerationArticles] = await Promise.all([
       // Total des articles actifs
       safeDbOperation(
         () => prisma.article.count({
@@ -50,12 +50,13 @@ export async function GET() {
         'seller-dashboard-totalArticles'
       ),
       
-      // Total des ventes - maintenant basé sur les articles vendus (isAvailable: false)
+      // Total des ventes - basé sur les articles réellement vendus
       safeDbOperation(
         () => prisma.article.count({
           where: {
             sellerId,
-            isAvailable: false
+            isAvailable: false,
+            status: 'APPROVED' // Seuls les articles approuvés et non disponibles sont des ventes
           }
         }),
         'seller-dashboard-totalSales'
@@ -67,6 +68,7 @@ export async function GET() {
           where: {
             sellerId,
             isAvailable: false,
+            status: 'APPROVED',
             updatedAt: {
               gte: startOfMonth
             }
@@ -81,6 +83,7 @@ export async function GET() {
           where: {
             sellerId,
             isAvailable: false,
+            status: 'APPROVED',
             updatedAt: {
               gte: startOfLastMonth,
               lt: startOfMonth
@@ -94,6 +97,17 @@ export async function GET() {
       safeDbOperation(
         () => prisma.$queryRaw<Array<{ total: bigint }>>`SELECT COALESCE(SUM(views), 0) as total FROM "Article" WHERE "sellerId" = ${sellerId}`.then((result) => Number(result[0]?.total || 0)),
         'seller-dashboard-totalViews'
+      ),
+      
+      // Articles en attente de modération
+      safeDbOperation(
+        () => prisma.article.count({
+          where: {
+            sellerId,
+            status: 'PENDING_MODERATION'
+          }
+        }),
+        'seller-dashboard-pendingModeration'
       )
     ])
 
@@ -121,7 +135,8 @@ export async function GET() {
         },
         _count: {
           select: {
-    
+            favorites: true,
+            reviews: true
           }
         }
       },
@@ -143,7 +158,8 @@ export async function GET() {
       activeArticles: totalArticles,
       totalViews: totalViews,
       thisMonthSales,
-      salesGrowth: Number(salesGrowth.toFixed(1))
+      salesGrowth: Number(salesGrowth.toFixed(1)),
+      pendingModerationArticles
     }
 
     const formattedArticles = recentArticles.map(article => ({

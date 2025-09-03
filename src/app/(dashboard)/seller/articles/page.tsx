@@ -39,7 +39,7 @@ interface Article {
     id: string
     name: string
   }
-  status: 'ACTIVE' | 'SOLD' | 'PAUSED'
+  status: 'ACTIVE' | 'SOLD' | 'PAUSED' | 'PENDING_MODERATION' | 'APPROVED' | 'REJECTED'
 }
 
 export default function ArticlesPage() {
@@ -100,13 +100,19 @@ export default function ArticlesPage() {
     const variants = {
       ACTIVE: 'bg-green-100 text-green-800',
       SOLD: 'bg-blue-100 text-blue-800',
-      PAUSED: 'bg-yellow-100 text-yellow-800'
+      PAUSED: 'bg-yellow-100 text-yellow-800',
+      PENDING_MODERATION: 'bg-orange-100 text-orange-800',
+      APPROVED: 'bg-green-100 text-green-800',
+      REJECTED: 'bg-red-100 text-red-800'
     }
     
     const labels = {
       ACTIVE: 'Actif',
       SOLD: 'Vendu',
-      PAUSED: 'En pause'
+      PAUSED: 'En pause',
+      PENDING_MODERATION: 'En modération',
+      APPROVED: 'Approuvé',
+      REJECTED: 'Rejeté'
     }
 
     return (
@@ -257,6 +263,9 @@ export default function ArticlesPage() {
                 <SelectItem value="active">Actif</SelectItem>
                 <SelectItem value="sold">Vendu</SelectItem>
                 <SelectItem value="paused">En pause</SelectItem>
+                <SelectItem value="pending_moderation">En modération</SelectItem>
+                <SelectItem value="approved">Approuvé</SelectItem>
+                <SelectItem value="rejected">Rejeté</SelectItem>
               </SelectContent>
             </Select>
 
