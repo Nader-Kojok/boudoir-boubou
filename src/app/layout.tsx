@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Le Boudoir du BouBou - Plateforme de Vente de Vêtements",
-  description: "La première plateforme Sénégalaise de vente de vêtements entre particuliers. Vendez et achetez des tenues de mariage, soirée, traditionnelles et plus encore.",
+  description: "La première plateforme Sénégalaise dédiée à la vente de vêtements traditionnels et tradi-modernes de seconde mains.",
 }
 
 export default function RootLayout({

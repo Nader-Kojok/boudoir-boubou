@@ -53,6 +53,7 @@ export function ExampleUsage() {
             category="Robes"
             isFavorite={favorites.includes("product-1")}
             sellerWhatsApp="221771234567"
+            sellerPhone="221771234567"
             sellerName="Fatou Diop"
             onFavoriteToggle={handleFavoriteToggle}
             onWhatsAppContact={handleWhatsAppContact}
@@ -69,6 +70,7 @@ export function ExampleUsage() {
             category="Accessoires"
             isFavorite={favorites.includes("product-2")}
             sellerWhatsApp="221772345678"
+            sellerPhone="221772345678"
             sellerName="Aminata Sow"
             onFavoriteToggle={handleFavoriteToggle}
             onWhatsAppContact={handleWhatsAppContact}

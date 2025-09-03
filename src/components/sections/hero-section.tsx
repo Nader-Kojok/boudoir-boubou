@@ -29,8 +29,7 @@ export function HeroSection() {
           
           {/* Subtitle */}
           <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-            La première plateforme Sénégalaise dédiée à la vente de vêtements personnels : 
-            mariages, soirées, tenues traditionnelles et bien plus encore.
+            La première plateforme Sénégalaise dédiée à la vente de vêtements traditionnels et tradi-modernes de seconde mains.
           </p>
           
           {/* CTA Buttons */}

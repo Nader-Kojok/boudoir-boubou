@@ -13,6 +13,7 @@ import { ConditionBadge } from '@/components/custom/condition-badge'
 import { ProductCard } from '@/components/custom/product-card'
 import { ReviewSection } from '@/components/custom/review-section'
 import { ReportButton } from '@/components/ui/report-button'
+import { ContactModal } from '@/components/custom/contact-modal'
 import { Heart, Phone, Share2, MapPin, Calendar, Package, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -37,6 +38,7 @@ interface Article {
     image?: string
     location?: string
     whatsappNumber?: string
+    phone?: string
   }
   _count: {
     favorites: number
@@ -61,10 +63,12 @@ export default function ArticlePage() {
   const params = useParams()
   const router = useRouter()
   const [article, setArticle] = useState<Article | null>(null)
+  const [relatedArticles, setRelatedArticles] = useState<Article[]>([])
   const [reviews, setReviews] = useState<Review[]>([])
   const [similarArticles, setSimilarArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [isFavorite, setIsFavorite] = useState(false)
+  const [showContactModal, setShowContactModal] = useState(false)
 
   const fetchArticle = useCallback(async (id: string) => {
     try {
@@ -121,14 +125,30 @@ export default function ArticlePage() {
     }
   }
 
-  const handleWhatsAppContact = () => {
-    if (!article?.seller.whatsappNumber) return
+  const handleContactClick = () => {
+    if (!article) return
     
-    const message = encodeURIComponent(
-      `Bonjour, je suis intéressé(e) par votre article "${article.title}" sur Boudoir.`
-    )
-    const whatsappUrl = `https://wa.me/${article.seller.whatsappNumber}?text=${message}`
-    window.open(whatsappUrl, '_blank')
+    // Si les deux numéros sont disponibles, afficher la modal de choix
+    if (article.seller.whatsappNumber && article.seller.phone) {
+      setShowContactModal(true)
+      return
+    }
+    
+    // Si seul WhatsApp est disponible
+    if (article.seller.whatsappNumber) {
+      const message = encodeURIComponent(
+        `Bonjour, je suis intéressé(e) par votre article "${article.title}" sur Boudoir.`
+      )
+      const whatsappUrl = `https://wa.me/${article.seller.whatsappNumber}?text=${message}`
+      window.open(whatsappUrl, '_blank')
+      return
+    }
+    
+    // Utiliser le numéro de téléphone (d'inscription ou autre)
+    if (article.seller.phone) {
+      window.open(`tel:${article.seller.phone}`, '_self')
+      return
+    }
   }
 
   const handleShare = async () => {
@@ -291,8 +311,8 @@ export default function ArticlePage() {
             <Button
               className="w-full"
               size="lg"
-              onClick={handleWhatsAppContact}
-              disabled={!article.seller.whatsappNumber || !article.isAvailable}
+              onClick={handleContactClick}
+              disabled={!article.isAvailable}
             >
               <Phone className="h-5 w-5 mr-2" />
               Contacter via WhatsApp
@@ -358,6 +378,18 @@ export default function ArticlePage() {
             ))}
           </div>
         </div>
+      )}
+      
+      {/* Modal de choix du mode de contact */}
+      {article && article.seller.whatsappNumber && article.seller.phone && (
+        <ContactModal
+          isOpen={showContactModal}
+          onClose={() => setShowContactModal(false)}
+          sellerName={article.seller.name}
+          whatsappNumber={article.seller.whatsappNumber}
+          phoneNumber={article.seller.phone}
+          articleTitle={article.title}
+        />
       )}
     </div>
   )

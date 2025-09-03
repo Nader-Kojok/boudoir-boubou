@@ -28,6 +28,7 @@ interface Article {
     id: string
     name: string
     whatsappNumber?: string
+    phone?: string
   }
   _count: {
     favorites: number
@@ -214,6 +215,7 @@ export default function FavorisPage() {
                   images={images}
                   category={article.category.name}
                   sellerWhatsApp={article.seller.whatsappNumber}
+                  sellerPhone={article.seller.phone}
                   sellerName={article.seller.name}
                   isFavorite={true}
                   onFavoriteToggle={handleFavoriteToggle}

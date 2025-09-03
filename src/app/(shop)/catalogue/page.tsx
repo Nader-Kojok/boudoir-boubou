@@ -30,6 +30,7 @@ interface Article {
     image?: string
     location?: string
     whatsappNumber?: string
+    phone?: string
   }
   _count: {
     favorites: number
@@ -233,7 +234,7 @@ function CatalogueContent() {
       {/* Header */}
       <div className="border-b bg-white">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4" suppressHydrationWarning>
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-foreground">Catalogue</h1>
@@ -336,7 +337,7 @@ function CatalogueContent() {
                 {/* Price Range */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Prix (FCFA)</label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2" suppressHydrationWarning>
                     <Input
                       type="number"
                       placeholder="Min"
@@ -502,6 +503,7 @@ function CatalogueContent() {
                     category={article.category.name}
                     isFavorite={favorites.includes(article.id)}
                     sellerWhatsApp={article.seller.whatsappNumber}
+                    sellerPhone={article.seller.phone}
                     sellerName={article.seller.name}
                     onFavoriteToggle={handleFavoriteToggle}
                     onWhatsAppContact={handleWhatsAppContact}

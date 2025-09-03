@@ -20,6 +20,7 @@ const featuredProducts = [
     ],
     category: "Mariage",
     sellerWhatsApp: "221771234567",
+    sellerPhone: "221771234567",
     sellerName: "Fatou Diop"
   },
   {
@@ -34,6 +35,7 @@ const featuredProducts = [
     ],
     category: "Traditionnel",
     sellerWhatsApp: "221772345678",
+    sellerPhone: "221772345678",
     sellerName: "Aminata Sow"
   },
   {
@@ -49,6 +51,7 @@ const featuredProducts = [
     ],
     category: "Soirée",
     sellerWhatsApp: "221773456789",
+    sellerPhone: "221773456789",
     sellerName: "Aïcha Ndiaye"
   },
   {
@@ -63,6 +66,7 @@ const featuredProducts = [
     ],
     category: "Traditionnel",
     sellerWhatsApp: "221774567890",
+    sellerPhone: "221774567890",
     sellerName: "Mariama Fall"
   }
 ]
@@ -126,6 +130,7 @@ export function FeaturedProducts() {
               category={product.category}
               isFavorite={favorites.includes(product.id)}
               sellerWhatsApp={product.sellerWhatsApp}
+              sellerPhone={product.sellerPhone}
               sellerName={product.sellerName}
               onFavoriteToggle={handleFavoriteToggle}
               onWhatsAppContact={handleWhatsAppContact}

@@ -18,6 +18,7 @@ interface Seller {
   location?: string
   bio?: string
   whatsappNumber?: string
+  phone?: string
   createdAt: string
   _count: {
     articles: number
@@ -267,6 +268,7 @@ export default function SellerPage() {
                     images={article.images ? JSON.parse(article.images as string) : []}
                     category={article.category.name}
                     sellerWhatsApp={seller?.whatsappNumber}
+                    sellerPhone={seller?.phone}
                     sellerName={seller?.name}
                     onFavoriteToggle={handleFavoriteToggle}
                     onWhatsAppContact={handleArticleWhatsAppContact}

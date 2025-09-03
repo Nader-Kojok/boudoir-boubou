@@ -88,6 +88,8 @@ type ArticleWithDetails = Prisma.ArticleGetPayload<{
         name: true
         image: true
         location: true
+        whatsappNumber: true
+        phone: true
       }
     }
     category: true
@@ -197,6 +199,7 @@ export async function getArticles(filters?: {
               image: true,
               location: true,
               whatsappNumber: true,
+              phone: true,
             },
           },
           category: true,
@@ -231,6 +234,7 @@ export async function getArticleById(id: string): Promise<Prisma.ArticleGetPaylo
         location: true
         bio: true
         whatsappNumber: true
+        phone: true
       }
     }
     category: true
@@ -266,6 +270,7 @@ export async function getArticleById(id: string): Promise<Prisma.ArticleGetPaylo
           location: true,
           bio: true,
           whatsappNumber: true,
+          phone: true,
         },
       },
       category: true,

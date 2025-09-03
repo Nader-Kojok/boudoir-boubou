@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { PriceDisplay } from "./price-display"
 import { ConditionBadge, type ConditionType } from "./condition-badge"
 import { ImageGallery } from "./image-gallery"
+import { ContactModal } from "./contact-modal"
 
 export interface ProductCardProps {
   id: string
@@ -20,6 +21,7 @@ export interface ProductCardProps {
   isFavorite?: boolean
   className?: string
   sellerWhatsApp?: string
+  sellerPhone?: string
   sellerName?: string
   onFavoriteToggle?: (id: string) => void
   onWhatsAppContact?: (id: string, sellerWhatsApp: string, title: string) => void
@@ -38,19 +40,37 @@ export function ProductCard({
   isFavorite = false,
   className,
   sellerWhatsApp,
+  sellerPhone,
+  sellerName,
   onFavoriteToggle,
   onWhatsAppContact,
   onClick,
 }: ProductCardProps) {
+  const [showContactModal, setShowContactModal] = React.useState(false)
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     onFavoriteToggle?.(id)
   }
 
-  const handleWhatsAppClick = (e: React.MouseEvent) => {
+  const handleContactClick = (e: React.MouseEvent) => {
     e.stopPropagation()
+    
+    // Si les deux numéros sont disponibles, afficher la modal de choix
+    if (sellerWhatsApp && sellerPhone) {
+      setShowContactModal(true)
+      return
+    }
+    
+    // Si seul WhatsApp est disponible
     if (sellerWhatsApp) {
       onWhatsAppContact?.(id, sellerWhatsApp, title)
+      return
+    }
+    
+    // Utiliser le numéro de téléphone (d'inscription ou autre)
+    if (sellerPhone) {
+      window.open(`tel:${sellerPhone}`, '_self')
+      return
     }
   }
 
@@ -59,6 +79,7 @@ export function ProductCard({
   }
 
   return (
+    <>
     <Card 
       className={cn(
         "group cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 py-0 gap-0 flex flex-col h-full",
@@ -128,14 +149,26 @@ export function ProductCard({
       <CardFooter className="p-4 pt-0">
         <Button 
           className="w-full"
-          onClick={handleWhatsAppClick}
-          disabled={!sellerWhatsApp}
+          onClick={handleContactClick}
         >
           <Phone className="h-4 w-4 mr-2" />
           Contacter le vendeur
         </Button>
       </CardFooter>
     </Card>
+    
+    {/* Modal de choix du mode de contact */}
+     {sellerWhatsApp && sellerPhone && sellerName && (
+       <ContactModal
+         isOpen={showContactModal}
+         onClose={() => setShowContactModal(false)}
+         sellerName={sellerName}
+         whatsappNumber={sellerWhatsApp}
+         phoneNumber={sellerPhone}
+         articleTitle={title}
+       />
+     )}
+    </>
   )
 }
 
